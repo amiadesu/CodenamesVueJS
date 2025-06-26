@@ -96,12 +96,16 @@ const {
     refreshGameboardRateLimiter
 } = require("./utils/rateLimiters");
 
+const RoomQueueManager = require("./SocketLogic/roomQueueManager");
+
 const RoomContext = require("./db/roomContext");
 
 let io = null;
+let roomQueueManager = null;
 
 function setupCodenames(codenamesIo) {
     io = codenamesIo;
+    roomQueueManager = new RoomQueueManager(io);
     DIContainer.init(io);
     CodenamesDB.initialize().then(() => {
         setupWordPackWatcher(codenamesPacksFolderPath);
@@ -147,20 +151,28 @@ function createIOListener() {
     io.on('connection', async (socket) => {
         console.log('User connected:', socket.id);
 
-        let userId = socket.userData.userID;
-        let userCodenamesId = socket.userData.codenamesID;
-        console.log('User id:', userId);
-        console.log("User Codenames ID:", userCodenamesId);
-        let user = null;
-        let roomId = "default";
-        let settedUp = false;
-        let countdownInterval = null;
-        let timerInterval = null;
-        let status = {
-            setup_event : {
-                active: false
+        const socketData = {
+            socketId: socket.id,
+            userId: socket.userData.userID,
+            userCodenamesId: socket.userData.codenamesID,
+            user: null,
+            roomId: "default",
+            settedUp: false,
+            countdownInterval: null,
+            timerInterval: null,
+            status: {
+                settedUp: false,
+                setup_event: {
+                    active: false
+                }
             }
         };
+        console.log('User id:', socketData.userId);
+        console.log("User Codenames ID:", socketData.userCodenamesId);
+
+        let user = null;
+        let countdownInterval = null;
+        let timerInterval = null;
 
         const originalOn = socket.on.bind(socket);
         socket.on = (event, handler) => {
@@ -184,11 +196,11 @@ function createIOListener() {
             eventCount++;
             console.log(eventCount);
             if (!validEventsWithoutAuthorization.includes(event)) {
-                if (roomId === "default") {
+                if (socketData.roomId === "default") {
                     return next(new Error('Unauthorized event'));
                 }
-                const room = new RoomContext(roomId);
-                const userIsAuthorized = await validateUser(room, userCodenamesId);
+                const room = new RoomContext(socketData.roomId);
+                const userIsAuthorized = await validateUser(room, socketData.userCodenamesId);
                 if (!userIsAuthorized) {
                     return next(new Error('Unauthorized event'));
                 }
@@ -216,7 +228,7 @@ function createIOListener() {
 
         socket.on("create_room", async () => {
             try {
-                await createNewRoomRateLimiter.consume(userId);
+                await createNewRoomRateLimiter.consume(socketData.userId);
             }
             catch (rejRes) {
                 socket.emit("error_message", { 
@@ -244,8 +256,8 @@ function createIOListener() {
             }
             newRoomId = result.data;
 
-            roomId = newRoomId;
-            socket.join(roomId);
+            socketData.roomId = newRoomId;
+            socket.join(socketData.roomId);
         });
     
         socket.on("setup_client", async (newRoomId) => {
@@ -257,17 +269,17 @@ function createIOListener() {
             }
             newRoomId = result.data;
 
-            if (status.setup_event.active) {
+            if (socketData.status.setup_event.active) {
                 socket.emit("error_message", { error_code: "still_being_set_up", error: "Your session is still being set up by the server." });
                 return;
             }
 
-            status.setup_event.active = true;
+            socketData.status.setup_event.active = true;
 
-            roomId = newRoomId;
-            socket.join(roomId);
+            socketData.roomId = newRoomId;
+            socket.join(socketData.roomId);
 
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
     
             const shouldGetNewWords = await CodenamesDB.createRoom(room.roomId);
 
@@ -283,7 +295,7 @@ function createIOListener() {
             let gameRules = await room.getGameRules();
             let gameProcess = await room.getGameProcess();
     
-            const objIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            const objIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
             if (objIndex !== -1) {
                 users[objIndex].online = true;
                 user = users[objIndex];
@@ -295,8 +307,8 @@ function createIOListener() {
                 user = {
                     name: socket.userData.name,
                     color: socket.userData.color,
-                    id: userCodenamesId,
-                    roomId: roomId,
+                    id: socketData.userCodenamesId,
+                    roomId: socketData.roomId,
                     state: {
                         teamColor: "spectator",
                         master: false,
@@ -315,19 +327,19 @@ function createIOListener() {
             
             await room.setUsers(users);
     
-            settedUp = true;
+            socketData.status.settedUp = true;
 
             const endTurnSelectors = await room.getEndTurnSelectors();
             const clues = await room.getClues();
             let gameWinStatus = await room.getGameWinStatus();
             let chatMessages = await room.getChatMessages();
             
-            socket.to(roomId).emit("update_users", teams, users);
+            socket.to(socketData.roomId).emit("update_users", teams, users);
             socket.emit("update_client_setup", teams, users, user, gameRules, gameProcess, endTurnSelectors, clues, gameWinStatus, chatMessages);
             socket.emit("set_initialized");
             socket.emit("request_new_gameboard");
 
-            status.setup_event.active = false;
+            socketData.status.setup_event.active = false;
         });
     
         socket.on("edit_user", async (newUser) => {
@@ -338,7 +350,7 @@ function createIOListener() {
             }
             newUser = result.data;
 
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
 
             let users = await room.getUsers();
     
@@ -349,7 +361,7 @@ function createIOListener() {
             users = await room.getUsers();
             let teams = await room.getTeams();
     
-            io.to(roomId).emit("update_users", teams, users);
+            io.to(socketData.roomId).emit("update_users", teams, users);
         });
 
         socket.on("edit_name", async (newName) => {
@@ -360,36 +372,36 @@ function createIOListener() {
             }
             newName = result.data;
 
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
 
             let users = await room.getUsers();
     
-            const objIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            const objIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
             users[objIndex].name = newName;
             await updateUser(room, users[objIndex]);
-            await updateGlobalUser(userId, { name: newName });
+            await updateGlobalUser(socketData.userId, { name: newName });
     
             users = await room.getUsers();
             let teams = await room.getTeams();
     
-            io.to(roomId).emit("update_users", teams, users);
+            io.to(socketData.roomId).emit("update_users", teams, users);
         });
 
         socket.on("change_color", async () => {
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
 
             let users = await room.getUsers();
             const newColor = makeColor();
     
-            const objIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            const objIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
             users[objIndex].color = newColor;
             await updateUser(room, users[objIndex]);
-            await updateGlobalUser(userId, { color: newColor });
+            await updateGlobalUser(socketData.userId, { color: newColor });
     
             users = await room.getUsers();
             let teams = await room.getTeams();
     
-            io.to(roomId).emit("update_users", teams, users);
+            io.to(socketData.roomId).emit("update_users", teams, users);
         });
     
         socket.on("state_changed", async (previousColor, newUser) => {
@@ -406,7 +418,7 @@ function createIOListener() {
             }
             newUser = resultPlayer.data;
 
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
             
             let users = await room.getUsers();
             let teams = await room.getTeams();
@@ -452,11 +464,11 @@ function createIOListener() {
             await room.setUsers(users);
             await room.setTeams(teams);
     
-            io.to(roomId).emit("update_users", teams, users);
+            io.to(socketData.roomId).emit("update_users", teams, users);
             if (updateEveryone) {
-                io.to(roomId).emit("request_new_gameboard");
+                io.to(socketData.roomId).emit("request_new_gameboard");
             } else {
-                const words = await getGameboard(room, userCodenamesId);
+                const words = await getGameboard(room, socketData.userCodenamesId);
                 socket.emit("send_new_gameboard", words);
             }
         });
@@ -466,51 +478,27 @@ function createIOListener() {
         });
     
         socket.on("get_gameboard", async () => {
-            const room = new RoomContext(roomId);
-
-            const words = await getGameboard(room, userCodenamesId);
-
-            const gameRules = await room.getGameRules();
-    
-            socket.emit("send_new_gameboard", words);
-            socket.emit("update_game_rules", gameRules);
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_gameboard", { socketData });
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
+            }
         });
     
         socket.on("refresh_gameboard", async () => {
             try {
-                await refreshGameboardRateLimiter.consume(userId);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "refresh_gameboard", { socketData });
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
             }
-            catch (rejRes) {
-                socket.emit("error_message", { 
-                    error_code: "action_rate_limit", 
-                    error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
-                    retry_ms: rejRes.msBeforeNext
-                });
-                return;
-            }
-
-            const room = new RoomContext(roomId);
-
-            if (!checkPermissions(room, userCodenamesId, Permissions.HOST)) {
-                return;
-            }
-
-            let gameRules = await room.getGameRules();
-    
-            const newCardsAmount = totalCards(gameRules);
-            if (newCardsAmount > gameRules.maxCards) {
-                socket.emit("error_message", { error_code: "card_amount_overflow", error: "Distributed card amount is larger that max cards amount." });
-                return;
-            } 
-            await getNewWords(room);
-    
-            io.to(roomId).emit("request_new_gameboard");
         });
     
         socket.on("randomize_team_order", async () => {
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
 
-            if (!checkPermissions(room, userCodenamesId, Permissions.HOST)) {
+            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
                 return;
             }
     
@@ -518,7 +506,7 @@ function createIOListener() {
             
             let gameRules = await room.getGameRules();
             
-            io.to(roomId).emit("update_game_rules", gameRules);
+            io.to(socketData.roomId).emit("update_game_rules", gameRules);
         });
     
         socket.on("get_all_word_packs", async () => {
@@ -563,9 +551,9 @@ function createIOListener() {
             }
             newGameRules = result.data;
 
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
             
-            if (!checkPermissions(room, userCodenamesId, Permissions.HOST)) {
+            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
                 return;
             }
 
@@ -628,7 +616,7 @@ function createIOListener() {
     
         socket.on("start_new_game", async (randomizeTeamOrder, getNewGameboard) => {
             try {
-                await startNewGameRateLimiter.consume(userId);
+                await startNewGameRateLimiter.consume(socketData.userId);
             }
             catch (rejRes) {
                 socket.emit("error_message", { 
@@ -652,9 +640,9 @@ function createIOListener() {
             }
             getNewGameboard = result.data;
             
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
             
-            if (!checkPermissions(room, userCodenamesId, Permissions.HOST)) {
+            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
                 return;
             }
 
@@ -722,23 +710,23 @@ function createIOListener() {
 
                 const clues = await room.getClues();
         
-                io.to(roomId).emit("update_clues", clues);
+                io.to(socketData.roomId).emit("update_clues", clues);
 
                 io.to(room.roomId).emit("request_new_gameboard");
             });
         });
     
         socket.on("get_traitors", async () => {
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
 
             let users = await room.getUsers();
             let traitors = await room.getTraitors();
     
-            const objIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            const objIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
             if (objIndex !== -1 && users[objIndex].state.master === true) {
                 traitors = traitors.filter((traitor) => traitor.state.teamColor !== users[objIndex].state.teamColor);
-            } else if (traitors.some((traitor) => traitor.id === userCodenamesId)) {
-                traitors = traitors.filter((traitor) => traitor.id === userCodenamesId);
+            } else if (traitors.some((traitor) => traitor.id === socketData.userCodenamesId)) {
+                traitors = traitors.filter((traitor) => traitor.id === socketData.userCodenamesId);
             } else {
                 traitors = [];
             }
@@ -760,9 +748,9 @@ function createIOListener() {
             }
             teamColor = result.data;
             
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
 
-            if (!checkPermissions(room, userCodenamesId, Permissions.MASTER)) {
+            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.MASTER)) {
                 return;
             }
             
@@ -791,11 +779,11 @@ function createIOListener() {
             await room.setClueIDCounter(clueIDCounter);
             await room.setGameProcess(gameProcess);
             
-            io.to(roomId).emit("update_game_process", gameProcess);
+            io.to(socketData.roomId).emit("update_game_process", gameProcess);
 
             const clues = await room.getClues();
     
-            io.to(roomId).emit("update_clues", clues);
+            io.to(socketData.roomId).emit("update_clues", clues);
         });
     
         socket.on("edit_clue", async (newClue) => {
@@ -806,9 +794,9 @@ function createIOListener() {
             }
             newClue = result.data;
             
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
             
-            if (!checkPermissions(room, userCodenamesId, Permissions.HOST)) {
+            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
                 return;
             }
 
@@ -816,11 +804,11 @@ function createIOListener() {
 
             const clues = await room.getClues();
     
-            io.to(roomId).emit("update_clues", clues);
+            io.to(socketData.roomId).emit("update_clues", clues);
         });
     
         socket.on("get_clues", async () => {
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
 
             const clues = await room.getClues();
     
@@ -835,7 +823,7 @@ function createIOListener() {
             }
             selectedWord = result.data;
             
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
             
             let words = await room.getWords();
             if (!words.some((word) => word.text === selectedWord) && selectedWord !== "endTurn") {
@@ -845,7 +833,7 @@ function createIOListener() {
             
             let users = await room.getUsers();
     
-            const selecterIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            const selecterIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
             await toggleWord(room, selectedWord, selecterIndex, countdownInterval);
     
             let gameRules = await room.getGameRules();
@@ -873,15 +861,15 @@ function createIOListener() {
                 const endTurnSelectors = await room.getEndTurnSelectors();
                 const gameRules = await room.getGameRules();
                 const gameProcess = await room.getGameProcess();
-                const selecterIndex = users.findIndex((obj) => obj.id === userCodenamesId);
-                io.to(roomId).emit("request_new_gameboard");
-                io.to(roomId).emit("update_game_process", gameProcess);
-                io.to(roomId).emit("update_users", teams, users);
+                const selecterIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
+                io.to(socketData.roomId).emit("request_new_gameboard");
+                io.to(socketData.roomId).emit("update_game_process", gameProcess);
+                io.to(socketData.roomId).emit("update_users", teams, users);
                 socket.emit("update_client", teams, users, users[selecterIndex], endTurnSelectors, gameRules, gameProcess);
             }
     
             if (await shouldRevealWord()) {
-                io.to(roomId).emit("start_countdown", selectedWord);
+                io.to(socketData.roomId).emit("start_countdown", selectedWord);
                 if (countdownInterval) {
                     clearInterval(countdownInterval);
                 }
@@ -893,7 +881,7 @@ function createIOListener() {
                     if (timer <= 0 && !freezed) {
                         freezed = true;
                         timer = 0;
-                        io.to(roomId).emit("stop_countdown");
+                        io.to(socketData.roomId).emit("stop_countdown");
                         if (await shouldRevealWord()) {
                             await revealWord(room, selectedWord);
                             await notifyClient();
@@ -901,11 +889,11 @@ function createIOListener() {
                         clearInterval(countdownInterval);
                     }
     
-                    io.to(roomId).emit("update_countdown", 1 - timer / gameRules.countdownTime);
+                    io.to(socketData.roomId).emit("update_countdown", 1 - timer / gameRules.countdownTime);
                 }, 10);
             } else {
                 clearInterval(countdownInterval);
-                io.to(roomId).emit("stop_countdown");
+                io.to(socketData.roomId).emit("stop_countdown");
             }
     
             await notifyClient();
@@ -921,11 +909,11 @@ function createIOListener() {
 
             // Master shouldn't click!
             
-            io.to(roomId).emit("click_word", clickedWordText, userCodenamesId);
+            io.to(socketData.roomId).emit("click_word", clickedWordText, socketData.userCodenamesId);
         });
     
         socket.on("get_game_process", async () => {
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
 
             let gameProcess = await room.getGameProcess();
     
@@ -933,9 +921,9 @@ function createIOListener() {
         });
     
         socket.on("pass_turn", async () => {
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
 
-            if (!checkPermissions(room, userCodenamesId, Permissions.HOST)) {
+            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
                 return;
             }
             
@@ -947,9 +935,9 @@ function createIOListener() {
 
             let gameProcess = await room.getGameProcess();
     
-            io.to(roomId).emit("update_game_process", gameProcess);
-            io.to(roomId).emit("request_new_gameboard");
-            io.to(roomId).emit("update_users", teams, users);
+            io.to(socketData.roomId).emit("update_game_process", gameProcess);
+            io.to(socketData.roomId).emit("request_new_gameboard");
+            io.to(socketData.roomId).emit("update_users", teams, users);
         });
     
         socket.on("remove_all_players", async (withMasters) => {
@@ -960,9 +948,9 @@ function createIOListener() {
             }
             withMasters = result.data;
             
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
 
-            if (!checkPermissions(room, userCodenamesId, Permissions.HOST)) {
+            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
                 return;
             }
     
@@ -971,7 +959,7 @@ function createIOListener() {
             let users = await room.getUsers();
             let teams = await room.getTeams();
     
-            io.to(roomId).emit("update_users", teams, users);
+            io.to(socketData.roomId).emit("update_users", teams, users);
         });
     
         socket.on("remove_player", async (playerId) => {
@@ -982,9 +970,9 @@ function createIOListener() {
             }
             playerId = result.data;
             
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
             
-            if (!checkPermissions(room, userCodenamesId, Permissions.HOST)) {
+            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
                 return;
             }
     
@@ -993,7 +981,7 @@ function createIOListener() {
             let users = await room.getUsers();
             let teams = await room.getTeams();
     
-            io.to(roomId).emit("update_users", teams, users);
+            io.to(socketData.roomId).emit("update_users", teams, users);
         });
     
         socket.on("randomize_players", async (withMasters) => {
@@ -1004,9 +992,9 @@ function createIOListener() {
             }
             withMasters = result.data;
             
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
             
-            if (!checkPermissions(room, userCodenamesId, Permissions.HOST)) {
+            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
                 return;
             }
     
@@ -1015,7 +1003,7 @@ function createIOListener() {
             let users = await room.getUsers();
             let teams = await room.getTeams();
     
-            io.to(roomId).emit("update_users", teams, users);
+            io.to(socketData.roomId).emit("update_users", teams, users);
         });
         
         socket.on("transfer_host", async (playerId) => {
@@ -1026,18 +1014,18 @@ function createIOListener() {
             }
             playerId = result.data;
             
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
             
-            if (!checkPermissions(room, userCodenamesId, Permissions.HOST)) {
+            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
                 return;
             }
     
-            await transferHost(room, userCodenamesId, playerId);
+            await transferHost(room, socketData.userCodenamesId, playerId);
     
             let users = await room.getUsers();
             let teams = await room.getTeams();
     
-            io.to(roomId).emit("update_users", teams, users);
+            io.to(socketData.roomId).emit("update_users", teams, users);
         });
 
         socket.on("send_new_chat_message", async (messageText) => {
@@ -1048,34 +1036,34 @@ function createIOListener() {
             }
             messageText = resultChatMessages.data;
             
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
 
             let users = await room.getUsers();
 
-            const objIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            const objIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
             let sender = users[objIndex];
 
-            let result = await CodenamesDB.addChatMessageToRoomData(roomId, sender.name, userCodenamesId, messageText);
+            let result = await CodenamesDB.addChatMessageToRoomData(socketData.roomId, sender.name, socketData.userCodenamesId, messageText);
 
             await room.getChatMessages();
 
             const message = {
                 senderName: sender.name,
-                senderID: userCodenamesId,
+                senderID: socketData.userCodenamesId,
                 messageText: messageText
             };
 
-            io.to(roomId).emit("add_chat_message", message);
+            io.to(socketData.roomId).emit("add_chat_message", message);
         });
     
         socket.on('disconnect', async () => {
-            const room = new RoomContext(roomId);
+            const room = new RoomContext(socketData.roomId);
 
-            if (!settedUp) {
+            if (!socketData.status.settedUp) {
                 console.log("Some shit is going on... user was not setted up");
                 return;
             }
-            if (!(await validateUser(room, userCodenamesId))) {
+            if (!(await validateUser(room, socketData.userCodenamesId))) {
                 console.log("Some shit is going on... user was not validated");
                 return;
             }
@@ -1084,7 +1072,7 @@ function createIOListener() {
     
             console.log('User disconnected:', socket.handshake.address);
 
-            const objIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            const objIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
             console.log(objIndex);
             let newUser = users[objIndex];
             newUser.online = false;
@@ -1095,7 +1083,7 @@ function createIOListener() {
             if (users.every((user) => !user.online)) {
                 console.log("Room is AFK now!");
             }
-            io.to(roomId).emit("update_users", teams, users);
+            io.to(socketData.roomId).emit("update_users", teams, users);
         });
     });
 }
