@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "async-mutex": "^0.5.0",
+    "bull": "^4.16.5",
     "chokidar": "^4.0.3",
     "express": "^4.21.2",
     "mongoose": "^8.9.6",
