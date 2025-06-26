@@ -5,42 +5,71 @@ const {
     getGameboardEvent,
     refreshGameboardEvent
 } = require("./gameboard");
-
+const {
+    sendClueEvent,
+    editClueEvent,
+    getCluesEvent
+} = require("./clues");
 const { config } = require("../../../utils/config");
 
 class RoomQueueManager {
     constructor(io) {
-        this.queues = new Map(); // Stores queues by roomId
-        this.redisClient = redis.createClient();
-        this.io = io; // Store Socket.IO instance
+        if (!io) {
+            throw new Error('Socket.IO instance is required');
+        }
+
+        this.queues = new Map();
+        this.io = io;
         
-        // Event processors registry
+        this.redisClient = redis.createClient(config.redis.clientOptions);
+        this.redisClient.on('error', (err) => {
+            console.error('Redis client error:', err);
+        });
+
+        // Event processors now expect positional arguments
         this.eventProcessors = {
             'get_gameboard': this.processGetGameboard.bind(this),
-            'refresh_gameboard': this.processRefreshGameboard.bind(this)
-            // Add more event types as needed
+            'refresh_gameboard': this.processRefreshGameboard.bind(this),
+            'send_clue': this.processSendClue.bind(this), 
+            'edit_clue': this.processEditClue.bind(this), 
+            'get_clues': this.processGetClues.bind(this),
         };
     }
 
-    // Get or create queue for a room
     getQueue(roomId) {
         if (!this.queues.has(roomId)) {
-            const queue = new Queue(`room-${roomId}`, {
+            const queueName = `room-${roomId}`;
+            const queue = new Queue(queueName, {
                 redis: config.redis.clientOptions,
                 defaultJobOptions: {
-                    removeOnComplete: 10, // or a number to keep N jobs
+                    removeOnComplete: 10,
+                    removeOnFail: 20,
+                    attempts: 3,
+                    // backoff: {
+                    //     type: 'exponential',
+                    //     delay: 1000
+                    // }
                 }
             });
-        
-            // Single processor that handles all event types
+
+            queue.on('error', (error) => {
+                console.error(`Queue ${queueName} error:`, error);
+            });
+
             queue.process(async (job) => {
-                const { eventType, eventData } = job.data;
-                
-                if (this.eventProcessors[eventType]) {
-                    // Use this.io instead of undefined 'io'
-                    return await this.eventProcessors[eventType](eventData);
+                try {
+                    const { eventType, args } = job.data;
+                    // console.log(`Processing ${eventType} for room ${roomId}`, args);
+                    
+                    if (this.eventProcessors[eventType]) {
+                        // Spread the args array into positional parameters
+                        return await this.eventProcessors[eventType](...args);
+                    }
+                    throw new Error(`Unknown event type: ${eventType}`);
+                } catch (error) {
+                    console.error(`Job ${job.id} failed:`, error);
+                    throw error;
                 }
-                throw new Error(`Unknown event type: ${eventType}`);
             });
             
             this.queues.set(roomId, queue);
@@ -48,50 +77,69 @@ class RoomQueueManager {
         return this.queues.get(roomId);
     }
 
-    // Add event to room's queue
-    async addToRoomQueue(roomId, eventType, eventData) {
-        console.log(roomId, eventType, eventData);
+    /**
+     * Add event to room's queue with positional arguments
+     * @param {string} roomId 
+     * @param {string} eventType 
+     * @param {Array} args Positional arguments for the event processor
+     * @returns {Promise<Queue.Job>}
+     */
+    async addToRoomQueue(roomId, eventType, ...args) {
+        if (!roomId || !eventType) {
+            throw new Error('roomId and eventType are required');
+        }
+
+        // console.log(`Adding ${eventType} to room ${roomId} queue`, args);
         const queue = this.getQueue(roomId);
-        const job = await queue.add({ eventType, eventData }, {
-            attempts: 3,
-            backoff: 1000
+        
+        return await queue.add({ 
+            eventType,
+            args // Store arguments as an array
         });
-        console.log('Job added with ID:', job.id);
     }
 
-    async processGetGameboard(data) {
-        return getGameboardEvent(this.io, data.socketData);
+    // Processor methods now take positional arguments
+    async processGetGameboard(socketData) {
+        return await getGameboardEvent(this.io, socketData);
     }
 
-    async processRefreshGameboard(data) {
-        return refreshGameboardEvent(this.io, data.socketData);
+    async processRefreshGameboard(socketData) {
+        return await refreshGameboardEvent(this.io, socketData);
     }
 
-    // Event processors for different event types
-    async processMessageEvent(roomId, data) {
-        this.io.to(roomId).emit('new-message', data);
-        return { status: 'message-processed' };
+    async processSendClue(socketData, clueText, teamColor) {
+        return await sendClueEvent(this.io, socketData, clueText, teamColor);
     }
 
-    async processNotificationEvent(roomId, data) {
-        this.io.to(roomId).emit('notification', data);
-        return { status: 'notification-processed' };
+    async processEditClue(socketData, newClue) {
+        return await editClueEvent(this.io, socketData, newClue);
     }
 
-    async processUpdateEvent(roomId, data) {
-        this.io.to(roomId).emit('update', data);
-        // Example of more complex processing
-        // await someDatabaseOperation(data);
-        return { status: 'update-processed' };
+    async processGetClues(socketData) {
+        return await getCluesEvent(this.io, socketData);
     }
 
-    // Cleanup when room becomes empty
     async cleanupRoomQueue(roomId) {
         if (this.queues.has(roomId)) {
             const queue = this.queues.get(roomId);
-            await queue.obliterate({ force: true }); // Completely remove queue
-            this.queues.delete(roomId);
+            try {
+                await queue.close();
+                await queue.obliterate({ force: true });
+                this.queues.delete(roomId);
+                console.log(`Queue for room ${roomId} cleaned up successfully`);
+            } catch (error) {
+                console.error(`Error cleaning up queue for room ${roomId}:`, error);
+                throw error;
+            }
         }
+    }
+
+    async shutdown() {
+        const cleanupPromises = Array.from(this.queues.keys()).map(roomId => 
+            this.cleanupRoomQueue(roomId)
+        );
+        await Promise.all(cleanupPromises);
+        await this.redisClient.quit();
     }
 }
 
