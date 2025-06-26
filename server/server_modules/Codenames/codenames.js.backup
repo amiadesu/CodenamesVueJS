@@ -1,0 +1,1723 @@
+// Code before the update to RoomContext
+
+const path = require('path');
+const z = require("zod/v4");
+const { Mutex } = require('async-mutex');
+const mutex = new Mutex();
+
+const {
+    validTeamColorZodSchema,
+    validPlayerColorZodSchema,
+    validWordColorZodSchema,
+    packIdZodSchema,
+    gameRulesZodSchema,
+    clueTextZodSchema,
+    clueZodSchema,
+    playerIdZomSchema,
+    playerZodSchema,
+    wordZodSchema,
+    chatMessageZodSchema
+} = require("../../ZodSchemas/Codenames/codenamesZodSchemas");
+const { 
+    usernameZodSchema,
+    userColorZodSchema,
+    userZodSchema,
+    roomIdZodSchema
+} = require("../../ZodSchemas/Global/globalZodSchemas");
+const {
+    connectCodenamesDB,
+    setupAutomaticCodenamesRoomDeletion,
+    getFreeRoom,
+    createCodenamesRoom,
+    deleteCodenamesRoom,
+    getCodenamesRoomData,
+    setCodenamesRoomData,
+    addCodenamesChatMessageToRoomData,
+    getCodenamesWordPack,
+    getCodenamesWordPackNoWords,
+    getCodenamesWordPackWordsOnly,
+    getAllCodenamesWordPacks,
+    setCodenamesWordPack
+} = require("./db");
+const {
+    isObject,
+    makeID,
+    makeColor,
+    randChoice,
+    shuffle
+} = require("../extra");
+const {
+    setupWordPackWatcher
+} = require("./wordPacksRelated");
+
+const codenamesPacksFolderPath = path.join(__dirname, '..', '..', 'WordPacks', 'Codenames');
+
+const {
+    processUser,
+    updateGlobalUser,
+    createNewGameID
+} = require("../Global/userRegistration");
+
+let io = null;
+
+function setupCodenames(codenamesIo) {
+    io = codenamesIo;
+    connectCodenamesDB().then(() => {
+        setupWordPackWatcher(codenamesPacksFolderPath);
+        createIOListener();
+    });
+}
+
+async function safeRoomDataAccess(roomId, callback) {
+    const release = await mutex.acquire();
+    try {
+        await callback(roomId);
+    } finally {
+        release();
+    }
+}
+
+const clearRooms = setupAutomaticCodenamesRoomDeletion();
+
+const Permissions = Object.freeze({
+    SPECTATOR: 0,
+    PLAYER: 1,
+    MASTER: 2,
+    HOST: 3
+});
+
+async function validateUser(roomId, userRoomId) {
+    let users = await getCodenamesRoomData(roomId, "users");
+
+    const objIndex = users.findIndex((obj) => obj.id === userRoomId);
+
+    return (objIndex !== -1);
+}
+
+async function getWordsFromPack(packId) {
+    const words = await getCodenamesWordPackWordsOnly(packId);
+    return words;
+}
+
+async function getWordsForRoom(roomId) {
+    let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+    console.log(gameRules);
+    const words = await getWordsFromPack(gameRules.wordPack.packId);
+    return words;
+}
+
+async function getNewWords(roomId) {
+    const words = await getWordsForRoom(roomId);
+    shuffle(words);
+
+    let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+
+    const newWordsArray = words.splice(0, gameRules.maxCards);
+    const colors = gameRules.teamOrder.concat(["black", "white"]);
+    const amount = {
+        "red": 10,
+        "yellow": 0,
+        "blue": 0,
+        "green": 9,
+        "white": 0,
+        "black": 1
+    };
+
+    let extraIndex = 0;
+    let currentAmount = gameRules.baseCards + gameRules.extraCards[extraIndex];
+    let total = 0;
+
+    const newWords = [];
+    colors.forEach((color) => {
+        if (color === "white") {
+            let count = 0;
+            while (total < gameRules.maxCards) {
+                newWords.push({
+                    text: newWordsArray[total],
+                    color: "white",
+                    selectedBy: [],
+                    selectable: false,
+                    revealed: false
+                });
+                total++;
+                count++;
+            }
+            amount["white"] = count;
+        } else if (color === "black") {
+            for (let i = 0; i < gameRules.blackCards; i++) {
+                newWords.push({
+                    text: newWordsArray[total],
+                    color: "black",
+                    selectedBy: [],
+                    selectable: false,
+                    revealed: false
+                });
+                total++;
+            }
+            amount[color] = gameRules.blackCards;
+        } else {
+            for (let i = 0; i < currentAmount; i++) {
+                newWords.push({
+                    text: newWordsArray[total],
+                    color: color,
+                    selectedBy: [],
+                    selectable: false,
+                    revealed: false
+                });
+                total++;
+            }
+            if (extraIndex < gameRules.teamAmount - 2) {
+                extraIndex++;
+            } else {
+                extraIndex = 3;
+            }
+            amount[color] = currentAmount;
+            currentAmount = gameRules.baseCards + gameRules.extraCards[extraIndex];
+        }
+    });
+
+    // const newWords = newWordsArray.map((word) => {
+    //     return {
+    //         text: word,
+    //         color: "white"
+    //     };
+    // });
+    shuffle(newWords);
+    await setCodenamesRoomData(roomId, "gameProcess", { ...await getCodenamesRoomData(roomId, "gameProcess"), wordsCount: amount });
+    await setCodenamesRoomData(roomId, "currentWords", newWords);
+    await setCodenamesRoomData(roomId, "hiddenWords", newWords.map(word => ({ ...word, color: "unknown", selectable: true })));
+
+    return newWords;
+}
+
+async function updateTeamOrder(roomId) {
+    let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+    
+    if (gameRules.teamAmount !== gameRules.teamOrder.length) {
+        if (gameRules.teamAmount === 2) {
+            gameRules.teamOrder = ["red", "green"];
+        }
+        else if (gameRules.teamAmount === 3) {
+            gameRules.teamOrder = ["red", "blue", "green"];
+        }
+        else {
+            gameRules.teamOrder = ["red", "yellow", "blue", "green"];
+        }
+    }
+    shuffle(gameRules.teamOrder);
+
+    await setCodenamesRoomData(roomId, "gameRules", gameRules);
+    await setCodenamesRoomData(roomId, "gameProcess", { ...await getCodenamesRoomData(roomId, "gameProcess"), currentTurn: gameRules.teamOrder[0] });
+}
+
+async function updateUser(roomId, newUser) {
+    let users = await getCodenamesRoomData(roomId, "users");
+    let teams = await getCodenamesRoomData(roomId, "teams");
+
+    const objIndex = users.findIndex((obj) => obj.id === newUser.id);
+    users[objIndex] = newUser;
+    ["red", "yellow", "blue", "green"].forEach((color) => {
+        const index = teams[color].team.findIndex((player) => player.id === newUser.id);
+        if (teams[color].master?.id === newUser.id) {
+            teams[color].master = newUser;
+        } else if (index !== -1) {
+            teams[color].team[index] = newUser;
+        }
+    });
+
+    if (!newUser.online && newUser.state.teamColor === "spectator") {
+        users = users.filter((user) => user.online || user.host || user.state.teamColor !== "spectator");
+    }
+
+    await setCodenamesRoomData(roomId, "users", users);
+    await setCodenamesRoomData(roomId, "teams", teams);
+}
+
+async function getGameboard(roomId, userCodenamesId) {
+    let users = await getCodenamesRoomData(roomId, "users");
+    let traitors = await getCodenamesRoomData(roomId, "traitors");
+
+    const index = users.findIndex((user) => user.id === userCodenamesId);
+    const user = users[index];
+
+    const isMaster = user.state.master;
+    const isTraitor = traitors.some((traitor) => traitor.id === userCodenamesId);
+    if (isMaster) {
+        let currentWords = await getCodenamesRoomData(roomId, "currentWords");
+        if (currentWords.length === 0) {
+            await getNewWords(roomId);
+            currentWords = await getCodenamesRoomData(roomId, "currentWords");
+        }
+        return currentWords;
+    }
+    else if (isTraitor) {
+        let currentWords = await getCodenamesRoomData(roomId, "currentWords");
+        if (currentWords.length === 0) {
+            await getNewWords(roomId);
+            currentWords = await getCodenamesRoomData(roomId, "currentWords");
+        }
+        let hiddenWords = await getCodenamesRoomData(roomId, "hiddenWords");
+        for (let i = 0; i < hiddenWords.length; i++) {
+            if (currentWords[i].color === "white" || currentWords[i].color === user.state.teamColor) {
+                continue;
+            }
+            hiddenWords[i].color = currentWords[i].color;
+        }
+        return hiddenWords;
+    }
+    let hiddenWords = await getCodenamesRoomData(roomId, "hiddenWords");
+    if (hiddenWords.length === 0) {
+        await getNewWords(roomId);
+        hiddenWords = await getCodenamesRoomData(roomId, "hiddenWords");
+    }
+    return hiddenWords;
+}
+
+async function toggleWord(roomId, wordText, selecterIndex, countdownInterval) {
+    let users = await getCodenamesRoomData(roomId, "users");
+    let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+    let currentWords = await getCodenamesRoomData(roomId, "currentWords");
+    let hiddenWords = await getCodenamesRoomData(roomId, "hiddenWords");
+
+    const wordObjectIndex = currentWords.findIndex((word) => word.text === wordText);
+    const selecterId = users[selecterIndex].id;
+    const selecterObject = {
+        id: selecterId,
+        color: users[selecterIndex].color
+    };
+    if (users[selecterIndex].state.selecting !== "" && users[selecterIndex].state.selecting !== wordText) {
+        clearInterval(countdownInterval);
+        const data = {
+            users, gameProcess, currentWords, hiddenWords
+        };
+        toggleWordNoSave(roomId, users[selecterIndex].state.selecting, selecterIndex, countdownInterval, data);
+        users = data.users;
+        gameProcess = data.gameProcess;
+        currentWords = data.currentWords;
+        hiddenWords = data.hiddenWords;
+    }
+    if (wordText === "endTurn") {
+        const index = gameProcess.endTurnSelected.findIndex((selecter) => selecter.id === selecterId);
+        if (index > -1) {
+            gameProcess.endTurnSelected.splice(index, 1);
+            users[selecterIndex].state.selecting = "";
+        } else {
+            gameProcess.endTurnSelected.push(selecterObject);
+            users[selecterIndex].state.selecting = wordText;
+        }
+    }
+    else if (wordObjectIndex !== -1) {
+        const index = currentWords[wordObjectIndex].selectedBy.findIndex((selecter) => selecter.id === selecterId);
+        if (index > -1) {
+            currentWords[wordObjectIndex].selectedBy.splice(index, 1);
+            hiddenWords[wordObjectIndex].selectedBy.splice(index, 1);
+            users[selecterIndex].state.selecting = "";
+        } else {
+            currentWords[wordObjectIndex].selectedBy.push(selecterObject);
+            hiddenWords[wordObjectIndex].selectedBy.push(selecterObject);
+            users[selecterIndex].state.selecting = wordText;
+        }
+    }
+    
+    await setCodenamesRoomData(roomId, "users", users);
+    await setCodenamesRoomData(roomId, "gameProcess", gameProcess);
+    await setCodenamesRoomData(roomId, "currentWords", currentWords);
+    await setCodenamesRoomData(roomId, "hiddenWords", hiddenWords);
+}
+
+function toggleWordNoSave(roomId, wordText, selecterIndex, countdownInterval, data) {
+    const wordObjectIndex = data.currentWords.findIndex((word) => word.text === wordText);
+    const selecterId = data.users[selecterIndex].id;
+    const selecterObject = {
+        id: selecterId,
+        color: data.users[selecterIndex].color
+    };
+    if (data.users[selecterIndex].state.selecting !== "" && data.users[selecterIndex].state.selecting !== wordText) {
+        clearInterval(countdownInterval);
+        toggleWordNoSave(roomId, users[selecterIndex].state.selecting, selecterIndex, countdownInterval, data);
+    }
+    if (wordText === "endTurn") {
+        const index = data.gameProcess.endTurnSelected.findIndex((selecter) => selecter.id === selecterId);
+        if (index > -1) {
+            data.gameProcess.endTurnSelected.splice(index, 1);
+            data.users[selecterIndex].state.selecting = "";
+        } else {
+            data.gameProcess.endTurnSelected.push(selecterObject);
+            data.users[selecterIndex].state.selecting = wordText;
+        }
+    }
+    else if (wordObjectIndex !== -1) {
+        const index = data.currentWords[wordObjectIndex].selectedBy.findIndex((selecter) => selecter.id === selecterId);
+        if (index > -1) {
+            data.currentWords[wordObjectIndex].selectedBy.splice(index, 1);
+            data.hiddenWords[wordObjectIndex].selectedBy.splice(index, 1);
+            data.users[selecterIndex].state.selecting = "";
+        } else {
+            data.currentWords[wordObjectIndex].selectedBy.push(selecterObject);
+            data.hiddenWords[wordObjectIndex].selectedBy.push(selecterObject);
+            data.users[selecterIndex].state.selecting = wordText;
+        }
+    }
+}
+
+async function clearWord(roomId, wordText) {
+    let users = await getCodenamesRoomData(roomId, "users");
+    let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+    let currentWords = await getCodenamesRoomData(roomId, "currentWords");
+    let hiddenWords = await getCodenamesRoomData(roomId, "hiddenWords");
+
+    const data = {
+        users, gameProcess, currentWords, hiddenWords
+    }
+
+    clearWordNoSave(wordText, data);
+    
+    await setCodenamesRoomData(roomId, "users", data.users);
+    await setCodenamesRoomData(roomId, "gameProcess", data.gameProcess);
+    await setCodenamesRoomData(roomId, "currentWords", data.currentWords);
+    await setCodenamesRoomData(roomId, "hiddenWords", data.hiddenWords);
+}
+
+function clearWordNoSave(wordText, data) {
+    if (wordText === "endTurn") {
+        const selecters = data.gameProcess.endTurnSelected;
+        selecters.forEach((selecter) => {
+            const userIndex = data.users.findIndex((user) => user.id === selecter.id);
+            data.users[userIndex].state.selecting = "";
+        });
+        data.gameProcess.endTurnSelected = [];
+    } else {
+        const wordObjectIndex = data.currentWords.findIndex((word) => word.text === wordText);
+        if (wordObjectIndex === -1) {
+            return;
+        }
+        const selecters = data.currentWords[wordObjectIndex].selectedBy;
+        selecters.forEach((selecter) => {
+            const userIndex = data.users.findIndex((user) => user.id === selecter.id);
+            data.users[userIndex].state.selecting = "";
+        });
+        data.currentWords[wordObjectIndex].selectedBy = [];
+        data.hiddenWords[wordObjectIndex].selectedBy = [];
+    }
+}
+
+async function revealWord(roomId, wordText) {
+    if (wordText === "endTurn") {
+        await clearWord(roomId, wordText);
+        await passTurn(roomId);
+        return;
+    }
+
+    await clearWord(roomId, wordText);
+
+    let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+    let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+    let currentWords = await getCodenamesRoomData(roomId, "currentWords");
+    let hiddenWords = await getCodenamesRoomData(roomId, "hiddenWords");
+
+    const wordObjectIndex = currentWords.findIndex((word) => word.text === wordText);
+    if (!hiddenWords[wordObjectIndex].selectable) {
+        return;
+    }
+    hiddenWords[wordObjectIndex].color = currentWords[wordObjectIndex].color;
+    hiddenWords[wordObjectIndex].selectable = false;
+    hiddenWords[wordObjectIndex].revealed = true;
+    currentWords[wordObjectIndex].revealed = true;
+    
+    gameProcess.guessesCount++;
+    gameProcess.wordsCount[currentWords[wordObjectIndex].color]--;
+    
+    await setCodenamesRoomData(roomId, "gameProcess", gameProcess);
+    await setCodenamesRoomData(roomId, "currentWords", currentWords);
+    await setCodenamesRoomData(roomId, "hiddenWords", hiddenWords);
+
+    if (["red", "yellow", "blue", "green"].includes(currentWords[wordObjectIndex].color)) {
+        if (gameProcess.wordsCount[currentWords[wordObjectIndex].color] === 0 && 
+            !gameProcess.blacklisted[currentWords[wordObjectIndex].color]) {
+                await processWin(roomId, currentWords[wordObjectIndex].color);
+        }
+    }
+
+    let shouldPassTurn = false;
+    if (currentWords[wordObjectIndex].color === "black") {
+        gameProcess.blacklisted[gameProcess.currentTurn] = true;
+        shouldPassTurn = true;
+    } else if (currentWords[wordObjectIndex].color !== gameProcess.currentTurn) {
+        shouldPassTurn = true;
+    } else {
+        gameProcess.timeLeft = (gameProcess.timeLeft + gameRules.extraTime) % 3600;
+        if (gameRules.limitedGuesses && gameProcess.guessesCount >= gameRules.guessesLimit) {
+            shouldPassTurn = true;
+        }
+    }
+
+    await setCodenamesRoomData(roomId, "gameProcess", gameProcess);
+
+    if (shouldPassTurn) {
+        await passTurn(roomId);
+    }
+}
+
+async function wordAutoselect(roomId) {
+    let teams = await getCodenamesRoomData(roomId, "teams");
+    let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+    let currentWords = await getCodenamesRoomData(roomId, "currentWords");
+
+    let total = gameProcess.endTurnSelected.length;
+    let most = gameProcess.endTurnSelected.length;
+    let mostCnt = 1;
+    let currentMostWord = "endTurn";
+    let selectedSomething = false;
+    currentWords.forEach((word) => {
+        const selectersCnt = word.selectedBy.length;
+        if (selectersCnt > most) {
+            mostCnt = 1;
+            most = word.selectedBy.length;
+            currentMostWord = word.text;
+        } else if (selectersCnt === most && selectersCnt !== 0) {
+            mostCnt++;
+        }
+        total += selectersCnt;
+    });
+    
+    if (most > teams[gameProcess.currentTurn].team.length - total && mostCnt === 1) {
+        await revealWord(roomId, currentMostWord);
+        selectedSomething = true;
+    }
+    await clearAllSelections(roomId);
+    return selectedSomething;
+}
+
+async function clearAllSelections(roomId) {
+    let users = await getCodenamesRoomData(roomId, "users");
+    let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+    let currentWords = await getCodenamesRoomData(roomId, "currentWords");
+    let hiddenWords = await getCodenamesRoomData(roomId, "hiddenWords");
+
+    const data = {
+        users, gameProcess, currentWords, hiddenWords
+    }
+
+    clearWordNoSave("endTurn", data);
+    currentWords.forEach((word) => {
+        clearWordNoSave(word.text, data);
+    });
+    
+    await setCodenamesRoomData(roomId, "users", data.users);
+    await setCodenamesRoomData(roomId, "gameProcess", data.gameProcess);
+    await setCodenamesRoomData(roomId, "currentWords", data.currentWords);
+    await setCodenamesRoomData(roomId, "hiddenWords", data.hiddenWords);
+}
+
+async function passTurn(roomId) {
+    await clearTimer(roomId);
+
+    let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+    let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+
+    gameProcess.guessesCount = 0;
+
+    let notBlacklisted = "";
+    let blacklistedCnt = 0;
+    gameRules.teamOrder.forEach((color) => {
+        if (gameProcess.blacklisted[color]) {
+            blacklistedCnt++;
+        } else {
+            notBlacklisted = color;
+        }
+    });
+    if (blacklistedCnt === gameRules.teamAmount - 1) {
+        await processWin(roomId, notBlacklisted);
+        return;
+    }
+
+    const startedFrom = gameProcess.currentTurn;
+    const teamAmount = gameRules.teamOrder.length;
+    let index = (gameRules.teamOrder.indexOf(startedFrom) + 1) % teamAmount;
+    do {
+        if (!gameProcess.blacklisted[gameRules.teamOrder[index]]) {
+            gameProcess.currentTurn = gameRules.teamOrder[index];
+
+            await setCodenamesRoomData(roomId, "gameProcess", gameProcess);
+            return;
+        }
+        index = (index + 1) % teamAmount;
+    } while (gameRules.teamOrder[index] !== startedFrom);
+    if (gameProcess.blacklisted[startedFrom]) {
+        await processWin(roomId, "tie");
+    } else {
+        await processWin(roomId, startedFrom);
+    }
+}
+
+async function processWin(roomId, winner) {
+    let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+    gameProcess.isGoing = false;
+    await setCodenamesRoomData(roomId, "gameProcess", gameProcess);
+    io.to(roomId).emit("update_game_process", gameProcess);
+
+    let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+    let gameWinStatus = await getCodenamesRoomData(roomId, "gameWinStatus");
+    let currentWords = await getCodenamesRoomData(roomId, "currentWords");
+    let hiddenWords = await getCodenamesRoomData(roomId, "hiddenWords");
+
+    gameRules.locked = false;
+    
+    gameWinStatus.gameIsEnded = true;
+    gameWinStatus.winner = winner;
+    for (let i = 0; i < gameRules.maxCards; i++) {
+        hiddenWords[i].color = currentWords[i].color;
+    }
+
+    await setCodenamesRoomData(roomId, "gameRules", gameRules);
+    await setCodenamesRoomData(roomId, "gameWinStatus", gameWinStatus);
+    await setCodenamesRoomData(roomId, "hiddenWords", hiddenWords);
+
+    io.to(roomId).emit("update_game_rules", gameRules);
+    io.to(roomId).emit("end_game", gameWinStatus, await getCodenamesRoomData(roomId, "traitors"));
+}
+
+async function clearTimer(roomId) {
+    let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+    let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+
+    if (gameProcess.isFirstTurn) {
+        gameProcess.isFirstTurn = false;
+        gameProcess.timeLeft = gameRules.firstMasterTurnTime;
+    } else {
+        gameProcess.timeLeft = gameRules.masterTurnTime;
+    }
+    if (gameProcess.timeLeft === 0) {
+        gameProcess.infiniteTime = true;
+    } else {
+        gameProcess.infiniteTime = false;
+    }
+    gameProcess.masterTurn = true;
+    gameProcess.teamTimeStarted = false;
+
+    await setCodenamesRoomData(roomId, "gameProcess", gameProcess);
+}
+
+async function updateGameTimer(roomId, interval = 1) {
+    let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+    let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+
+    if (gameRules.freezeTime || gameProcess.infiniteTime) {
+        return false;
+    }
+    gameProcess.timeLeft -= interval;
+    if (gameProcess.timeLeft <= 0) {
+        if (gameProcess.teamTimeStarted) {
+            await setCodenamesRoomData(roomId, "gameProcess", gameProcess);
+            return true;
+        }
+        gameProcess.timeLeft = gameRules.teamTurnTime;
+        if (gameProcess.timeLeft === 0) {
+            gameProcess.infiniteTime = true;
+        } else {
+            gameProcess.infiniteTime = false;
+        }
+        gameProcess.teamTimeStarted = true;
+    }
+    await setCodenamesRoomData(roomId, "gameProcess", gameProcess);
+    return false;
+}
+
+async function clearRoles(roomId) {
+    // let users = await getCodenamesRoomData(roomId, "users");
+    // let teams = await getCodenamesRoomData(roomId, "teams");
+    // let traitors = await getCodenamesRoomData(roomId, "traitors");
+
+    await setCodenamesRoomData(roomId, "traitors", []);
+
+    // for (let i = 0; i < users.length; i++) {
+    //     ["red", "yellow", "blue", "green"].forEach((color) => {
+    //         const index = teams[color].team.findIndex((player) => player.id === users[i].id);;
+    //         if (teams[color].master?.id === users[i].id) {
+    //             teams[color].master = users[i];
+    //         } else if (index !== -1) {
+    //             teams[color].team[index] = users[i];
+    //         }
+    //     });
+    // };
+
+    // await setCodenamesRoomData(roomId, "users", users);
+    // await setCodenamesRoomData(roomId, "teams", teams);
+}
+
+async function setupGamemode(roomId) {
+    let users = await getCodenamesRoomData(roomId, "users");
+    let teams = await getCodenamesRoomData(roomId, "teams");
+    let traitors = await getCodenamesRoomData(roomId, "traitors");
+    let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+
+    if (gameRules.game_mode === "traitor") {
+        ["red", "yellow", "blue", "green"].forEach((color) => {
+            const selectedPlayer = randChoice(teams[color].team);
+            if (selectedPlayer) {
+                traitors.push(selectedPlayer);
+            }
+        });
+    }
+
+    await setCodenamesRoomData(roomId, "traitors", traitors);
+}
+
+async function startNewGame(roomId, randomizeTeamOrder, getNewGameboard) {
+    let clueIDCounter = await getCodenamesRoomData(roomId, "clueIDCounter");
+    let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+    let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+    let gameWinStatus = await getCodenamesRoomData(roomId, "gameWinStatus");
+
+    gameRules.locked = true;
+
+    gameProcess.isFirstTurn = true;
+    gameProcess.isGoing = true;
+    gameProcess.guessesCount = 0;
+    clueIDCounter = 0;
+    gameWinStatus = {
+        gameIsEnded: false,
+        winner: ""
+    };
+    gameProcess.clues = {
+        "red" : [],
+        "yellow" : [],
+        "blue" : [],
+        "green" : []
+    };
+    gameProcess.blacklisted = {
+        "red" : false,
+        "yellow" : false,
+        "blue" : false,
+        "green" : false
+    };
+
+    await setCodenamesRoomData(roomId, "clueIDCounter", clueIDCounter);
+    await setCodenamesRoomData(roomId, "gameRules", gameRules);
+    await setCodenamesRoomData(roomId, "gameProcess", gameProcess);
+    await setCodenamesRoomData(roomId, "gameWinStatus", gameWinStatus);
+
+    await clearRoles(roomId);
+    await setupGamemode(roomId);
+    if (randomizeTeamOrder) {
+        await updateTeamOrder(roomId);
+    }
+    if (getNewGameboard) {
+        await getNewWords(roomId);
+    }
+    await clearTimer(roomId);
+}
+
+async function removeAllPlayers(roomId, withMasters) {
+    let teams = await getCodenamesRoomData(roomId, "teams");
+    let users = await getCodenamesRoomData(roomId, "users");
+
+    ["red", "yellow", "blue", "green"].forEach((color) => {
+        if (withMasters && teams[color].master) {
+            const masterId = teams[color].master.id;
+            const masterIndex = users.findIndex((user) => user.id === masterId);
+            users[masterIndex].state.teamColor = "spectator";
+            users[masterIndex].state.master = false;
+            teams[color].master = null;
+        }
+        teams[color].team.forEach((player) => {
+            const playerId = player.id;
+            const playerIndex = users.findIndex((user) => user.id === playerId);
+            users[playerIndex].state.teamColor = "spectator";
+            users[playerIndex].state.master = false;
+        });
+        teams[color].team = [];
+    });
+
+    users = users.filter((user) => user.online || user.host || user.state.teamColor !== "spectator");
+
+    await setCodenamesRoomData(roomId, "teams", teams);
+    await setCodenamesRoomData(roomId, "users", users);
+}
+
+async function removePlayer(roomId, playerId) {
+    let teams = await getCodenamesRoomData(roomId, "teams");
+    let users = await getCodenamesRoomData(roomId, "users");
+
+    const index = users.findIndex((user) => user.id === playerId);
+    if (index === -1) {
+        return;
+    }
+    const color = users[index].state.teamColor;
+    if (color === "spectator") {
+        return;
+    }
+    users[index].state.teamColor = "spectator";
+    users[index].state.master = false;
+    if (teams[color].master?.id === playerId) {
+        teams[color].master = null;
+    } else {
+        teams[color].team = teams[color].team.filter((user) => user.id !== playerId);
+    }
+
+    users = users.filter((user) => user.online || user.host || user.state.teamColor !== "spectator");
+
+    await setCodenamesRoomData(roomId, "teams", teams);
+    await setCodenamesRoomData(roomId, "users", users);
+}
+
+async function randomizePlayers(roomId, withMasters = true) {
+    let teams = await getCodenamesRoomData(roomId, "teams");
+    let users = await getCodenamesRoomData(roomId, "users");
+    let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+    
+    const allPlayers = [];
+
+    for (const [color, teamData] of Object.entries(teams)) {
+        console.log(color, teamData);
+        allPlayers.push(...teamData.team);
+        if (withMasters) {
+            if (teamData.master) {
+                allPlayers.push(teamData.master);
+            }
+            teams[color].master = null;
+        }
+        teams[color].team = [];
+    }
+
+    shuffle(allPlayers);
+
+    const colors = gameRules.teamOrder.slice();
+
+    let n = allPlayers.length;
+    const k = colors.length;
+
+    function updateColors(players, isMaster = false) {
+        players.forEach((player, index, newArray) => {
+            newArray[index].state.teamColor = colors[index];
+            newArray[index].state.master = isMaster;
+            const userIndex = users.findIndex((user) => user.id === player.id);
+            if (userIndex !== -1) {
+                users[userIndex].state.teamColor = colors[index];
+                users[userIndex].state.master = isMaster;
+            }
+        });
+    }
+
+    async function saveData() {
+        await setCodenamesRoomData(roomId, "teams", teams);
+        await setCodenamesRoomData(roomId, "users", users);
+    }
+
+    if (withMasters) {
+        const players = allPlayers.splice(0, k);
+        if (players.length < k) {
+            shuffle(colors);
+        }
+        updateColors(players, true);
+        colors.forEach((color, index) => {
+            if (index >= players.length) {
+                return;
+            }
+            teams[color].master = players[index];
+        });
+        n -= k;
+        if (n <= 0) {
+            await saveData();
+            return;
+        }
+    }
+
+    while (n >= k) {
+        const players = allPlayers.splice(0, k);
+        updateColors(players, false);
+        colors.forEach((color, index) => {
+            teams[color].team.push(players[index]);
+        });
+        n -= k;
+    }
+
+    const players = allPlayers.splice(0, n);
+    shuffle(colors);
+    updateColors(players, false);
+    colors.forEach((color, index) => {
+        if (index >= players.length) {
+            return;
+        }
+        teams[color].team.push(players[index]);
+    });
+
+    await saveData();
+}
+
+async function transferHost(roomId, hostId, playerId) {
+    let teams = await getCodenamesRoomData(roomId, "teams");
+    let users = await getCodenamesRoomData(roomId, "users");
+
+    const hostIndex = users.findIndex((user) => user.id === hostId);
+    const playerIndex = users.findIndex((user) => user.id === playerId);
+    if (hostIndex === -1 || playerIndex === -1) {
+        return;
+    }
+    const hostColor = users[hostIndex].state.teamColor;
+    const playerColor = users[playerIndex].state.teamColor;
+    users[hostIndex].host = false;
+    users[playerIndex].host = true;
+    if (hostColor !== "spectator") {
+        if (teams[hostColor].master?.id === hostId) {
+            teams[hostColor].master.host = false;
+        } else {
+            const hostIndexInTeam = teams[hostColor].team.findIndex((user) => user.id === hostId);
+            if (hostIndexInTeam !== -1) {
+                teams[hostColor].team[hostIndexInTeam].host = false;
+            }
+        }
+    }
+    if (playerColor !== "spectator") {
+        if (teams[playerColor].master?.id === playerId) {
+            teams[playerColor].master.host = true;
+        } else {
+            const playerIndexInTeam = teams[playerColor].team.findIndex((user) => user.id === playerId);
+            if (playerIndexInTeam !== -1) {
+                teams[playerColor].team[playerIndexInTeam].host = true;
+            }
+        }
+    }
+
+    await setCodenamesRoomData(roomId, "teams", teams);
+    await setCodenamesRoomData(roomId, "users", users);
+}
+
+async function totalCards(roomId) {
+    let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+
+    let extraSum = 0;
+    for (let i = 0; i < gameRules.teamAmount - 1; i++) {
+        extraSum += gameRules.extraCards[i];
+    }
+    const totalCardAmount = gameRules.teamAmount * gameRules.baseCards + 
+                            extraSum + gameRules.blackCards;
+    return totalCardAmount;
+}
+
+async function checkPermissions(roomId, userCodenamesId, permission) {
+    let users = await getCodenamesRoomData(roomId, "users");
+    const index = users.findIndex((user) => user.id === userCodenamesId);
+    if (index === -1) {
+        return false;
+    }
+    const user = users[index];
+    let userPermissionsLevel = Permissions.SPECTATOR;
+    if (user.state.color !== "spectator") {
+        userPermissionsLevel = Permissions.PLAYER;
+    }
+    if (user.state.master) {
+        userPermissionsLevel = Permissions.MASTER;
+    }
+    if (user.host) {
+        userPermissionsLevel = Permissions.HOST;
+    }
+    return permission <= userPermissionsLevel;
+}
+
+let eventCount = 0;
+const validEventsWithoutAuthorization = [
+    "create_room",
+    "process_room",
+    "setup_client"
+];
+
+function createIOListener() {
+    io.use(async (socket, next) => {
+        const userID = socket.handshake.auth.userID;
+    
+        socket.userData = await processUser(userID, socket.id, io.sockets);
+        const result = playerIdZomSchema.safeParse(socket.userData.gameIDs.codenames);
+        if (!result.success) {
+            const newGameIDResult = await createNewGameID(userID, "codenames");
+            if (!newGameIDResult.success) {
+                console.log(newGameIDResult.error);
+                return;
+            }
+            const newUserCodenamesID = newGameIDResult.value;
+            socket.userData.gameIDs.codenames = newUserCodenamesID;
+        }
+    
+        next();
+    });
+    io.on('connection', async (socket) => {
+        console.log('User connected:', socket.id);
+
+        let userId = socket.userData.userID;
+        let userCodenamesId = socket.userData.gameIDs.codenames;
+        console.log('User id:', userId);
+        console.log("User Codenames ID:", userCodenamesId);
+        let user = null;
+        let roomId = "default";
+        let settedUp = false;
+        let countdownInterval = null;
+        let timerInterval = null;
+
+        socket.use(async ([event, data], next) => {
+            console.log(event, data);
+            eventCount++;
+            console.log(eventCount);
+            if (!validEventsWithoutAuthorization.includes(event)) {
+                if (roomId === "default") {
+                    return next(new Error('Unauthorized event'));
+                }
+                const userIsAuthorized = await validateUser(roomId, userCodenamesId);
+                if (!userIsAuthorized) {
+                    return next(new Error('Unauthorized event'));
+                }
+            }
+            else {
+                if (!(typeof data === 'string' || data instanceof String || !data) || data === "default") {
+                    return next(new Error('Unauthorized event'));
+                }
+            }
+            next();
+        });
+        
+        socket.on("error", (err) => {
+            if (err && err.message === 'Unauthorized event') {
+                console.log("Unauthorized access blocked.");
+                socket.disconnect(true);
+            }
+        });
+
+        socket.emit("update_local_storage_data", {
+            userID: socket.userData.userID
+        });
+    
+
+
+        socket.on("create_room", async () => {
+            const result = await getFreeRoom();
+            if (!result.success) {
+                console.log(result.error);
+                socket.emit("error_message", { error: "Couldn't find any free room. Please try again later." });
+            }
+            socket.emit("get_free_room_code", result.value);
+        });
+        
+        socket.on("process_room", (newRoomId) => {
+            let result = roomIdZodSchema.safeParse(newRoomId);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                socket.emit("error_message", { error: "The room code is not valid. The room code must contain from 1 to 16 characters and consist only of Latin letters and numbers." });
+                return;
+            }
+            newRoomId = result.data;
+
+            roomId = newRoomId;
+            socket.join(roomId);
+        });
+    
+        socket.on("setup_client", async (newRoomId) => {
+            let result = roomIdZodSchema.safeParse(newRoomId);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                socket.emit("error_message", { error: "The room code is not valid. The room code must contain from 1 to 16 characters and consist only of Latin letters and numbers." });
+                return;
+            }
+            newRoomId = result.data;
+
+            roomId = newRoomId;
+            socket.join(roomId);
+    
+            const shouldGetNewWords = await createCodenamesRoom(roomId);
+            if (shouldGetNewWords) {
+                await getNewWords(roomId);
+            }
+            let users = await getCodenamesRoomData(roomId, "users");
+            let teams = await getCodenamesRoomData(roomId, "teams");
+            let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+            let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+    
+            const objIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            if (objIndex !== -1) {
+                users[objIndex].online = true;
+                user = users[objIndex];
+                await updateUser(roomId, users[objIndex]);
+                users = await getCodenamesRoomData(roomId, "users");
+                teams = await getCodenamesRoomData(roomId, "teams");
+            }
+            else {
+                user = {
+                    name: socket.userData.name,
+                    color: socket.userData.color,
+                    id: userCodenamesId,
+                    roomId: roomId,
+                    state: {
+                        teamColor: "spectator",
+                        master: false,
+                        selecting: ""
+                    },
+                    online: true,
+                    host: false
+                };
+    
+                if (users.length === 0) {
+                    user.host = true;
+                }
+    
+                users.push(user);
+            }
+    
+            await setCodenamesRoomData(roomId, "users", users);
+    
+            settedUp = true;
+
+            let gameWinStatus = await getCodenamesRoomData(roomId, "gameWinStatus");
+            let chatMessages = await getCodenamesRoomData(roomId, "chatMessages");
+            
+            socket.to(roomId).emit("update_users", teams, users);
+            socket.emit("update_client", teams, users, user, gameRules, gameProcess, gameWinStatus, chatMessages);
+            socket.emit("set_initialized");
+            socket.emit("request_new_gameboard");
+        });
+    
+        socket.on("edit_user", async (newUser) => {
+            let result = playerZodSchema.safeParse(newUser);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            newUser = result.data;
+
+            let users = await getCodenamesRoomData(roomId, "users");
+    
+            const objIndex = users.findIndex((obj) => obj.id === newUser.id);
+            users[objIndex].name = newUser.name;
+            await updateUser(roomId, users[objIndex]);
+    
+            users = await getCodenamesRoomData(roomId, "users");
+            let teams = await getCodenamesRoomData(roomId, "teams");
+    
+            io.to(roomId).emit("update_users", teams, users);
+        });
+
+        socket.on("edit_name", async (newName) => {
+            let result = usernameZodSchema.safeParse(newName);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            newName = result.data;
+
+            let users = await getCodenamesRoomData(roomId, "users");
+    
+            const objIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            users[objIndex].name = newName;
+            await updateUser(roomId, users[objIndex]);
+            await updateGlobalUser(userId, { name: newName });
+    
+            users = await getCodenamesRoomData(roomId, "users");
+            let teams = await getCodenamesRoomData(roomId, "teams");
+    
+            io.to(roomId).emit("update_users", teams, users);
+        });
+
+        socket.on("change_color", async () => {
+            let users = await getCodenamesRoomData(roomId, "users");
+            const newColor = makeColor();
+    
+            const objIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            users[objIndex].color = newColor;
+            await updateUser(roomId, users[objIndex]);
+            await updateGlobalUser(userId, { color: newColor });
+    
+            users = await getCodenamesRoomData(roomId, "users");
+            let teams = await getCodenamesRoomData(roomId, "teams");
+    
+            io.to(roomId).emit("update_users", teams, users);
+        });
+    
+        socket.on("state_changed", async (previousColor, newUser) => {
+            let result = validPlayerColorZodSchema.safeParse(previousColor);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            previousColor = result.data;
+            result = playerZodSchema.safeParse(newUser);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            newUser = result.data;
+            
+            let users = await getCodenamesRoomData(roomId, "users");
+            let teams = await getCodenamesRoomData(roomId, "teams");
+
+            const objIndex = users.findIndex((obj) => obj.id === newUser.id);
+            if (objIndex === -1) {
+                return;
+            }
+            if (newUser.host && !users[objIndex].host) {
+                console.log("Privilege escalation attempt was blocked.");
+                return;
+            }
+
+            if (previousColor !== "spectator") {
+                const objIndex = teams[previousColor].team.findIndex((player) => player.id === newUser.id);
+                if (teams[previousColor].master?.id === newUser.id) {
+                    teams[previousColor].master = null;
+                } else if (objIndex !== -1) {
+                    teams[previousColor].team.splice(objIndex, 1);
+                }
+            }
+            if (newUser.state.teamColor !== "spectator") {
+                if (newUser.state.master) {
+                    teams[newUser.state.teamColor].master = newUser;
+                } else {
+                    teams[newUser.state.teamColor].team.push(newUser);
+                }
+            }
+            let updateEveryone = false;
+            if (newUser.state.selecting !== "") {
+                updateEveryone = true;
+                await toggleWord(roomId, newUser.state.selecting, objIndex, countdownInterval);
+                users = await getCodenamesRoomData(roomId, "users");
+            }
+            users[objIndex].state = newUser.state;
+            users[objIndex].state.selecting = "";
+    
+            await setCodenamesRoomData(roomId, "users", users);
+            await setCodenamesRoomData(roomId, "teams", teams);
+    
+            io.to(roomId).emit("update_users", teams, users);
+            if (updateEveryone) {
+                io.to(roomId).emit("request_new_gameboard");
+            } else {
+                const words = await getGameboard(roomId, userCodenamesId);
+                socket.emit("send_new_gameboard", words);
+            }
+        });
+    
+        socket.on("notify_server_about_change", () => {
+            socket.emit("notify_client_about_change");
+        });
+    
+        socket.on("get_gameboard", async () => {
+            const words = await getGameboard(roomId, userCodenamesId);
+    
+            socket.emit("send_new_gameboard", words);
+            socket.emit("update_game_rules", await getCodenamesRoomData(roomId, "gameRules"));
+        });
+    
+        socket.on("refresh_gameboard", async () => {
+            if (!checkPermissions(roomId, userCodenamesId, Permissions.HOST)) {
+                return;
+            }
+
+            let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+    
+            const newCardsAmount = await totalCards(roomId);
+            if (newCardsAmount > gameRules.maxCards) {
+                socket.emit("error_message", "cardAmountError");
+                return;
+            } 
+            await getNewWords(roomId);
+    
+            io.to(roomId).emit("request_new_gameboard");
+        });
+    
+        socket.on("randomize_team_order", async () => {
+            if (!checkPermissions(roomId, userCodenamesId, Permissions.HOST)) {
+                return;
+            }
+    
+            await updateTeamOrder(roomId);
+            
+            let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+            
+            io.to(roomId).emit("update_game_rules", gameRules);
+        });
+    
+        socket.on("get_all_word_packs", async () => {
+            socket.emit("word_packs", await getAllCodenamesWordPacks());
+        });
+    
+        socket.on("get_word_pack_no_words", async (packId) => {
+            let result = packIdZodSchema.safeParse(packId);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            packId = result.data;
+            
+            socket.emit("word_pack_no_words", await getCodenamesWordPackNoWords(packId));
+        });
+    
+        socket.on("get_words_from_word_pack", async (packId) => {
+            let result = packIdZodSchema.safeParse(packId);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            packId = result.data;
+            
+            socket.emit("words_from_word_pack", await getWordsFromPack(packId));
+        });
+    
+        socket.on("set_new_game_rules", async (newGameRules) => {
+            let result = gameRulesZodSchema.safeParse(newGameRules);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            newGameRules = result.data;
+            
+            if (!checkPermissions(roomId, userCodenamesId, Permissions.HOST)) {
+                return;
+            }
+
+            await safeRoomDataAccess(roomId, async (roomId) => {
+                let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+    
+                const oldTeamAmount = gameRules.teamAmount;
+                if (oldTeamAmount < newGameRules.teamAmount) {
+                    if (oldTeamAmount === 2) {
+                        if (newGameRules.teamAmount >= 3) {
+                            newGameRules.teamOrder.push("blue");
+                        }
+                        if (newGameRules.teamAmount >= 4) {
+                            newGameRules.teamOrder.push("yellow");
+                        }
+                    } else if (oldTeamAmount === 3) {
+                        if (newGameRules.teamAmount >= 4) {
+                            newGameRules.teamOrder.push("yellow");
+                        }
+                    }
+                } else if (oldTeamAmount > newGameRules.teamAmount) {
+                    if (oldTeamAmount === 4) {
+                        if (newGameRules.teamAmount <= 3) {
+                            newGameRules.teamOrder = newGameRules.teamOrder.filter((color) => color !== "yellow");
+                        }
+                        if (newGameRules.teamAmount <= 2) {
+                            newGameRules.teamOrder = newGameRules.teamOrder.filter((color) => color !== "blue");
+                        }
+                    } else if (oldTeamAmount === 3) {
+                        if (newGameRules.teamAmount <= 2) {
+                            newGameRules.teamOrder = newGameRules.teamOrder.filter((color) => color !== "blue");
+                        }
+                    }
+                }
+                
+                gameRules = newGameRules;
+                switch(gameRules.fieldSize) {
+                    case "5x5":
+                        gameRules.maxCards = 25;
+                        break;
+                    case "5x6":
+                        gameRules.maxCards = 30;
+                        break;
+                    case "6x6":
+                        gameRules.maxCards = 36;
+                        break;
+                    case "6x7":
+                        gameRules.maxCards = 42;
+                        break;
+                    case "7x7":
+                        gameRules.maxCards = 49;
+                        break;
+                }
+                
+                await setCodenamesRoomData(roomId, "gameRules", gameRules);
+    
+                io.to(roomId).emit("update_game_rules", gameRules);
+            });
+        });
+    
+        socket.on("start_new_game", async (randomizeTeamOrder, getNewGameboard) => {
+            let result = z.boolean().safeParse(randomizeTeamOrder);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            randomizeTeamOrder = result.data;
+            result = z.boolean().safeParse(getNewGameboard);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            getNewGameboard = result.data;
+            
+            if (!checkPermissions(roomId, userCodenamesId, Permissions.HOST)) {
+                return;
+            }
+
+            await safeRoomDataAccess(roomId, async (roomId) => {
+                let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+                let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+    
+                if (gameProcess.isGoing) {
+                    clearInterval(timerInterval);
+                    await processWin(roomId, "tie");
+                } else {
+                    const newCardsAmount = await totalCards(roomId);
+                    if (newCardsAmount > gameRules.maxCards) {
+                        socket.emit("error_message", "cardAmountError");
+                        return;
+                    } 
+    
+                    await startNewGame(roomId, randomizeTeamOrder, getNewGameboard);
+
+                    io.to(roomId).emit("update_game_rules", await getCodenamesRoomData(roomId, "gameRules"));
+    
+                    let gameWinStatus = await getCodenamesRoomData(roomId, "gameWinStatus");
+                    io.to(roomId).emit("start_game", gameWinStatus);
+                    io.to(roomId).emit("setup_new_game");
+                    
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                    }
+                    timerInterval = setInterval(async () => {
+                        const stopTimer = await updateGameTimer(roomId, 0.5);
+                        if (stopTimer) {
+                            let users = await getCodenamesRoomData(roomId, "users");
+                            let teams = await getCodenamesRoomData(roomId, "teams");
+        
+                            const selectedSomething = await wordAutoselect(roomId);
+                            const gp = await getCodenamesRoomData(roomId, "gameProcess");
+                            io.to(roomId).emit("update_game_process", gp);
+                            io.to(roomId).emit("request_new_gameboard");
+                            io.to(roomId).emit("update_users", teams, users);
+                            if (!selectedSomething) {
+                                await passTurn(roomId);
+                            }
+                        }
+                        const gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+                        if (!gameProcess.isGoing) {
+                            clearInterval(timerInterval);
+                        }
+                        io.to(roomId).emit("update_game_process", gameProcess);
+                    }, 500);
+                }
+    
+                io.to(roomId).emit("update_game_process", await getCodenamesRoomData(roomId, "gameProcess"));
+                io.to(roomId).emit("request_new_gameboard");
+            });
+        });
+    
+        socket.on("get_traitors", async () => {
+            let users = await getCodenamesRoomData(roomId, "users");
+            let traitors = await getCodenamesRoomData(roomId, "traitors");
+    
+            const objIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            if (objIndex !== -1 && users[objIndex].state.master === true) {
+                traitors = traitors.filter((traitor) => traitor.state.teamColor !== users[objIndex].state.teamColor);
+            } else if (traitors.some((traitor) => traitor.id === userCodenamesId)) {
+                traitors = traitors.filter((traitor) => traitor.id === userCodenamesId);
+            } else {
+                traitors = [];
+            }
+            
+            socket.emit("update_traitors", traitors);
+        });
+    
+        socket.on("send_clue", async (clueText, teamColor) => {
+            let result = clueTextZodSchema.safeParse(clueText);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            clueText = result.data;
+            result = validTeamColorZodSchema.safeParse(teamColor);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            teamColor = result.data;
+
+            if (!checkPermissions(roomId, userCodenamesId, Permissions.MASTER)) {
+                return;
+            }
+            
+            let clueIDCounter = await getCodenamesRoomData(roomId, "clueIDCounter");
+            let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+            let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+    
+            gameProcess.clues[teamColor].push({
+                text: clueText,
+                id: clueIDCounter++
+            });
+            gameProcess.masterTurn = false;
+            if (!gameProcess.teamTimeStarted) {
+                gameProcess.teamTimeStarted = true;
+                gameProcess.timeLeft = gameRules.teamTurnTime;
+                if (gameProcess.timeLeft === 0) {
+                    gameProcess.infiniteTime = true;
+                } else {
+                    gameProcess.infiniteTime = false;
+                }
+            }
+    
+            await setCodenamesRoomData(roomId, "clueIDCounter", clueIDCounter);
+            await setCodenamesRoomData(roomId, "gameProcess", gameProcess);
+            
+            io.to(roomId).emit("update_game_process", gameProcess);
+        });
+    
+        socket.on("edit_clue", async (newClue) => {
+            let result = clueZodSchema.safeParse(newClue);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            newClue = result.data;
+            
+            if (!checkPermissions(roomId, userCodenamesId, Permissions.HOST)) {
+                return;
+            }
+
+            let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+    
+            let clueIndex = -1;
+            for (let color in gameProcess.clues) {
+                clueIndex = gameProcess.clues[color].findIndex((clue) => clue.id === newClue.id);
+                if (clueIndex !== -1) {
+                    gameProcess.clues[color][clueIndex].text = newClue.text;
+                    break;
+                }
+            }
+    
+            await setCodenamesRoomData(roomId, "gameProcess", gameProcess);
+    
+            io.to(roomId).emit("update_game_process", gameProcess);
+        });
+    
+        socket.on("get_clues", async () => {
+            let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+    
+            socket.emit("update_clues", gameProcess.clues);
+        });
+    
+        socket.on("select_word", async (selectedWord) => {
+            let result = z.string().min(1).safeParse(selectedWord);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            selectedWord = result.data;
+            
+            let currentWords = await getCodenamesRoomData(roomId, "currentWords");
+            if (!currentWords.some((word) => word.text === selectedWord) && selectedWord !== "endTurn") {
+                console.log("Invalid word was selected:", selectedWord);
+                return;
+            }
+            
+            let users = await getCodenamesRoomData(roomId, "users");
+    
+            const selecterIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            await toggleWord(roomId, selectedWord, selecterIndex, countdownInterval);
+    
+            let teams = await getCodenamesRoomData(roomId, "teams");
+            let gameRules = await getCodenamesRoomData(roomId, "gameRules");
+            let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+            currentWords = await getCodenamesRoomData(roomId, "currentWords");
+    
+            const wordObjectIndex = currentWords.findIndex((word) => word.text === selectedWord);
+            const selecters = wordObjectIndex !== -1 ? currentWords[wordObjectIndex].selectedBy : gameProcess.endTurnSelected;
+    
+            if (selecters.length === teams[gameProcess.currentTurn].team.length) {
+                io.to(roomId).emit("start_countdown", selectedWord);
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+                let timer = gameRules.countdownTime;
+                let freezed = false;
+                countdownInterval = setInterval(async () => {
+                    timer -= 0.01;
+    
+                    if (timer <= 0 && !freezed) {
+                        freezed = true;
+                        timer = 0;
+                        io.to(roomId).emit("stop_countdown");
+                        await revealWord(roomId, selectedWord);
+                        gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+                        io.to(roomId).emit("request_new_gameboard");
+                        io.to(roomId).emit("update_game_process", gameProcess);
+                        clearInterval(countdownInterval);
+                    }
+    
+                    io.to(roomId).emit("update_countdown", 1 - timer / gameRules.countdownTime);
+                }, 10);
+            } else {
+                clearInterval(countdownInterval);
+                io.to(roomId).emit("stop_countdown");
+            }
+    
+            users = await getCodenamesRoomData(roomId, "users");
+    
+            io.to(roomId).emit("request_new_gameboard");
+            io.to(roomId).emit("update_game_process", await getCodenamesRoomData(roomId, "gameProcess"));
+            io.to(roomId).emit("update_users", teams, users);
+            socket.emit("update_client", teams, users, users[selecterIndex], gameRules, gameProcess);
+        });
+    
+        socket.on("proceed_click", (clickedWordText) => {
+            let result = z.string().min(1).safeParse(clickedWordText);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            clickedWordText = result.data;
+            
+            io.to(roomId).emit("click_word", clickedWordText, userCodenamesId);
+        });
+    
+        socket.on("get_game_process", async () => {
+            let gameProcess = await getCodenamesRoomData(roomId, "gameProcess");
+    
+            socket.emit("update_game_process", gameProcess);
+        });
+    
+        socket.on("pass_turn", async () => {
+            if (!checkPermissions(roomId, userCodenamesId, Permissions.HOST)) {
+                return;
+            }
+            let teams = await getCodenamesRoomData(roomId, "teams");
+            let users = await getCodenamesRoomData(roomId, "users");
+    
+            await clearAllSelections(roomId);
+            await passTurn(roomId);
+    
+            io.to(roomId).emit("update_game_process", await getCodenamesRoomData(roomId, "gameProcess"));
+            io.to(roomId).emit("request_new_gameboard");
+            io.to(roomId).emit("update_users", teams, users);
+        });
+    
+        socket.on("remove_all_players", async (withMasters) => {
+            let result = z.boolean().safeParse(withMasters);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            withMasters = result.data;
+            
+            if (!checkPermissions(roomId, userCodenamesId, Permissions.HOST)) {
+                return;
+            }
+    
+            await removeAllPlayers(roomId, withMasters);
+    
+            let teams = await getCodenamesRoomData(roomId, "teams");
+            let users = await getCodenamesRoomData(roomId, "users");
+    
+            io.to(roomId).emit("update_users", teams, users);
+        });
+    
+        socket.on("remove_player", async (playerId) => {
+            let result = playerIdZomSchema.safeParse(playerId);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            playerId = result.data;
+            
+            if (!checkPermissions(roomId, userCodenamesId, Permissions.HOST)) {
+                return;
+            }
+    
+            await removePlayer(roomId, playerId);
+    
+            let teams = await getCodenamesRoomData(roomId, "teams");
+            let users = await getCodenamesRoomData(roomId, "users");
+            
+            io.to(roomId).emit("update_users", teams, users);
+        });
+    
+        socket.on("randomize_players", async (withMasters) => {
+            let result = z.boolean().safeParse(withMasters);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            withMasters = result.data;
+            
+            if (!checkPermissions(roomId, userCodenamesId, Permissions.HOST)) {
+                return;
+            }
+    
+            await randomizePlayers(roomId, withMasters);
+    
+            let teams = await getCodenamesRoomData(roomId, "teams");
+            let users = await getCodenamesRoomData(roomId, "users");
+            
+            io.to(roomId).emit("update_users", teams, users);
+        });
+        
+        socket.on("transfer_host", async (playerId) => {
+            let result = playerIdZomSchema.safeParse(playerId);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            playerId = result.data;
+            
+            if (!checkPermissions(roomId, userCodenamesId, Permissions.HOST)) {
+                return;
+            }
+    
+            await transferHost(roomId, userCodenamesId, playerId);
+    
+            let teams = await getCodenamesRoomData(roomId, "teams");
+            let users = await getCodenamesRoomData(roomId, "users");
+            
+            io.to(roomId).emit("update_users", teams, users);
+        });
+
+        socket.on("send_new_chat_message", async (messageText) => {
+            let result = chatMessageZodSchema.safeParse(messageText);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            messageText = result.data;
+
+            let users = await getCodenamesRoomData(roomId, "users");
+
+            const objIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            let sender = users[objIndex];
+
+            result = await addCodenamesChatMessageToRoomData(roomId, sender.name, userCodenamesId, messageText);
+
+            const message = {
+                senderName: sender.name,
+                senderID: userCodenamesId,
+                messageText: messageText
+            };
+
+            io.to(roomId).emit("add_chat_message", message);
+        });
+    
+        socket.on('disconnect', async () => {
+            if (!settedUp) {
+                console.log("Some shit is going on... user was not setted up");
+                return;
+            }
+            if (!(await validateUser(roomId, userCodenamesId))) {
+                console.log("Some shit is going on... user was not validated");
+                return;
+            }
+            let users = await getCodenamesRoomData(roomId, "users");
+    
+            console.log('User disconnected:', socket.handshake.address);
+
+            const objIndex = users.findIndex((obj) => obj.id === userCodenamesId);
+            console.log(objIndex);
+            let newUser = users[objIndex];
+            newUser.online = false;
+            await updateUser(roomId, newUser);
+
+            let teams = await getCodenamesRoomData(roomId, "teams");
+            users = await getCodenamesRoomData(roomId, "users");
+            if (users.every((user) => !user.online)) {
+                console.log("Room is AFK now!");
+            }
+            io.to(roomId).emit("update_users", teams, users);
+        });
+    });
+}
+
+module.exports = {
+    setupCodenames
+}

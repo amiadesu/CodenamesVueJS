@@ -1,0 +1,192 @@
+{
+    "code" : "en",
+    "select_language" : {
+        "message" : "Выберите язык:",
+        "en" : "English",
+        "ru" : "Русский",
+        "ua" : "Українська",
+        "flags" : {
+            "en" : "🇬🇧",
+            "ru" : "🇷🇺",
+            "ua" : "🇺🇦"
+        }
+    },
+    "gamePreview" : {
+        "codenames" : {
+            "name" : "Codenames",
+            "description" : "In Codenames, two rival spymasters know the secret identities of 25 agents. Their teammates, however, only know these agents by their codenames — single, seemingly random words like “chocolate,” “sunflower,” or even “carrot.” (Yes, there's an agent out there codenamed \"carrot.\") The goal is simple: each spymaster wants their team to identify all of their agents first, without accidentally revealing the assassin.",
+            "rules" : ""
+        },
+        "example" : {
+            "name" : "Game preview example",
+            "description" : "An example of a game preview. This is the description.",
+            "rules" : ""
+        },
+        "read_rules" : "Read rules",
+        "enter_room_code" : "Enter room code",
+        "or" : "OR",
+        "create_new_room" : "Create new room"
+    },
+    "codenames" : {
+        "loading" : "Loading...",
+        "disconnected" : "Disconnected (another session started)",
+        "guesses_no_limit" : "There is no limit for guesses!",
+        "guesses_with_limit" : "{used} out of {total} guesses were used.",
+        "teams" : {
+            "become_master" : "Become master",
+            "join_team" : "Join team",
+            "logs" : "Logs",
+            "end_turn" : "End turn",
+            "display_players" : "Players",
+            "display_clues" : "Clues"
+        },
+        "spectators" : {
+            "text" : "Spectators:",
+            "list" : "List of spectators:",
+            "open_list" : "Open list",
+            "close_list" : "Close list",
+            "count" : "Spectators: {count}",
+            "join" : "Become spectator",
+            "already_spectator" : "Already spectator"
+        },
+        "chat" : {
+            "title" : "Game chat:",
+            "send_message_placeholder" : "Write your message"
+        },
+        "admin" : {
+            "get_new_gameboard" : "Get new gameboard",
+            "amount_of_teams" : "Select amount of teams:",
+            "team" : {
+                "order" : "Team order",
+                "red" : "Red team",
+                "yellow" : "Yellow team",
+                "blue" : "Blue team",
+                "green" : "Green team"
+            },
+            "randomize_team_order" : "Randomize team order",
+            "maximum_amount_of_players_per_team" : "Select maximum amount of players per team:",
+            "first_master_turn_time" : "First master turn time (in s):",
+            "master_turn_time" : "Master turn time (in s):",
+            "team_turn_time" : "Team turn time (in s):",
+            "extra_time" : "Extra time for correctly guessed word (in s):",
+            "word_guesses_limit" : "Word guesses limit:",
+            "start_game" : "Start game",
+            "end_game" : "End game",
+            "freeze_time" : "Freeze time",
+            "unfreeze_time" : "Unfreeze time",
+            "lock_room" : "Lock room",
+            "unlock_room" : "Unlock room",
+            "pass_turn" : "Pass turn",
+            "remove_all_players" : "Remove all players",
+            "randomize_all_players" : "Randomize all players",
+            "with_masters" : "With masters",
+            "field_size" : "Select field size:",
+            "base_amount_of_cards" : "Select base amount of cards:",
+            "extra_amount_of_cards" : "Select extra {num} amount of cards:",
+            "calculated_cards_amount" : "Calculated amount: {amount}",
+            "black_cards_amount" : "Select black cards amount:",
+            "assigned_cards" : "You assigned {assigned}/{total} cards.",
+            "white_cards" : "You will have {amount} white cards.",
+            "card_amount_overflow" : "This is too much. Reduce your total amount of cards!",
+            "game_mode" : {
+                "select" : "Select game mode:",
+                "default" : "Default",
+                "traitor" : "Traitor"
+            },
+            "word_pack" : {
+                "message" : "Word pack:",
+                "select" : "Select word pack"
+            },
+            "edit_name" : "Edit name"
+        },
+        "settings" : {
+            "amount_of_teams" : "Amount of teams:",
+            "team" : {
+                "order" : "Team order",
+                "red" : "Red team",
+                "yellow" : "Yellow team",
+                "blue" : "Blue team",
+                "green" : "Green team"
+            },
+            "maximum_amount_of_players_per_team" : "Maximum amount of players per team:",
+            "first_master_turn_time" : "First master turn time (in s):",
+            "master_turn_time" : "Master turn time (in s):",
+            "team_turn_time" : "Team turn time (in s):",
+            "extra_time" : "Extra time for correctly guessed word (in s):",
+            "word_guesses_limit" : "Word guesses limit:",
+            "start_game" : "Game is not going.",
+            "end_game" : "Game is going.",
+            "freeze_time" : "Time is not freezed.",
+            "unfreeze_time" : "Time is freezed.",
+            "field_size" : "Field size:",
+            "base_amount_of_cards" : "Base amount of cards:",
+            "extra_amount_of_cards" : "Extra {num} amount of cards:",
+            "calculated_cards_amount" : "Calculated amount: {amount}",
+            "black_cards_amount" : "Black cards amount:",
+            "assigned_cards" : "Host assigned {assigned}/{total} cards.",
+            "white_cards" : "You will have {amount} white cards.",
+            "card_amount_overflow" : "There is card amount overflow. Game cannot be started.",
+            "game_mode" : {
+                "message" : "Game mode:",
+                "default" : "Default",
+                "traitor" : "Traitor"
+            },
+            "word_pack" : {
+                "message" : "Word pack:",
+                "view" : "View word pack"
+            },
+            "edit_name" : "Edit name"
+        },
+        "clues" : {
+            "0" : "Garden",
+            "1" : "Mango",
+            "2" : "Pegasus",
+            "3" : "Nebula",
+            "4" : "Whimsical",
+            "5" : "Luminescence",
+            "6" : "Quilt",
+            "7" : "Dragonfly",
+            "8" : "Jukebox",
+            "9" : "Stethoscope"
+        },
+        "gameboard" : {
+            "request_new_board" : "Your gameboard has {total} words while having the word list of {amount} words. Request new gameboard to see words again."
+        },
+        "panels" : {
+            "edit_clue_panel" : {
+                "edit_clue" : "Edit clue:"
+            },
+            "edit_name_panel" : {
+                "edit_name" : "Edit your name:"
+            },
+            "word_pack_selection_panel" : {
+                "close_panel" : "Close panel",
+                "select_word_pack" : "Select word pack",
+                "view_words" : "View words",
+                "return" : "Return",
+                "all_words_message" : "All words from {packName}",
+                "no_word_pack_selected" : "Looks like there is no word pack selected right now.",
+                "select_message" : "Click on any word pack to view information about it!"
+            },
+            "word_pack_info_panel" : {
+                "close_panel" : "Close panel",
+                "view_words" : "View words",
+                "return" : "Return",
+                "all_words_message" : "All words from {packName}",
+                "no_word_pack_selected" : "Looks like there is no word pack selected right now.",
+                "select_message" : "Click on any word pack to view information about it!"
+            }
+        },
+        "errors" : {
+            "error_title" : "Error!",
+            "error_code" : "Error code: {error_code}",
+            "no_free_room" : "Couldn't find a free room. Please try again later.",
+            "invalid_room_code" : "Room code you provided is invalid. The room code must contain from 1 to 16 characters and consist only of Latin letters and numbers.",
+            "still_being_set_up" : "Your session is still being set up by the server.",
+            "action_rate_limit" : "Your current action is being rate limited. Retry after {rateLimitDelay}ms.",
+            "card_amount_overflow" : "Distributed card amount is larger that max cards amount.",
+            "invalid_game_rules" : "Game rules object you provided is invalid or corrupted.",
+            "close" : "Close"
+        }
+    }
+}

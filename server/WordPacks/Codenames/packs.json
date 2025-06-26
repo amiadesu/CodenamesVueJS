@@ -1,0 +1,26 @@
+{
+    "russian" : {
+        "name" : "Russian word pack (extended)",
+        "language" : "russian",
+        "description" : "Набор из 2000+ слов на русском языке.",
+        "version" : "1.0.0",
+        "type" : "text",
+        "file_name" : "russian.txt"
+    },
+    "english" : {
+        "name" : "English word pack (standart)",
+        "language" : "english",
+        "description" : "Standart english word pack for Codenames, that consists 400 words.",
+        "version" : "1.0.0",
+        "type" : "text",
+        "file_name" : "english.txt"
+    },
+    "brainrot" : {
+        "name" : "Brainrot word pack",
+        "language" : "english",
+        "description" : "Ohio sigma skibidi gyass!!!",
+        "version" : "1.0.0",
+        "type" : "text",
+        "file_name" : "brainrot.txt"
+    }
+}

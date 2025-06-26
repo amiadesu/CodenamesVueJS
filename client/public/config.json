@@ -1,0 +1,9 @@
+{
+    "defaultLocale" : "en",
+    "defaultTheme" : "light",
+    "fallbackLocale" : "en",
+    "serverIPs" : {
+        "codenames" : "http://localhost:3000/codenames"
+    },
+    "availableGames" : ["codenames", "example", "codenames", "example", "codenames", "example", "codenames", "example", "codenames", "example"]
+}

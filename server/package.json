@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "async-mutex": "^0.5.0",
+    "chokidar": "^4.0.3",
+    "express": "^4.21.2",
+    "mongoose": "^8.9.6",
+    "rate-limiter-flexible": "^7.1.1",
+    "redis": "^5.5.6",
+    "socketio-wildcard": "^2.0.0",
+    "zod": "^3.25.67"
+  }
+}
