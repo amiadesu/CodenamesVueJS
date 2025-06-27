@@ -38,6 +38,9 @@ const {
     getTraitorsEvent,
     getGameProcessEvent
 } = require("./gameProcess");
+const {
+    sendNewChatMessageEvent
+} = require("./chat");
 const { config } = require("../../../utils/config");
 
 class RoomQueueManager {
@@ -90,7 +93,10 @@ class RoomQueueManager {
             // Game process events
             'start_new_game': this.processStartNewGame.bind(this),
             'get_traitors': this.processGetTraitors.bind(this),
-            'get_game_process': this.processGetGameProcess.bind(this)
+            'get_game_process': this.processGetGameProcess.bind(this),
+
+            // Chat events
+            'send_new_message': this.processSendNewMessage.bind(this)
         };
     }
 
@@ -273,6 +279,10 @@ class RoomQueueManager {
 
     async processGetGameProcess(socketData) {
         return await getGameProcessEvent(this.io, socketData);
+    }
+
+    async processSendNewMessage(socketData, messageText) {
+        return await sendNewChatMessageEvent(this.io, socketData, messageText);
     }
 
 

@@ -692,24 +692,12 @@ function createIOListener() {
             }
             messageText = resultChatMessages.data;
             
-            const room = new RoomContext(socketData.roomId);
-
-            let users = await room.getUsers();
-
-            const objIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
-            let sender = users[objIndex];
-
-            let result = await CodenamesDB.addChatMessageToRoomData(socketData.roomId, sender.name, socketData.userCodenamesId, messageText);
-
-            await room.getChatMessages();
-
-            const message = {
-                senderName: sender.name,
-                senderID: socketData.userCodenamesId,
-                messageText: messageText
-            };
-
-            io.to(socketData.roomId).emit("add_chat_message", message);
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "send_new_chat_message", socketData, messageText);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
+            }
         });
     
         socket.on('disconnect', async () => {
@@ -747,3 +735,8 @@ function createIOListener() {
 module.exports = {
     setupCodenames
 }
+
+// TODO:
+// move disconnect to /SocketLogic/user.js
+// add actual functionality for the sake of RoomQueueManager.cleanupRoomQueue being called
+// clear up code that left
