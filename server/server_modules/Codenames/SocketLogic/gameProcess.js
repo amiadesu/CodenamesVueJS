@@ -56,31 +56,6 @@ const {
 } = require("../ZodSchemas/codenamesZodSchemas");
 
 async function startNewGameEvent(io, socketData, randomizeTeamOrder, getNewGameboard) {
-    try {
-        await startNewGameRateLimiter.consume(socketData.userId);
-    }
-    catch (rejRes) {
-        io.to(socketData.socketId).emit("error_message", { 
-            error_code: "action_rate_limit", 
-            error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
-            retry_ms: rejRes.msBeforeNext
-        });
-        return;
-    }
-
-    let result = z.boolean().safeParse(randomizeTeamOrder);
-    if (!result.success) {
-        console.log("Zod error:", result.error);
-        return;
-    }
-    randomizeTeamOrder = result.data;
-    result = z.boolean().safeParse(getNewGameboard);
-    if (!result.success) {
-        console.log("Zod error:", result.error);
-        return;
-    }
-    getNewGameboard = result.data;
-    
     const room = new RoomContext(socketData.roomId);
     
     if (!(await checkPermissions(room, socketData.userCodenamesId, Permissions.HOST))) {
@@ -90,7 +65,7 @@ async function startNewGameEvent(io, socketData, randomizeTeamOrder, getNewGameb
     let gameRules = await room.getGameRules();
     let resultGameRules = gameRulesZodSchemaStrict.safeParse(gameRules);
     if (!resultGameRules.success) {
-        console.log("Zod error:", result.error);
+        console.log("Zod error:", resultGameRules.error);
         io.to(socketData.socketId).emit("error_message", { error_code: "invalid_game_rules", error: "Game rules object is invalid." });
         return;
     }
@@ -175,7 +150,16 @@ async function getTraitorsEvent(io, socketData) {
     io.to(socketData.socketId).emit("update_traitors", traitors);
 };
 
+async function getGameProcessEvent(io, socketData) {
+    const room = new RoomContext(socketData.roomId);
+
+    let gameProcess = await room.getGameProcess();
+
+    io.to(socketData.socketId).emit("update_game_process", gameProcess);
+};
+
 module.exports = {
     startNewGameEvent,
-    getTraitorsEvent
+    getTraitorsEvent,
+    getGameProcessEvent
 };

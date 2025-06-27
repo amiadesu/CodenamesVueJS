@@ -16,8 +16,7 @@ const {
 
 const DIContainer = require("../GameLogic/container");
 const {
-    validateUser,
-    checkPermissions
+    getUserTeamPermissions,
 } = DIContainer.modules.permissionsValidation;
 const {
     getWordsFromPack,
@@ -46,14 +45,7 @@ async function getGameboardEvent(io, socketData) {
     io.to(socketData.socketId).emit("update_game_rules", gameRules);
 }
 
-async function selectWordEvent(io, socketData, selectedWordText) {
-    let result = z.string().min(1).safeParse(selectedWordText);
-    if (!result.success) {
-        console.log("Zod error:", result.error);
-        return;
-    }
-    selectedWordText = result.data;
-    
+async function selectWordEvent(io, socketData, selectedWordText) { 
     const room = new RoomContext(socketData.roomId);
     
     let words = await room.getWords();
@@ -63,8 +55,14 @@ async function selectWordEvent(io, socketData, selectedWordText) {
     }
     
     let users = await room.getUsers();
+    const gameProcess = await room.getGameProcess();
 
     const selecterIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
+
+    if (users[selecterIndex].state.teamColor !== gameProcess.currentTurn) {
+        return;
+    }
+
     await toggleWord(room, selectedWordText, selecterIndex, socketData.countdownInterval);
 
     let gameRules = await room.getGameRules();
@@ -131,14 +129,13 @@ async function selectWordEvent(io, socketData, selectedWordText) {
 };
 
 async function processClickEvent(io, socketData, clickedWordText) {
-    let result = z.string().min(1).safeParse(clickedWordText);
-    if (!result.success) {
-        console.log("Zod error:", result.error);
+    const room = new RoomContext(socketData.roomId);
+
+    const userTeamPermissionsLevel = await getUserTeamPermissions(room, socketData.userCodenamesId);
+
+    if (userTeamPermissionsLevel === Permissions.MASTER) {
         return;
     }
-    clickedWordText = result.data;
-
-    // Master shouldn't click!
     
     io.to(socketData.roomId).emit("click_word", clickedWordText, socketData.userCodenamesId);
 };

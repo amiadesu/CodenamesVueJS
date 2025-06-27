@@ -50,13 +50,6 @@ const {
 
 // Requires mutex!!!
 async function setNewGameRulesEvent(io, socketData, newGameRules) {
-    let result = gameRulesZodSchemaNonStrict.safeParse(newGameRules);
-    if (!result.success) {
-        console.log("Zod error:", result.error);
-        return;
-    }
-    newGameRules = result.data;
-
     const room = new RoomContext(socketData.roomId);
     
     if (!(await checkPermissions(room, socketData.userCodenamesId, Permissions.HOST))) {
@@ -119,18 +112,6 @@ async function setNewGameRulesEvent(io, socketData, newGameRules) {
 };
 
 async function refreshGameboardEvent(io, socketData) {
-    try {
-        await refreshGameboardRateLimiter.consume(socketData.userId);
-    }
-    catch (rejRes) {
-        io.to(socketData.socketId).emit("error_message", { 
-            error_code: "action_rate_limit", 
-            error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
-            retry_ms: rejRes.msBeforeNext
-        });
-        return;
-    }
-
     const room = new RoomContext(socketData.roomId);
 
     if (!(await checkPermissions(room, socketData.userCodenamesId, Permissions.HOST))) {
@@ -183,14 +164,7 @@ async function passTurnEvent(io, socketData) {
     io.to(socketData.roomId).emit("update_users", teams, users);
 };
 
-async function removeAllPlayersEvent(io, socketData, withMasters) {
-    let result = z.boolean().safeParse(withMasters);
-    if (!result.success) {
-        console.log("Zod error:", result.error);
-        return;
-    }
-    withMasters = result.data;
-    
+async function removeAllPlayersEvent(io, socketData, withMasters) {  
     const room = new RoomContext(socketData.roomId);
 
     if (!(await checkPermissions(room, socketData.userCodenamesId, Permissions.HOST))) {
@@ -206,13 +180,6 @@ async function removeAllPlayersEvent(io, socketData, withMasters) {
 };
 
 async function removePlayerEvent(io, socketData, playerId) {
-    let result = playerIdZodSchema.safeParse(playerId);
-    if (!result.success) {
-        console.log("Zod error:", result.error);
-        return;
-    }
-    playerId = result.data;
-    
     const room = new RoomContext(socketData.roomId);
     
     if (!(await checkPermissions(room, socketData.userCodenamesId, Permissions.HOST))) {

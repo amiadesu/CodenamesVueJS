@@ -35,7 +35,8 @@ const {
 } = require("./host");
 const {
     startNewGameEvent,
-    getTraitorsEvent
+    getTraitorsEvent,
+    getGameProcessEvent
 } = require("./gameProcess");
 const { config } = require("../../../utils/config");
 
@@ -88,7 +89,8 @@ class RoomQueueManager {
 
             // Game process events
             'start_new_game': this.processStartNewGame.bind(this),
-            'get_traitors': this.processGetTraitors.bind(this)
+            'get_traitors': this.processGetTraitors.bind(this),
+            'get_game_process': this.processGetGameProcess.bind(this)
         };
     }
 
@@ -267,6 +269,10 @@ class RoomQueueManager {
 
     async processGetTraitors(socketData) {
         return await getTraitorsEvent(this.io, socketData);
+    }
+
+    async processGetGameProcess(socketData) {
+        return await getGameProcessEvent(this.io, socketData);
     }
 
 

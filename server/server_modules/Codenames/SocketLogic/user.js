@@ -44,13 +44,6 @@ const {
 } = require("../../../utils/extra");
 
 async function editUserNameEvent(io, socketData, newName) {
-    let result = usernameZodSchema.safeParse(newName);
-    if (!result.success) {
-        console.log("Zod error:", result.error);
-        return;
-    }
-    newName = result.data;
-
     const room = new RoomContext(socketData.roomId);
 
     let users = await room.getUsers();
@@ -84,19 +77,6 @@ async function changeUserColorEvent(io, socketData) {
 }
 
 async function stateChangedEvent(io, socketData, previousColor, newUser) {
-    const resultPlayerColor = validPlayerTeamColorZodSchema.safeParse(previousColor);
-    if (!resultPlayerColor.success) {
-        console.log("Zod error:", resultPlayerColor.error);
-        return;
-    }
-    previousColor = resultPlayerColor.data;
-    const resultPlayer = playerZodSchema.safeParse(newUser);
-    if (!resultPlayer.success) {
-        console.log("Zod error:", resultPlayer.error);
-        return;
-    }
-    newUser = resultPlayer.data;
-
     const room = new RoomContext(socketData.roomId);
     
     let users = await room.getUsers();

@@ -29,20 +29,7 @@ const {
     chatMessageZodSchema
 } = require("../ZodSchemas/codenamesZodSchemas");
 
-async function sendClueEvent(io, socketData, clueText, teamColor) {
-    let result = clueTextZodSchema.safeParse(clueText);
-    if (!result.success) {
-        console.log("Zod error:", result.error);
-        return;
-    }
-    clueText = result.data;
-    result = validTeamColorZodSchema.safeParse(teamColor);
-    if (!result.success) {
-        console.log("Zod error:", result.error);
-        return;
-    }
-    teamColor = result.data;
-    
+async function sendClueEvent(io, socketData, clueText, teamColor) {    
     const room = new RoomContext(socketData.roomId);
 
     if (!(await checkPermissions(room, socketData.userCodenamesId, Permissions.MASTER))) {
@@ -82,13 +69,6 @@ async function sendClueEvent(io, socketData, clueText, teamColor) {
 }
 
 async function editClueEvent(io, socketData, newClue) {
-    let result = clueZodSchema.safeParse(newClue);
-    if (!result.success) {
-        console.log("Zod error:", result.error);
-        return;
-    }
-    newClue = result.data;
-    
     const room = new RoomContext(socketData.roomId);
     
     if (!(await checkPermissions(room, socketData.userCodenamesId, Permissions.HOST))) {

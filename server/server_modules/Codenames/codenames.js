@@ -2,8 +2,6 @@
 
 const path = require('path');
 const z = require("zod/v4");
-const { Mutex } = require('async-mutex');
-const mutex = new Mutex();
 
 const {
     validTeamColorZodSchema,
@@ -113,25 +111,6 @@ function setupCodenames(codenamesIo) {
     });
 }
 
-async function safeRoomDataAccess(room, callback) {
-    const release = await mutex.acquire();
-    try {
-        await callback(room);
-    } finally {
-        release();
-    }
-}
-
-function totalCards(gameRules) {
-    let extraSum = 0;
-    for (let i = 0; i < gameRules.teamAmount - 1; i++) {
-        extraSum += gameRules.extraCards[i];
-    }
-    const totalCardAmount = gameRules.teamAmount * gameRules.baseCards + 
-                            extraSum + gameRules.blackCards;
-    return totalCardAmount;
-}
-
 let eventCount = 0;
 
 function createIOListener() {
@@ -171,8 +150,6 @@ function createIOListener() {
         console.log("User Codenames ID:", socketData.userCodenamesId);
 
         let user = null;
-        let countdownInterval = null;
-        let timerInterval = null;
 
         const originalOn = socket.on.bind(socket);
         socket.on = (event, handler) => {
@@ -346,29 +323,16 @@ function createIOListener() {
             socketData.status.setup_event.active = false;
         });
     
-        // socket.on("edit_user", async (newUser) => {
-        //     let result = playerZodSchema.safeParse(newUser);
-        //     if (!result.success) {
-        //         console.log("Zod error:", result.error);
-        //         return;
-        //     }
-        //     newUser = result.data;
-
-        //     const room = new RoomContext(socketData.roomId);
-
-        //     let users = await room.getUsers();
-    
-        //     const objIndex = users.findIndex((obj) => obj.id === newUser.id);
-        //     users[objIndex].name = newUser.name;
-        //     await updateUser(room, users[objIndex]);
-    
-        //     users = await room.getUsers();
-        //     let teams = await room.getTeams();
-    
-        //     io.to(socketData.roomId).emit("update_users", teams, users);
-        // });
+        
 
         socket.on("edit_user_name", async (newName) => {
+            const result = usernameZodSchema.safeParse(newName);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            newName = result.data;
+
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "edit_user_name", socketData, newName);
             } catch (error) {
@@ -387,6 +351,19 @@ function createIOListener() {
         });
     
         socket.on("state_changed", async (previousColor, newUser) => {
+            const resultPlayerColor = validPlayerTeamColorZodSchema.safeParse(previousColor);
+            if (!resultPlayerColor.success) {
+                console.log("Zod error:", resultPlayerColor.error);
+                return;
+            }
+            previousColor = resultPlayerColor.data;
+            const resultPlayer = playerZodSchema.safeParse(newUser);
+            if (!resultPlayer.success) {
+                console.log("Zod error:", resultPlayer.error);
+                return;
+            }
+            newUser = resultPlayer.data;
+
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "state_changed", socketData, previousColor, newUser);
             } catch (error) {
@@ -407,6 +384,13 @@ function createIOListener() {
         });
 
         socket.on("select_word", async (selectedWordText) => {
+            const result = z.string().min(1).safeParse(selectedWordText);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            selectedWordText = result.data;
+
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "select_word", socketData, selectedWordText);
             } catch (error) {
@@ -416,6 +400,13 @@ function createIOListener() {
         });
     
         socket.on("proceed_click", async (clickedWordText) => {
+            const result = z.string().min(1).safeParse(clickedWordText);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            clickedWordText = result.data;
+
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "proceed_click", socketData, clickedWordText);
             } catch (error) {
@@ -436,6 +427,13 @@ function createIOListener() {
         });
     
         socket.on("get_word_pack_no_words", async (packId) => {
+            const resultPackId = packIdZodSchema.safeParse(packId);
+            if (!resultPackId.success) {
+                console.log("Zod error:", resultPackId.error);
+                return;
+            }
+            packId = resultPackId.data;
+
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "get_word_pack_no_words", socketData, packId);
             } catch (error) {
@@ -445,6 +443,13 @@ function createIOListener() {
         });
     
         socket.on("get_words_from_word_pack", async (packId) => {
+            const resultPackId = packIdZodSchema.safeParse(packId);
+            if (!resultPackId.success) {
+                console.log("Zod error:", resultPackId.error);
+                return;
+            }
+            packId = resultPackId.data;
+
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "get_words_from_word_pack", socketData, packId);
             } catch (error) {
@@ -456,6 +461,13 @@ function createIOListener() {
 
     
         socket.on("set_new_game_rules", async (newGameRules) => {
+            const result = gameRulesZodSchemaNonStrict.safeParse(newGameRules);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            newGameRules = result.data;
+
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "set_new_game_rules", socketData, newGameRules);
             } catch (error) {
@@ -465,6 +477,18 @@ function createIOListener() {
         });
 
         socket.on("refresh_gameboard", async () => {
+            try {
+                await refreshGameboardRateLimiter.consume(socketData.userId);
+            }
+            catch (rejRes) {
+                io.to(socketData.socketId).emit("error_message", { 
+                    error_code: "action_rate_limit", 
+                    error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
+                    retry_ms: rejRes.msBeforeNext
+                });
+                return;
+            }
+
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "refresh_gameboard", socketData);
             } catch (error) {
@@ -492,6 +516,13 @@ function createIOListener() {
         });
     
         socket.on("remove_all_players", async (withMasters) => {
+            const result = z.boolean().safeParse(withMasters);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            withMasters = result.data;
+
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "remove_all_players", socketData, withMasters);
             } catch (error) {
@@ -501,6 +532,13 @@ function createIOListener() {
         });
     
         socket.on("remove_player", async (playerId) => {
+            const result = playerIdZodSchema.safeParse(playerId);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            playerId = result.data;
+
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "remove_player", socketData, playerId);
             } catch (error) {
@@ -510,6 +548,13 @@ function createIOListener() {
         });
     
         socket.on("randomize_players", async (withMasters) => {
+            const result = z.boolean().safeParse(withMasters);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            withMasters = result.data;
+
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "randomize_players", socketData, withMasters);
             } catch (error) {
@@ -519,6 +564,13 @@ function createIOListener() {
         });
         
         socket.on("transfer_host", async (playerId) => {
+            const result = playerIdZodSchema.safeParse(playerId);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            playerId = result.data;
+
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "transfer_host", socketData, playerId);
             } catch (error) {
@@ -530,6 +582,31 @@ function createIOListener() {
 
     
         socket.on("start_new_game", async (randomizeTeamOrder, getNewGameboard) => {
+            try {
+                await startNewGameRateLimiter.consume(socketData.userId);
+            }
+            catch (rejRes) {
+                io.to(socketData.socketId).emit("error_message", { 
+                    error_code: "action_rate_limit", 
+                    error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
+                    retry_ms: rejRes.msBeforeNext
+                });
+                return;
+            }
+        
+            const resultRandomizeTeamOrder = z.boolean().safeParse(randomizeTeamOrder);
+            if (!resultRandomizeTeamOrder.success) {
+                console.log("Zod error:", resultRandomizeTeamOrder.error);
+                return;
+            }
+            randomizeTeamOrder = resultRandomizeTeamOrder.data;
+            const resultGetNewGameboard = z.boolean().safeParse(getNewGameboard);
+            if (!resultGetNewGameboard.success) {
+                console.log("Zod error:", resultGetNewGameboard.error);
+                return;
+            }
+            getNewGameboard = resultGetNewGameboard.data;
+
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "start_new_game", socketData, randomizeTeamOrder, getNewGameboard);
             } catch (error) {
@@ -547,9 +624,31 @@ function createIOListener() {
             }
         });
 
+        socket.on("get_game_process", async () => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_game_process", socketData);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
+            }
+        });
+
 
     
         socket.on("send_clue", async (clueText, teamColor) => {
+            const resultClueText = clueTextZodSchema.safeParse(clueText);
+            if (!resultClueText.success) {
+                console.log("Zod error:", resultClueText.error);
+                return;
+            }
+            clueText = resultClueText.data;
+            const resultTeamColor = validTeamColorZodSchema.safeParse(teamColor);
+            if (!resultTeamColor.success) {
+                console.log("Zod error:", resultTeamColor.error);
+                return;
+            }
+            teamColor = resultTeamColor.data;
+            
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "send_clue", socketData, clueText, teamColor);
             } catch (error) {
@@ -559,6 +658,13 @@ function createIOListener() {
         });
     
         socket.on("edit_clue", async (newClue) => {
+            const result = clueZodSchema.safeParse(newClue);
+            if (!result.success) {
+                console.log("Zod error:", result.error);
+                return;
+            }
+            newClue = result.data;
+            
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "edit_clue", socketData, newClue);
             } catch (error) {
@@ -577,14 +683,6 @@ function createIOListener() {
         });
 
 
-        
-        socket.on("get_game_process", async () => {
-            const room = new RoomContext(socketData.roomId);
-
-            let gameProcess = await room.getGameProcess();
-    
-            socket.emit("update_game_process", gameProcess);
-        });
 
         socket.on("send_new_chat_message", async (messageText) => {
             const resultChatMessages = chatMessageZodSchema.safeParse(messageText);

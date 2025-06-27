@@ -21,13 +21,6 @@ async function getAllWordPacksEvent(io, socketData) {
 };
 
 async function getWordPackNoWordsEvent(io, socketData, packId) {
-    let resultPackId = packIdZodSchema.safeParse(packId);
-    if (!resultPackId.success) {
-        console.log("Zod error:", resultPackId.error);
-        return;
-    }
-    packId = resultPackId.data;
-
     const result = await CodenamesDB.getWordPackNoWords(packId);
     if (!result.success) {
         return;
@@ -36,13 +29,6 @@ async function getWordPackNoWordsEvent(io, socketData, packId) {
 };
 
 async function getWordsFromWordPackEvent(io, socketData, packId) {
-    let result = packIdZodSchema.safeParse(packId);
-    if (!result.success) {
-        console.log("Zod error:", result.error);
-        return;
-    }
-    packId = result.data;
-    
     io.to(socketData.socketId).emit("words_from_word_pack", await getWordsFromPack(packId));
 };
 

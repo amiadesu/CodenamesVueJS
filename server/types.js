@@ -160,6 +160,8 @@
 /**
  * @typedef {Object} PermissionsValidationModule
  * @property {function(Room, string): Promise<boolean>} validateUser
+ * @property {function(Room, string): Promise<number>} getUserTeamPermissions
+ * @property {function(Room, string): Promise<number>} getUserPermissions
  * @property {function(Room, string, number): Promise<boolean>} checkPermissions
  */
 
