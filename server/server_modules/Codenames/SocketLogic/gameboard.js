@@ -1,4 +1,6 @@
 // @ts-check
+const z = require("zod/v4");
+
 const RoomContext = require("../db/roomContext");
 
 const {
@@ -44,38 +46,105 @@ async function getGameboardEvent(io, socketData) {
     io.to(socketData.socketId).emit("update_game_rules", gameRules);
 }
 
-async function refreshGameboardEvent(io, socketData) {
-    try {
-        await refreshGameboardRateLimiter.consume(socketData.userId);
-    }
-    catch (rejRes) {
-        io.to(socketData.socketId).emit("error_message", { 
-            error_code: "action_rate_limit", 
-            error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
-            retry_ms: rejRes.msBeforeNext
-        });
+async function selectWordEvent(io, socketData, selectedWordText) {
+    let result = z.string().min(1).safeParse(selectedWordText);
+    if (!result.success) {
+        console.log("Zod error:", result.error);
         return;
     }
-
+    selectedWordText = result.data;
+    
     const room = new RoomContext(socketData.roomId);
-
-    if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
+    
+    let words = await room.getWords();
+    if (!words.some((word) => word.text === selectedWordText) && selectedWordText !== "endTurn") {
+        console.log("Invalid word was selected:", selectedWordText);
         return;
     }
+    
+    let users = await room.getUsers();
+
+    const selecterIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
+    await toggleWord(room, selectedWordText, selecterIndex, socketData.countdownInterval);
 
     let gameRules = await room.getGameRules();
+    words = await room.getWords();
 
-    const newCardsAmount = totalCards(gameRules);
-    if (newCardsAmount > gameRules.maxCards) {
-        io.to(socketData.socketId).emit("error_message", { error_code: "card_amount_overflow", error: "Distributed card amount is larger that max cards amount." });
+    async function shouldRevealWord() {
+        const teams = await room.getTeams();
+        const words = await room.getWords();
+        const gameProcess = await room.getGameProcess();
+
+        const wordObjectIndex = words.findIndex((word) => word.text === selectedWordText);
+        let selectors = null;
+        if (wordObjectIndex === -1) {
+            selectors = await room.getEndTurnSelectors();
+        } else {
+            selectors = words[wordObjectIndex].selectedBy;
+        }
+
+        return selectors.length === teams[gameProcess.currentTurn].team.length && selectors.length !== 0;
+    }
+
+    async function notifyClient() {
+        const teams = await room.getTeams();
+        const users = await room.getUsers();
+        const endTurnSelectors = await room.getEndTurnSelectors();
+        const gameRules = await room.getGameRules();
+        const gameProcess = await room.getGameProcess();
+        const selecterIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
+        io.to(socketData.roomId).emit("request_new_gameboard");
+        io.to(socketData.roomId).emit("update_game_process", gameProcess);
+        io.to(socketData.roomId).emit("update_users", teams, users);
+        io.to(socketData.socketId).emit("update_client", teams, users, users[selecterIndex], endTurnSelectors, gameRules, gameProcess);
+    }
+
+    if (await shouldRevealWord()) {
+        io.to(socketData.roomId).emit("start_countdown", selectedWordText);
+        if (socketData.countdownInterval) {
+            clearInterval(socketData.countdownInterval);
+        }
+        let timer = gameRules.countdownTime;
+        let freezed = false;
+        socketData.countdownInterval = setInterval(async () => {
+            timer -= 0.01;
+
+            if (timer <= 0 && !freezed) {
+                freezed = true;
+                timer = 0;
+                io.to(socketData.roomId).emit("stop_countdown");
+                if (await shouldRevealWord()) {
+                    await revealWord(room, selectedWordText);
+                    await notifyClient();
+                }
+                clearInterval(socketData.countdownInterval);
+            }
+
+            io.to(socketData.roomId).emit("update_countdown", 1 - timer / gameRules.countdownTime);
+        }, 10);
+    } else {
+        clearInterval(socketData.countdownInterval);
+        io.to(socketData.roomId).emit("stop_countdown");
+    }
+
+    await notifyClient();
+};
+
+async function processClickEvent(io, socketData, clickedWordText) {
+    let result = z.string().min(1).safeParse(clickedWordText);
+    if (!result.success) {
+        console.log("Zod error:", result.error);
         return;
-    } 
-    await getNewWords(room);
+    }
+    clickedWordText = result.data;
 
-    io.to(socketData.roomId).emit("request_new_gameboard");
-}
+    // Master shouldn't click!
+    
+    io.to(socketData.roomId).emit("click_word", clickedWordText, socketData.userCodenamesId);
+};
 
 module.exports = {
     getGameboardEvent,
-    refreshGameboardEvent
+    selectWordEvent,
+    processClickEvent
 };

@@ -223,6 +223,10 @@ function createIOListener() {
         socket.emit("update_local_storage_data", {
             userID: socket.userData.userID
         });
+
+        socket.on("notify_server_about_change", () => {
+            socket.emit("notify_client_about_change");
+        });
     
 
 
@@ -342,141 +346,57 @@ function createIOListener() {
             socketData.status.setup_event.active = false;
         });
     
-        socket.on("edit_user", async (newUser) => {
-            let result = playerZodSchema.safeParse(newUser);
-            if (!result.success) {
-                console.log("Zod error:", result.error);
-                return;
+        // socket.on("edit_user", async (newUser) => {
+        //     let result = playerZodSchema.safeParse(newUser);
+        //     if (!result.success) {
+        //         console.log("Zod error:", result.error);
+        //         return;
+        //     }
+        //     newUser = result.data;
+
+        //     const room = new RoomContext(socketData.roomId);
+
+        //     let users = await room.getUsers();
+    
+        //     const objIndex = users.findIndex((obj) => obj.id === newUser.id);
+        //     users[objIndex].name = newUser.name;
+        //     await updateUser(room, users[objIndex]);
+    
+        //     users = await room.getUsers();
+        //     let teams = await room.getTeams();
+    
+        //     io.to(socketData.roomId).emit("update_users", teams, users);
+        // });
+
+        socket.on("edit_user_name", async (newName) => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "edit_user_name", socketData, newName);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
             }
-            newUser = result.data;
-
-            const room = new RoomContext(socketData.roomId);
-
-            let users = await room.getUsers();
-    
-            const objIndex = users.findIndex((obj) => obj.id === newUser.id);
-            users[objIndex].name = newUser.name;
-            await updateUser(room, users[objIndex]);
-    
-            users = await room.getUsers();
-            let teams = await room.getTeams();
-    
-            io.to(socketData.roomId).emit("update_users", teams, users);
         });
 
-        socket.on("edit_name", async (newName) => {
-            let result = usernameZodSchema.safeParse(newName);
-            if (!result.success) {
-                console.log("Zod error:", result.error);
-                return;
+        socket.on("change_user_color", async () => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "change_user_color", socketData);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
             }
-            newName = result.data;
-
-            const room = new RoomContext(socketData.roomId);
-
-            let users = await room.getUsers();
-    
-            const objIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
-            users[objIndex].name = newName;
-            await updateUser(room, users[objIndex]);
-            await updateGlobalUser(socketData.userId, { name: newName });
-    
-            users = await room.getUsers();
-            let teams = await room.getTeams();
-    
-            io.to(socketData.roomId).emit("update_users", teams, users);
-        });
-
-        socket.on("change_color", async () => {
-            const room = new RoomContext(socketData.roomId);
-
-            let users = await room.getUsers();
-            const newColor = makeColor();
-    
-            const objIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
-            users[objIndex].color = newColor;
-            await updateUser(room, users[objIndex]);
-            await updateGlobalUser(socketData.userId, { color: newColor });
-    
-            users = await room.getUsers();
-            let teams = await room.getTeams();
-    
-            io.to(socketData.roomId).emit("update_users", teams, users);
         });
     
         socket.on("state_changed", async (previousColor, newUser) => {
-            const resultPlayerColor = validPlayerTeamColorZodSchema.safeParse(previousColor);
-            if (!resultPlayerColor.success) {
-                console.log("Zod error:", resultPlayerColor.error);
-                return;
-            }
-            previousColor = resultPlayerColor.data;
-            const resultPlayer = playerZodSchema.safeParse(newUser);
-            if (!resultPlayer.success) {
-                console.log("Zod error:", resultPlayer.error);
-                return;
-            }
-            newUser = resultPlayer.data;
-
-            const room = new RoomContext(socketData.roomId);
-            
-            let users = await room.getUsers();
-            let teams = await room.getTeams();
-
-            const objIndex = users.findIndex((obj) => obj.id === newUser.id);
-            if (objIndex === -1) {
-                return;
-            }
-            if (newUser.host && !users[objIndex].host) {
-                console.log("Privilege escalation attempt was blocked.");
-                return;
-            }
-
-            let updateEveryone = false;
-            if (newUser.state.selecting !== "" && newUser.state.selecting === users[objIndex].state.selecting) {
-                console.log(newUser.state.selecting, users[objIndex].state.selecting);
-                updateEveryone = true;
-                await toggleWord(room, newUser.state.selecting, objIndex, countdownInterval);
-                console.log(newUser.state.selecting, users[objIndex].state.selecting);
-                users = await room.getUsers();
-                newUser.state.selection = "";
-            }
-            users[objIndex].state = newUser.state;
-            users[objIndex].state.selecting = "";
-            console.log(newUser.state.selecting, users[objIndex].state.selecting);
-
-            if (previousColor !== "spectator") {
-                const objIndex = teams[previousColor].team.findIndex((player) => player.id === newUser.id);
-                if (teams[previousColor].master?.id === newUser.id) {
-                    teams[previousColor].master = null;
-                } else if (objIndex !== -1) {
-                    teams[previousColor].team.splice(objIndex, 1);
-                }
-            }
-            if (newUser.state.teamColor !== "spectator") {
-                if (newUser.state.master) {
-                    teams[newUser.state.teamColor].master = newUser;
-                } else {
-                    teams[newUser.state.teamColor].team.push(newUser);
-                }
-            }
-
-            await room.setUsers(users);
-            await room.setTeams(teams);
-    
-            io.to(socketData.roomId).emit("update_users", teams, users);
-            if (updateEveryone) {
-                io.to(socketData.roomId).emit("request_new_gameboard");
-            } else {
-                const words = await getGameboard(room, socketData.userCodenamesId);
-                socket.emit("send_new_gameboard", words);
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "state_changed", socketData, previousColor, newUser);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
             }
         });
     
-        socket.on("notify_server_about_change", () => {
-            socket.emit("notify_client_about_change");
-        });
-    
+        
+
         socket.on("get_gameboard", async () => {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "get_gameboard", socketData);
@@ -485,7 +405,65 @@ function createIOListener() {
                 socket.emit('error', 'Failed to queue event');
             }
         });
+
+        socket.on("select_word", async (selectedWordText) => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "select_word", socketData, selectedWordText);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
+            }
+        });
     
+        socket.on("proceed_click", async (clickedWordText) => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "proceed_click", socketData, clickedWordText);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
+            }
+        });
+
+
+    
+        socket.on("get_all_word_packs", async () => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_all_word_packs", socketData);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
+            }
+        });
+    
+        socket.on("get_word_pack_no_words", async (packId) => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_word_pack_no_words", socketData, packId);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
+            }
+        });
+    
+        socket.on("get_words_from_word_pack", async (packId) => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_words_from_word_pack", socketData, packId);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
+            }
+        });
+
+
+    
+        socket.on("set_new_game_rules", async (newGameRules) => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "set_new_game_rules", socketData, newGameRules);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
+            }
+        });
+
         socket.on("refresh_gameboard", async () => {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "refresh_gameboard", socketData);
@@ -494,245 +472,82 @@ function createIOListener() {
                 socket.emit('error', 'Failed to queue event');
             }
         });
-    
+
         socket.on("randomize_team_order", async () => {
-            const room = new RoomContext(socketData.roomId);
-
-            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
-                return;
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "randomize_team_order", socketData);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
             }
-    
-            await updateTeamOrder(room);
-            
-            let gameRules = await room.getGameRules();
-            
-            io.to(socketData.roomId).emit("update_game_rules", gameRules);
+        });
+
+        socket.on("pass_turn", async () => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "pass_turn", socketData);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
+            }
         });
     
-        socket.on("get_all_word_packs", async () => {
-            const result = await CodenamesDB.getAllWordPacks();
-            if (!result.success) {
-                return;
+        socket.on("remove_all_players", async (withMasters) => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "remove_all_players", socketData, withMasters);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
             }
-            socket.emit("word_packs", result.value);
         });
     
-        socket.on("get_word_pack_no_words", async (packId) => {
-            let resultPackId = packIdZodSchema.safeParse(packId);
-            if (!resultPackId.success) {
-                console.log("Zod error:", resultPackId.error);
-                return;
+        socket.on("remove_player", async (playerId) => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "remove_player", socketData, playerId);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
             }
-            packId = resultPackId.data;
-
-            const result = await CodenamesDB.getWordPackNoWords(packId);
-            if (!result.success) {
-                return;
-            }
-            socket.emit("word_pack_no_words", result.value);
         });
     
-        socket.on("get_words_from_word_pack", async (packId) => {
-            let result = packIdZodSchema.safeParse(packId);
-            if (!result.success) {
-                console.log("Zod error:", result.error);
-                return;
+        socket.on("randomize_players", async (withMasters) => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "randomize_players", socketData, withMasters);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
             }
-            packId = result.data;
-            
-            socket.emit("words_from_word_pack", await getWordsFromPack(packId));
         });
-    
-        socket.on("set_new_game_rules", async (newGameRules) => {
-            let result = gameRulesZodSchemaNonStrict.safeParse(newGameRules);
-            if (!result.success) {
-                console.log("Zod error:", result.error);
-                return;
+        
+        socket.on("transfer_host", async (playerId) => {
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "transfer_host", socketData, playerId);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
             }
-            newGameRules = result.data;
-
-            const room = new RoomContext(socketData.roomId);
-            
-            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
-                return;
-            }
-
-            await safeRoomDataAccess(room, async (room) => {
-                let gameRules = await room.getGameRules();
-    
-                const oldTeamAmount = gameRules.teamAmount;
-                if (oldTeamAmount < newGameRules.teamAmount) {
-                    if (oldTeamAmount === 2) {
-                        if (newGameRules.teamAmount >= 3) {
-                            newGameRules.teamOrder.push("blue");
-                        }
-                        if (newGameRules.teamAmount >= 4) {
-                            newGameRules.teamOrder.push("yellow");
-                        }
-                    } else if (oldTeamAmount === 3) {
-                        if (newGameRules.teamAmount >= 4) {
-                            newGameRules.teamOrder.push("yellow");
-                        }
-                    }
-                } else if (oldTeamAmount > newGameRules.teamAmount) {
-                    if (oldTeamAmount === 4) {
-                        if (newGameRules.teamAmount <= 3) {
-                            newGameRules.teamOrder = newGameRules.teamOrder.filter((color) => color !== "yellow");
-                        }
-                        if (newGameRules.teamAmount <= 2) {
-                            newGameRules.teamOrder = newGameRules.teamOrder.filter((color) => color !== "blue");
-                        }
-                    } else if (oldTeamAmount === 3) {
-                        if (newGameRules.teamAmount <= 2) {
-                            newGameRules.teamOrder = newGameRules.teamOrder.filter((color) => color !== "blue");
-                        }
-                    }
-                }
-                
-                gameRules = newGameRules;
-                switch(gameRules.fieldSize) {
-                    case "5x5":
-                        gameRules.maxCards = 25;
-                        break;
-                    case "5x6":
-                        gameRules.maxCards = 30;
-                        break;
-                    case "6x6":
-                        gameRules.maxCards = 36;
-                        break;
-                    case "6x7":
-                        gameRules.maxCards = 42;
-                        break;
-                    case "7x7":
-                        gameRules.maxCards = 49;
-                        break;
-                }
-
-                await room.setGameRules(gameRules);
-    
-                io.to(room.roomId).emit("update_game_rules", gameRules);
-            });
         });
+
+
     
         socket.on("start_new_game", async (randomizeTeamOrder, getNewGameboard) => {
             try {
-                await startNewGameRateLimiter.consume(socketData.userId);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "start_new_game", socketData, randomizeTeamOrder, getNewGameboard);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
             }
-            catch (rejRes) {
-                socket.emit("error_message", { 
-                    error_code: "action_rate_limit", 
-                    error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
-                    retry_ms: rejRes.msBeforeNext
-                });
-                return;
-            }
-
-            let result = z.boolean().safeParse(randomizeTeamOrder);
-            if (!result.success) {
-                console.log("Zod error:", result.error);
-                return;
-            }
-            randomizeTeamOrder = result.data;
-            result = z.boolean().safeParse(getNewGameboard);
-            if (!result.success) {
-                console.log("Zod error:", result.error);
-                return;
-            }
-            getNewGameboard = result.data;
-            
-            const room = new RoomContext(socketData.roomId);
-            
-            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
-                return;
-            }
-
-            let gameRules = await room.getGameRules();
-            let resultGameRules = gameRulesZodSchemaStrict.safeParse(gameRules);
-            if (!resultGameRules.success) {
-                console.log("Zod error:", result.error);
-                socket.emit("error_message", { error_code: "invalid_game_rules", error: "Game rules object is invalid." });
-                return;
-            }
-
-            await safeRoomDataAccess(room, async (room) => {
-                let gameRules = await room.getGameRules();
-                let gameProcess = await room.getGameProcess();
-    
-                if (gameProcess.isGoing) {
-                    clearInterval(timerInterval);
-                    await processWin(room, "tie");
-                } else {
-                    const newCardsAmount = totalCards(gameRules);
-                    if (newCardsAmount > gameRules.maxCards) {
-                        socket.emit("error_message", { error_code: "card_amount_overflow", error: "Distributed card amount is larger that max cards amount." });
-                        return;
-                    } 
-    
-                    await startNewGame(room, randomizeTeamOrder, getNewGameboard);
-
-                    gameRules = await room.getGameRules();
-
-                    io.to(room.roomId).emit("update_game_rules", gameRules);
-    
-                    let gameWinStatus = await room.getGameWinStatus();
-                    io.to(room.roomId).emit("start_game", gameWinStatus);
-                    io.to(room.roomId).emit("setup_new_game");
-                    
-                    if (timerInterval) {
-                        clearInterval(timerInterval);
-                    }
-                    timerInterval = setInterval(async () => {
-                        const stopTimer = await updateGameTimer(room, 0.5);
-                        if (stopTimer) {
-                            let users = await room.getUsers();
-                            let teams = await room.getTeams();
-        
-                            const selectedSomething = await wordAutoselect(room);
-                            const gp = await room.getGameProcess();
-                            io.to(room.roomId).emit("update_game_process", gp);
-                            io.to(room.roomId).emit("request_new_gameboard");
-                            io.to(room.roomId).emit("update_users", teams, users);
-                            if (!selectedSomething) {
-                                await passTurn(room);
-                            }
-                        }
-                        const gameProcess = await room.getGameProcess();
-                        if (!gameProcess.isGoing) {
-                            clearInterval(timerInterval);
-                        }
-                        io.to(room.roomId).emit("update_game_process", gameProcess);
-                    }, 500);
-                }
-
-                gameProcess = await room.getGameProcess();
-    
-                io.to(room.roomId).emit("update_game_process", gameProcess);
-
-                const clues = await room.getClues();
-        
-                io.to(socketData.roomId).emit("update_clues", clues);
-
-                io.to(room.roomId).emit("request_new_gameboard");
-            });
         });
     
         socket.on("get_traitors", async () => {
-            const room = new RoomContext(socketData.roomId);
-
-            let users = await room.getUsers();
-            let traitors = await room.getTraitors();
-    
-            const objIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
-            if (objIndex !== -1 && users[objIndex].state.master === true) {
-                traitors = traitors.filter((traitor) => traitor.state.teamColor !== users[objIndex].state.teamColor);
-            } else if (traitors.some((traitor) => traitor.id === socketData.userCodenamesId)) {
-                traitors = traitors.filter((traitor) => traitor.id === socketData.userCodenamesId);
-            } else {
-                traitors = [];
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_traitors", socketData);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
             }
-            
-            socket.emit("update_traitors", traitors);
         });
+
+
     
         socket.on("send_clue", async (clueText, teamColor) => {
             try {
@@ -760,218 +575,15 @@ function createIOListener() {
                 socket.emit('error', 'Failed to queue event');
             }
         });
-    
-        socket.on("select_word", async (selectedWord) => {
-            let result = z.string().min(1).safeParse(selectedWord);
-            if (!result.success) {
-                console.log("Zod error:", result.error);
-                return;
-            }
-            selectedWord = result.data;
-            
-            const room = new RoomContext(socketData.roomId);
-            
-            let words = await room.getWords();
-            if (!words.some((word) => word.text === selectedWord) && selectedWord !== "endTurn") {
-                console.log("Invalid word was selected:", selectedWord);
-                return;
-            }
-            
-            let users = await room.getUsers();
-    
-            const selecterIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
-            await toggleWord(room, selectedWord, selecterIndex, countdownInterval);
-    
-            let gameRules = await room.getGameRules();
-            words = await room.getWords();
 
-            async function shouldRevealWord() {
-                const teams = await room.getTeams();
-                const words = await room.getWords();
-                const gameProcess = await room.getGameProcess();
-    
-                const wordObjectIndex = words.findIndex((word) => word.text === selectedWord);
-                let selectors = null;
-                if (wordObjectIndex === -1) {
-                    selectors = await room.getEndTurnSelectors();
-                } else {
-                    selectors = words[wordObjectIndex].selectedBy;
-                }
 
-                return selectors.length === teams[gameProcess.currentTurn].team.length && selectors.length !== 0;
-            }
-
-            async function notifyClient() {
-                const teams = await room.getTeams();
-                const users = await room.getUsers();
-                const endTurnSelectors = await room.getEndTurnSelectors();
-                const gameRules = await room.getGameRules();
-                const gameProcess = await room.getGameProcess();
-                const selecterIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
-                io.to(socketData.roomId).emit("request_new_gameboard");
-                io.to(socketData.roomId).emit("update_game_process", gameProcess);
-                io.to(socketData.roomId).emit("update_users", teams, users);
-                socket.emit("update_client", teams, users, users[selecterIndex], endTurnSelectors, gameRules, gameProcess);
-            }
-    
-            if (await shouldRevealWord()) {
-                io.to(socketData.roomId).emit("start_countdown", selectedWord);
-                if (countdownInterval) {
-                    clearInterval(countdownInterval);
-                }
-                let timer = gameRules.countdownTime;
-                let freezed = false;
-                countdownInterval = setInterval(async () => {
-                    timer -= 0.01;
-    
-                    if (timer <= 0 && !freezed) {
-                        freezed = true;
-                        timer = 0;
-                        io.to(socketData.roomId).emit("stop_countdown");
-                        if (await shouldRevealWord()) {
-                            await revealWord(room, selectedWord);
-                            await notifyClient();
-                        }
-                        clearInterval(countdownInterval);
-                    }
-    
-                    io.to(socketData.roomId).emit("update_countdown", 1 - timer / gameRules.countdownTime);
-                }, 10);
-            } else {
-                clearInterval(countdownInterval);
-                io.to(socketData.roomId).emit("stop_countdown");
-            }
-    
-            await notifyClient();
-        });
-    
-        socket.on("proceed_click", (clickedWordText) => {
-            let result = z.string().min(1).safeParse(clickedWordText);
-            if (!result.success) {
-                console.log("Zod error:", result.error);
-                return;
-            }
-            clickedWordText = result.data;
-
-            // Master shouldn't click!
-            
-            io.to(socketData.roomId).emit("click_word", clickedWordText, socketData.userCodenamesId);
-        });
-    
+        
         socket.on("get_game_process", async () => {
             const room = new RoomContext(socketData.roomId);
 
             let gameProcess = await room.getGameProcess();
     
             socket.emit("update_game_process", gameProcess);
-        });
-    
-        socket.on("pass_turn", async () => {
-            const room = new RoomContext(socketData.roomId);
-
-            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
-                return;
-            }
-            
-            let users = await room.getUsers();
-            let teams = await room.getTeams();
-    
-            await clearAllSelections(room);
-            await passTurn(room);
-
-            let gameProcess = await room.getGameProcess();
-    
-            io.to(socketData.roomId).emit("update_game_process", gameProcess);
-            io.to(socketData.roomId).emit("request_new_gameboard");
-            io.to(socketData.roomId).emit("update_users", teams, users);
-        });
-    
-        socket.on("remove_all_players", async (withMasters) => {
-            let result = z.boolean().safeParse(withMasters);
-            if (!result.success) {
-                console.log("Zod error:", result.error);
-                return;
-            }
-            withMasters = result.data;
-            
-            const room = new RoomContext(socketData.roomId);
-
-            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
-                return;
-            }
-    
-            await removeAllPlayers(room, withMasters);
-    
-            let users = await room.getUsers();
-            let teams = await room.getTeams();
-    
-            io.to(socketData.roomId).emit("update_users", teams, users);
-        });
-    
-        socket.on("remove_player", async (playerId) => {
-            let result = playerIdZodSchema.safeParse(playerId);
-            if (!result.success) {
-                console.log("Zod error:", result.error);
-                return;
-            }
-            playerId = result.data;
-            
-            const room = new RoomContext(socketData.roomId);
-            
-            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
-                return;
-            }
-    
-            await removePlayer(room, playerId);
-    
-            let users = await room.getUsers();
-            let teams = await room.getTeams();
-    
-            io.to(socketData.roomId).emit("update_users", teams, users);
-        });
-    
-        socket.on("randomize_players", async (withMasters) => {
-            let result = z.boolean().safeParse(withMasters);
-            if (!result.success) {
-                console.log("Zod error:", result.error);
-                return;
-            }
-            withMasters = result.data;
-            
-            const room = new RoomContext(socketData.roomId);
-            
-            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
-                return;
-            }
-    
-            await randomizePlayers(room, withMasters);
-    
-            let users = await room.getUsers();
-            let teams = await room.getTeams();
-    
-            io.to(socketData.roomId).emit("update_users", teams, users);
-        });
-        
-        socket.on("transfer_host", async (playerId) => {
-            let result = playerIdZodSchema.safeParse(playerId);
-            if (!result.success) {
-                console.log("Zod error:", result.error);
-                return;
-            }
-            playerId = result.data;
-            
-            const room = new RoomContext(socketData.roomId);
-            
-            if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
-                return;
-            }
-    
-            await transferHost(room, socketData.userCodenamesId, playerId);
-    
-            let users = await room.getUsers();
-            let teams = await room.getTeams();
-    
-            io.to(socketData.roomId).emit("update_users", teams, users);
         });
 
         socket.on("send_new_chat_message", async (messageText) => {

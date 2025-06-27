@@ -45,7 +45,7 @@ async function sendClueEvent(io, socketData, clueText, teamColor) {
     
     const room = new RoomContext(socketData.roomId);
 
-    if (!checkPermissions(room, socketData.userCodenamesId, Permissions.MASTER)) {
+    if (!(await checkPermissions(room, socketData.userCodenamesId, Permissions.MASTER))) {
         return;
     }
     
@@ -91,7 +91,7 @@ async function editClueEvent(io, socketData, newClue) {
     
     const room = new RoomContext(socketData.roomId);
     
-    if (!checkPermissions(room, socketData.userCodenamesId, Permissions.HOST)) {
+    if (!(await checkPermissions(room, socketData.userCodenamesId, Permissions.HOST))) {
         return;
     }
 

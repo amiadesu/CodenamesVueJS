@@ -99,7 +99,7 @@ export default defineComponent({
                 }
             }
             this.gameData.openedPanels.anything = anyOpened;
-            socket.emit("change_color");
+            socket.emit("change_user_color");
         },
         removePlayer() {
             socket.emit("remove_player", this.player.id);

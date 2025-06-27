@@ -97,7 +97,7 @@
                 "message" : "Word pack:",
                 "select" : "Select word pack"
             },
-            "edit_name" : "Edit name"
+            "edit_user_name" : "Edit name"
         },
         "settings" : {
             "amount_of_teams" : "Amount of teams:",
@@ -135,7 +135,7 @@
                 "message" : "Word pack:",
                 "view" : "View word pack"
             },
-            "edit_name" : "Edit name"
+            "edit_user_name" : "Edit name"
         },
         "clues" : {
             "0" : "Garden",

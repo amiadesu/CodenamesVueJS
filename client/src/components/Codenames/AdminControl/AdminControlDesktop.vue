@@ -376,7 +376,7 @@
                 @click="openEditNamePanel"
                 class="admin-panel-button"
             >
-                {{ $t("codenames.admin.edit_name") }}
+                {{ $t("codenames.admin.edit_user_name") }}
             </button>
         </div>
     </div>

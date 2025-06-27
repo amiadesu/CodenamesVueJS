@@ -141,7 +141,7 @@
         </button>
         <div class="settings-panel-bottom">
             <button class="settings-panel-button" @click="openEditNamePanel">
-                {{ $t("codenames.settings.edit_name") }}
+                {{ $t("codenames.settings.edit_user_name") }}
             </button>
         </div>
     </div>
