@@ -164,9 +164,10 @@ async function wordAutoselect(room) {
     let teams = await room.getTeams();
     let gameProcess = await room.getGameProcess();
     let words = await room.getWords();
+    let endTurnSelectors = await room.getEndTurnSelectors();
 
-    let total = gameProcess.endTurnSelected.length;
-    let most = gameProcess.endTurnSelected.length;
+    let total = endTurnSelectors.length;
+    let most = endTurnSelectors.length;
     let mostCnt = 1;
     let currentMostWord = "endTurn";
     let selectedSomething = false;
