@@ -98,7 +98,7 @@ class RoomQueueManager {
             'get_game_process': this.processGetGameProcess.bind(this),
 
             // Chat events
-            'send_new_message': this.processSendNewMessage.bind(this)
+            'send_new_chat_message': this.processSendNewMessage.bind(this)
         };
     }
 

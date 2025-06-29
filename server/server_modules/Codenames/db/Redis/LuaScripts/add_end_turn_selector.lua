@@ -31,6 +31,9 @@ end
 -- Add selector
 table.insert(endTurnSelectors, selector)
 
+-- Ensure the entire structure maintains array types
+setmetatable(endTurnSelectors, cjson.array_mt)
+
 -- Update Redis
 redis.call('SET', KEYS[1], cjson.encode(endTurnSelectors), 'EX', ARGV[2])
 

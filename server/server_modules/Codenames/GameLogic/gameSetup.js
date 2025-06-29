@@ -73,6 +73,7 @@ async function startNewGame(room, randomizeTeamOrder, getNewGameboard) {
 
     gameRules.locked = true;
 
+    gameProcess.selectionIsGoing = false;
     gameProcess.isFirstTurn = true;
     gameProcess.isGoing = true;
     gameProcess.guessesCount = 0;

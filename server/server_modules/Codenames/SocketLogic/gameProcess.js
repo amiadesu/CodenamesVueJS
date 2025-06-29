@@ -75,11 +75,16 @@ async function startNewGameEvent(io, socketData, randomizeTeamOrder, getNewGameb
         socketData.timerInterval = setInterval(async () => {
             const stopTimer = await updateGameTimer(room, 0.5);
             if (stopTimer) {
+                const gp = await room.getGameProcess();
+
+                if (gp.selectionIsGoing) {
+                    return;
+                }
+
                 let users = await room.getUsers();
                 let teams = await room.getTeams();
 
                 const selectedSomething = await wordAutoselect(room);
-                const gp = await room.getGameProcess();
                 io.to(room.roomId).emit("update_game_process", gp);
                 io.to(room.roomId).emit("request_new_gameboard");
                 io.to(room.roomId).emit("update_users", teams, users);

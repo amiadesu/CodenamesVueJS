@@ -34,6 +34,9 @@ if #clues[teamColor] > tonumber(ARGV[3]) then
     table.remove(clues[teamColor], 1)
 end
 
+-- Ensure the entire structure maintains array types
+setmetatable(clues, cjson.array_mt)
+
 -- Update Redis
 redis.call('SET', KEYS[1], cjson.encode(clues), 'EX', ARGV[4])
 

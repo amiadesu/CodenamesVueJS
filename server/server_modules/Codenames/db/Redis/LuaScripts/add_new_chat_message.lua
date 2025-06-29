@@ -28,6 +28,9 @@ if #chatMessages > tonumber(ARGV[2]) then
     table.remove(chatMessages, 1)
 end
 
+-- Ensure the entire structure maintains array types
+setmetatable(chatMessages, cjson.array_mt)
+
 -- Update Redis
 redis.call('SET', KEYS[1], cjson.encode(chatMessages), 'EX', ARGV[3])
 

@@ -98,7 +98,7 @@ class CodenamesDB {
     async #fetchDataFromMongoDB(roomId, key) {
         try {
             const result = await mongoDBAtomic.getRoomData(roomId, key);
-            console.log(result);
+            // console.log(result);
 
             const value = result.success ? result.value : null;
 
@@ -164,9 +164,9 @@ class CodenamesDB {
     async #withRedisLock(redisKey, fn) {
         const lockKey = `lock:${redisKey}`;
         const lockValue = `${process.pid}-${Date.now()}-${Math.random()}`;
-        console.log(lockKey, lockValue);
+        // console.log(lockKey, lockValue);
         const acquired = await this.#redisClient.set(lockKey, lockValue, { NX: true, PX: LOCK_TTL });
-        console.log(acquired);
+        // console.log(acquired);
         if (!acquired) return { success: false, error: "Could not acquire lock" };
     
         try {

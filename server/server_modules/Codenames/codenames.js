@@ -301,7 +301,7 @@ function createIOListener() {
             }
         });
     
-        socket.on("proceed_click", async (clickedWordText) => {
+        socket.on("process_click", async (clickedWordText) => {
             const result = z.string().min(1).safeParse(clickedWordText);
             if (!result.success) {
                 console.log("Zod error:", result.error);
@@ -310,7 +310,7 @@ function createIOListener() {
             clickedWordText = result.data;
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "proceed_click", socketData, clickedWordText);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "process_click", socketData, clickedWordText);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');

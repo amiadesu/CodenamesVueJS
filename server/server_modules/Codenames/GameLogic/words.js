@@ -74,14 +74,15 @@ async function clearWordNoSave(room, wordText) {
 
     if (wordText === "endTurn") {
         let selectors = await room.getEndTurnSelectors();
-
-        selectors.forEach((selector) => {
-            const userIndex = users.findIndex((user) => user.id === selector.id);
-            if (userIndex !== -1) {
+        if (Array.isArray(selectors)) {
+            selectors.forEach((selector) => {
+                const userIndex = users.findIndex((user) => user.id === selector.id);
+                if (userIndex !== -1) {
+                    users[userIndex].state.selecting = "";
+                }
                 users[userIndex].state.selecting = "";
-            }
-            users[userIndex].state.selecting = "";
-        });
+            });
+        }
 
         await room.setEndTurnSelectors([], false);
     } else {
@@ -92,12 +93,14 @@ async function clearWordNoSave(room, wordText) {
             return;
         }
         const selectors = words[wordObjectIndex].selectedBy;
-        selectors.forEach((selector) => {
-            const userIndex = users.findIndex((user) => user.id === selector.id);
-            if (userIndex !== -1) {
-                users[userIndex].state.selecting = "";
-            }
-        });
+        if (Array.isArray(selectors)) {
+            selectors.forEach((selector) => {
+                const userIndex = users.findIndex((user) => user.id === selector.id);
+                if (userIndex !== -1) {
+                    users[userIndex].state.selecting = "";
+                }
+            });
+        }
         words[wordObjectIndex].selectedBy = [];
 
         await room.setWords(words, false);
@@ -107,6 +110,13 @@ async function clearWordNoSave(room, wordText) {
 }
 
 async function revealWord(room, wordText) {
+    let gameProcess = await room.getGameProcess();
+    if (gameProcess.selectionIsGoing) {
+        return;
+    }
+    gameProcess.selectionIsGoing = true;
+    await room.setGameProcess(gameProcess);
+
     if (wordText === "endTurn") {
         await clearWord(room, wordText);
         await passTurn(room);
@@ -116,8 +126,11 @@ async function revealWord(room, wordText) {
     await clearWord(room, wordText);
 
     let gameRules = await room.getGameRules();
-    let gameProcess = await room.getGameProcess();
     let words = await room.getWords();
+    gameProcess = await room.getGameProcess();
+    
+
+    
 
     const wordObjectIndex = words.findIndex((word) => word.text === wordText);
     if (!words[wordObjectIndex].selectable) {
@@ -153,6 +166,8 @@ async function revealWord(room, wordText) {
         }
     }
 
+    gameProcess.selectionIsGoing = false;
+
     await room.setGameProcess(gameProcess);
 
     if (shouldPassTurn) {
@@ -171,6 +186,11 @@ async function wordAutoselect(room) {
     let mostCnt = 1;
     let currentMostWord = "endTurn";
     let selectedSomething = false;
+
+    if (!Array.isArray(words)) {
+        return false;
+    }
+
     words.forEach((word) => {
         const selectersCnt = word.selectedBy.length;
         if (selectersCnt > most) {
@@ -184,6 +204,7 @@ async function wordAutoselect(room) {
     });
     
     if (most > teams[gameProcess.currentTurn].team.length - total && mostCnt === 1) {
+        console.log("Selecting", currentMostWord);
         await revealWord(room, currentMostWord);
         selectedSomething = true;
     }
@@ -196,6 +217,11 @@ async function clearAllSelections(room) {
     let words = await room.getWords();
 
     await clearWordNoSave(room, "endTurn");
+
+    if (!Array.isArray(words)) {
+        return;
+    }
+    
     words.forEach(async (word) => {
         await clearWordNoSave(room, word.text);
     });

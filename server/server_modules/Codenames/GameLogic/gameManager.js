@@ -60,6 +60,7 @@ async function passTurn(room) {
     let gameRules = await room.getGameRules();
     let gameProcess = await room.getGameProcess();
 
+    gameProcess.selectionIsGoing = false;
     gameProcess.guessesCount = 0;
 
     let notBlacklisted = "";
@@ -97,6 +98,7 @@ async function passTurn(room) {
 
 async function processWin(room, winner) {
     let gameProcess = await room.getGameProcess();
+    gameProcess.selectionIsGoing = false;
     gameProcess.isGoing = false;
 
     await room.setGameProcess(gameProcess);
@@ -185,12 +187,14 @@ async function removeAllPlayers(room, withMasters) {
             users[masterIndex].state.master = false;
             teams[color].master = null;
         }
-        teams[color].team.forEach((player) => {
-            const playerId = player.id;
-            const playerIndex = users.findIndex((user) => user.id === playerId);
-            users[playerIndex].state.teamColor = "spectator";
-            users[playerIndex].state.master = false;
-        });
+        if (Array.isArray(teams[color].team)) {
+            teams[color].team.forEach((player) => {
+                const playerId = player.id;
+                const playerIndex = users.findIndex((user) => user.id === playerId);
+                users[playerIndex].state.teamColor = "spectator";
+                users[playerIndex].state.master = false;
+            });
+        }
         teams[color].team = [];
     });
 
@@ -253,6 +257,10 @@ async function randomizePlayers(room, withMasters = true) {
     const k = colors.length;
 
     function updateColors(players, isMaster = false) {
+        if (!Array.isArray(players)) {
+            return;
+        }
+
         players.forEach((player, index, newArray) => {
             newArray[index].state.teamColor = colors[index];
             newArray[index].state.master = isMaster;

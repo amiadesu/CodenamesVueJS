@@ -84,6 +84,7 @@ const defaultRoomData = { // MUST NOT include roomId
         timeLeft: 3599,
         teamTimeStarted: false,
         infiniteTime: false,
+        selectionIsGoing: false,
         blacklisted: {
             "red" : false,
             "yellow" : false,

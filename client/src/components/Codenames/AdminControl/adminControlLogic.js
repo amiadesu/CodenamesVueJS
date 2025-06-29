@@ -23,6 +23,12 @@ export const adminControlMixin = {
         togglePanel() {
             this.opened = !this.opened;
         },
+        handleKeyTogglePanel(event) {
+            console.log(event.key);
+            if (event.key === 'o' || event.key === 'O') {
+                this.togglePanel();
+            }
+        },
         clampGameRules() {
             if (this.gameData.gameRules.teamAmount < 2) {
                 this.gameData.gameRules.teamAmount = 2;

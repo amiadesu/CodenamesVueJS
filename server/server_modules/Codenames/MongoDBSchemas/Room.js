@@ -90,6 +90,7 @@ const roomSchema = new mongoose.Schema({
             timeLeft: 3599,
             teamTimeStarted: false,
             infiniteTime: false,
+            selectionIsGoing: false,
             blacklisted: {
                 "red" : false,
                 "yellow" : false,
