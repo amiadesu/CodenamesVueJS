@@ -67,56 +67,56 @@ class RoomContext {
 
     // Helper for common fields
     async getClueIDCounter(forceNew = true)                   { return await this.get('clueIDCounter', forceNew); }
-    async setClueIDCounter(clueIDCounter, forceUpdate = true) { await this.set('clueIDCounter', clueIDCounter, forceUpdate); }
+    async setClueIDCounter(clueIDCounter, forceUpdate = true) { return await this.set('clueIDCounter', clueIDCounter, forceUpdate); }
 
     async getUsers(forceNew = true)                           { return await this.get('users', forceNew); }
-    async setUsers(users, forceUpdate = true)                 { await this.set('users', users, forceUpdate); }
+    async setUsers(users, forceUpdate = true)                 { return await this.set('users', users, forceUpdate); }
 
     async getTeams(forceNew = true)                           { return await this.get('teams', forceNew); }
-    async setTeams(teams, forceUpdate = true)                 { await this.set('teams', teams, forceUpdate); }
+    async setTeams(teams, forceUpdate = true)                 { return await this.set('teams', teams, forceUpdate); }
 
     async getTraitors(forceNew = true)                        { return await this.get('traitors', forceNew); }
-    async setTraitors(traitors, forceUpdate = true)           { await this.set('traitors', traitors, forceUpdate); }
+    async setTraitors(traitors, forceUpdate = true)           { return await this.set('traitors', traitors, forceUpdate); }
 
     async getWords(forceNew = true)                           { return await this.get('words', forceNew); }
-    async setWords(words, forceUpdate = true)                 { await this.set('words', words, forceUpdate); }
+    async setWords(words, forceUpdate = true)                 { return await this.set('words', words, forceUpdate); }
 
     async getGameRules(forceNew = true)                       { return await this.get('gameRules', forceNew); }
-    async setGameRules(gr, forceUpdate = true)                { await this.set('gameRules', gr, forceUpdate); }
+    async setGameRules(gr, forceUpdate = true)                { return await this.set('gameRules', gr, forceUpdate); }
 
     async getGameProcess(forceNew = true)                     { return await this.get('gameProcess', forceNew); }
-    async setGameProcess(gp, forceUpdate = true)              { await this.set('gameProcess', gp, forceUpdate); }
+    async setGameProcess(gp, forceUpdate = true)              { return await this.set('gameProcess', gp, forceUpdate); }
 
     async getGameWinStatus(forceNew = true)                   { return await this.get('gameWinStatus', forceNew); }
-    async setGameWinStatus(gws, forceUpdate = true)           { await this.set('gameWinStatus', gws, forceUpdate); }
+    async setGameWinStatus(gws, forceUpdate = true)           { return await this.set('gameWinStatus', gws, forceUpdate); }
 
     async getChatMessages(forceNew = true)                    { return await this.get('chatMessages', forceNew); }
-    async setChatMessages(cm, forceUpdate = true)             { await this.set('chatMessages', cm, forceUpdate); }
+    async setChatMessages(cm, forceUpdate = true)             { return await this.set('chatMessages', cm, forceUpdate); }
 
     async getEndTurnSelectors(forceNew = true)                { return await this.get('endTurnSelectors', forceNew); }
-    async setEndTurnSelectors(ets, forceUpdate = true)        { await this.set('endTurnSelectors', ets, forceUpdate); }
+    async setEndTurnSelectors(ets, forceUpdate = true)        { return await this.set('endTurnSelectors', ets, forceUpdate); }
 
     async addWordSelector(wordText, selectorObject) {
         return this.#withLock(async () => {
-            await CodenamesDB.addWordSelector(this.roomId, wordText, selectorObject);
+            return await CodenamesDB.addWordSelector(this.roomId, wordText, selectorObject);
         });
     }
     async removeWordSelector(wordText, selectorId) {
         return this.#withLock(async () => {
-            await CodenamesDB.removeWordSelector(this.roomId, wordText, selectorId);
+            return await CodenamesDB.removeWordSelector(this.roomId, wordText, selectorId);
         });
     }
 
     async getClues(forceNew = true)                           { return await this.get('clues', forceNew); }
-    async setClues(clues, forceUpdate = true)                 { await this.set('clues', clues, forceUpdate); }
+    async setClues(clues, forceUpdate = true)                 { return await this.set('clues', clues, forceUpdate); }
     async addNewClue(teamColor, newClueObject) {
         return this.#withLock(async () => {
-            await CodenamesDB.addNewClue(this.roomId, teamColor, newClueObject);
+            return await CodenamesDB.addNewClue(this.roomId, teamColor, newClueObject);
         });
     }
     async updateClueByID(clueId, newClueObject) {
         return this.#withLock(async () => {
-            await CodenamesDB.updateClue(this.roomId, clueId, newClueObject);
+            return await CodenamesDB.updateClue(this.roomId, clueId, newClueObject);
         });
     }
 }

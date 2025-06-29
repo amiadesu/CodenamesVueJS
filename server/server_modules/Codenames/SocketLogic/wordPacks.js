@@ -1,15 +1,9 @@
 // @ts-check
-const {
-    packIdZodSchema
-} = require("../ZodSchemas/codenamesZodSchemas");
 const CodenamesDB = require("../db/codenamesDB");
 
 const DIContainer = require("../GameLogic/container");
 const {
-    getWordsFromPack,
-    getWordsForRoom,
-    getNewWords,
-    getGameboard
+    getWordsFromPack
 } = DIContainer.modules.gameboard;
 
 async function getAllWordPacksEvent(io, socketData) {

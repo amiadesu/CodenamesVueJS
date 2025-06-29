@@ -4,30 +4,11 @@ const RoomContext = require("../db/roomContext");
 const {
     Permissions
 } = require("../utils/constants");
-const {
-    refreshGameboardRateLimiter
-} = require("../utils/rateLimiters");
 
 const DIContainer = require("../GameLogic/container");
 const {
-    validateUser,
     checkPermissions
 } = DIContainer.modules.permissionsValidation;
-
-const {
-    validTeamColorZodSchema,
-    validPlayerTeamColorZodSchema,
-    validWordColorZodSchema,
-    packIdZodSchema,
-    gameRulesZodSchemaNonStrict,
-    gameRulesZodSchemaStrict,
-    clueTextZodSchema,
-    clueZodSchema,
-    playerIdZodSchema,
-    playerZodSchema,
-    wordZodSchema,
-    chatMessageZodSchema
-} = require("../ZodSchemas/codenamesZodSchemas");
 
 async function sendClueEvent(io, socketData, clueText, teamColor) {    
     const room = new RoomContext(socketData.roomId);
@@ -75,7 +56,10 @@ async function editClueEvent(io, socketData, newClue) {
         return;
     }
 
-    await room.updateClueByID(newClue.id, newClue);
+    const result = await room.updateClueByID(newClue.id, newClue);
+    if (!result) {
+        return;
+    }
 
     const clues = await room.getClues();
 

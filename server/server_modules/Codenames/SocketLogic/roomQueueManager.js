@@ -14,6 +14,7 @@ const {
     getCluesEvent
 } = require("./clues");
 const {
+    setupClientEvent,
     editUserNameEvent,
     changeUserColorEvent,
     stateChangedEvent
@@ -71,6 +72,7 @@ class RoomQueueManager {
             'get_clues': this.processGetClues.bind(this),
 
             // User-specific events
+            'setup_client': this.processSetupClient.bind(this),
             'edit_user_name': this.processEditUserName.bind(this),
             'change_user_color': this.processChangeUserColor.bind(this),
             'state_changed': this.processStateChanged.bind(this),
@@ -205,6 +207,10 @@ class RoomQueueManager {
     }
 
 
+
+    async processSetupClient(socketData) {
+        return await setupClientEvent(this.io, socketData);
+    }
 
     async processEditUserName(socketData, newName) {
         return await editUserNameEvent(this.io, socketData, newName);

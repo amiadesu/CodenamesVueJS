@@ -1,35 +1,20 @@
 // @ts-check
-const z = require("zod/v4");
-
 const RoomContext = require("../db/roomContext");
 
 const {
     Permissions
 } = require("../utils/constants");
-const {
-    startNewGameRateLimiter
-} = require("../utils/rateLimiters");
 
 const DIContainer = require("../GameLogic/container");
 const {
-    validateUser,
     checkPermissions
 } = DIContainer.modules.permissionsValidation;
 const {
-    updateTeamOrder,
-    updateUser,
     passTurn,
     processWin,
-    clearTimer,
-    updateGameTimer,
-    removeAllPlayers,
-    removePlayer,
-    randomizePlayers,
-    transferHost
+    updateGameTimer
 } = DIContainer.modules.gameManager;
 const {
-    clearRoles,
-    setupGamemode,
     startNewGame
 } = DIContainer.modules.gameSetup;
 const {
@@ -41,18 +26,7 @@ const {
 } = require("../utils/helpers");
 
 const {
-    validTeamColorZodSchema,
-    validPlayerTeamColorZodSchema,
-    validWordColorZodSchema,
-    packIdZodSchema,
-    gameRulesZodSchemaNonStrict,
-    gameRulesZodSchemaStrict,
-    clueTextZodSchema,
-    clueZodSchema,
-    playerIdZodSchema,
-    playerZodSchema,
-    wordZodSchema,
-    chatMessageZodSchema
+    gameRulesZodSchemaStrict
 } = require("../ZodSchemas/codenamesZodSchemas");
 
 async function startNewGameEvent(io, socketData, randomizeTeamOrder, getNewGameboard) {

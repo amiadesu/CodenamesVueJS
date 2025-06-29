@@ -1,91 +1,42 @@
 // @ts-check
-
 const path = require('path');
 const z = require("zod/v4");
 
 const {
     validTeamColorZodSchema,
     validPlayerTeamColorZodSchema,
-    validWordColorZodSchema,
     packIdZodSchema,
     gameRulesZodSchemaNonStrict,
-    gameRulesZodSchemaStrict,
     clueTextZodSchema,
     clueZodSchema,
     playerIdZodSchema,
     playerZodSchema,
-    wordZodSchema,
     chatMessageZodSchema
 } = require("./ZodSchemas/codenamesZodSchemas");
 const { 
     usernameZodSchema,
-    userColorZodSchema,
-    userZodSchema,
     roomIdZodSchema
 } = require("../Global/ZodSchemas/globalZodSchemas");
 const CodenamesDB = require("./db/codenamesDB");
 const {
-    isObject,
-    makeID,
-    makeColor,
-    randChoice,
-    shuffle
-} = require("../../utils/extra");
-const {
     setupWordPackWatcher
 } = require("./db/wordPacksDB");
 
-
-
 const DIContainer = require("./GameLogic/container");
 const {
-    validateUser,
-    checkPermissions
+    validateUser
 } = DIContainer.modules.permissionsValidation;
 const {
-    getWordsFromPack,
-    getWordsForRoom,
-    getNewWords,
-    getGameboard
-} = DIContainer.modules.gameboard;
-const {
-    toggleWord,
-    toggleWordNoSave,
-    clearWord,
-    clearWordNoSave,
-    revealWord,
-    wordAutoselect,
-    clearAllSelections
-} = DIContainer.modules.words;
-const {
-    updateTeamOrder,
-    updateUser,
-    passTurn,
-    processWin,
-    clearTimer,
-    updateGameTimer,
-    removeAllPlayers,
-    removePlayer,
-    randomizePlayers,
-    transferHost
+    updateUser
 } = DIContainer.modules.gameManager;
-const {
-    clearRoles,
-    setupGamemode,
-    startNewGame
-} = DIContainer.modules.gameSetup;
-
-
 
 const codenamesPacksFolderPath = path.join(__dirname, '..', '..', 'WordPacks', 'Codenames');
 
 const {
-    processUser,
-    updateGlobalUser
+    processUser
 } = require("../Global/logic/userRegistration");
 
 const {
-    Permissions,
     validEventsWithoutAuthorization
 } = require("./utils/constants");
 const {
@@ -132,6 +83,7 @@ function createIOListener() {
 
         const socketData = {
             socketId: socket.id,
+            userData: socket.userData,
             userId: socket.userData.userID,
             userCodenamesId: socket.userData.codenamesID,
             user: null,
@@ -148,8 +100,6 @@ function createIOListener() {
         };
         console.log('User id:', socketData.userId);
         console.log("User Codenames ID:", socketData.userCodenamesId);
-
-        let user = null;
 
         const originalOn = socket.on.bind(socket);
         socket.on = (event, handler) => {
@@ -260,65 +210,12 @@ function createIOListener() {
             socketData.roomId = newRoomId;
             socket.join(socketData.roomId);
 
-            const room = new RoomContext(socketData.roomId);
-    
-            const shouldGetNewWords = await CodenamesDB.createRoom(room.roomId);
-
-            if (!shouldGetNewWords.success) {
-                return;
+            try {
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "setup_client", socketData);
+            } catch (error) {
+                console.error('Error queuing event:', error);
+                socket.emit('error', 'Failed to queue event');
             }
-
-            if (shouldGetNewWords.value) {
-                await getNewWords(room);
-            }
-            let users = await room.getUsers();
-            let teams = await room.getTeams();
-            let gameRules = await room.getGameRules();
-            let gameProcess = await room.getGameProcess();
-    
-            const objIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
-            if (objIndex !== -1) {
-                users[objIndex].online = true;
-                user = users[objIndex];
-                await updateUser(room, users[objIndex]);
-                users = await room.getUsers();
-                teams = await room.getTeams();
-            }
-            else {
-                user = {
-                    name: socket.userData.name,
-                    color: socket.userData.color,
-                    id: socketData.userCodenamesId,
-                    roomId: socketData.roomId,
-                    state: {
-                        teamColor: "spectator",
-                        master: false,
-                        selecting: ""
-                    },
-                    online: true,
-                    host: false
-                };
-    
-                if (users.length === 0) {
-                    user.host = true;
-                }
-    
-                users.push(user);
-            }
-            
-            await room.setUsers(users);
-    
-            socketData.status.settedUp = true;
-
-            const endTurnSelectors = await room.getEndTurnSelectors();
-            const clues = await room.getClues();
-            let gameWinStatus = await room.getGameWinStatus();
-            let chatMessages = await room.getChatMessages();
-            
-            socket.to(socketData.roomId).emit("update_users", teams, users);
-            socket.emit("update_client_setup", teams, users, user, gameRules, gameProcess, endTurnSelectors, clues, gameWinStatus, chatMessages);
-            socket.emit("set_initialized");
-            socket.emit("request_new_gameboard");
 
             socketData.status.setup_event.active = false;
         });
@@ -363,6 +260,11 @@ function createIOListener() {
                 return;
             }
             newUser = resultPlayer.data;
+
+            if (newUser?.id !== socketData.userCodenamesId) {
+                console.log("An attempt to impersonate another user has been blocked");
+                return;
+            }
 
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "state_changed", socketData, previousColor, newUser);
@@ -724,10 +626,15 @@ function createIOListener() {
 
             let teams = await room.getTeams();
             users = await room.getUsers();
+
+            io.to(socketData.roomId).emit("update_users", teams, users);
+
             if (users.every((user) => !user.online)) {
                 console.log("Room is AFK now!");
             }
-            io.to(socketData.roomId).emit("update_users", teams, users);
+            if (users.length === 0) {
+                await roomQueueManager.cleanupRoomQueue(socketData.roomId);
+            }
         });
     });
 }
@@ -737,6 +644,5 @@ module.exports = {
 }
 
 // TODO:
-// move disconnect to /SocketLogic/user.js
-// add actual functionality for the sake of RoomQueueManager.cleanupRoomQueue being called
-// clear up code that left
+// move disconnect to /SocketLogic/user.js (or should I?)
+// clean up code that left

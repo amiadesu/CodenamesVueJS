@@ -6,9 +6,6 @@ const RoomContext = require("../db/roomContext");
 const {
     Permissions
 } = require("../utils/constants");
-const {
-    refreshGameboardRateLimiter
-} = require("../utils/rateLimiters");
 
 const DIContainer = require("../GameLogic/container");
 const {
@@ -34,18 +31,7 @@ const {
 } = require("../utils/helpers");
 
 const {
-    validTeamColorZodSchema,
-    validPlayerTeamColorZodSchema,
-    validWordColorZodSchema,
-    packIdZodSchema,
-    gameRulesZodSchemaNonStrict,
-    gameRulesZodSchemaStrict,
-    clueTextZodSchema,
-    clueZodSchema,
-    playerIdZodSchema,
-    playerZodSchema,
-    wordZodSchema,
-    chatMessageZodSchema
+    playerIdZodSchema
 } = require("../ZodSchemas/codenamesZodSchemas");
 
 // Requires mutex!!!
@@ -186,6 +172,7 @@ async function removePlayerEvent(io, socketData, playerId) {
         return;
     }
 
+    // Also checks if user with codenamesId of playerId actually exists
     await removePlayer(room, playerId);
 
     let users = await room.getUsers();

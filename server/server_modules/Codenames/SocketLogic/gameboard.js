@@ -1,37 +1,20 @@
 // @ts-check
-const z = require("zod/v4");
-
 const RoomContext = require("../db/roomContext");
-
-const {
-    totalCards
-} = require("../utils/helpers");
 
 const {
     Permissions
 } = require("../utils/constants");
-const {
-    refreshGameboardRateLimiter
-} = require("../utils/rateLimiters");
 
 const DIContainer = require("../GameLogic/container");
 const {
     getUserTeamPermissions,
 } = DIContainer.modules.permissionsValidation;
 const {
-    getWordsFromPack,
-    getWordsForRoom,
-    getNewWords,
     getGameboard
 } = DIContainer.modules.gameboard;
 const {
     toggleWord,
-    toggleWordNoSave,
-    clearWord,
-    clearWordNoSave,
-    revealWord,
-    wordAutoselect,
-    clearAllSelections
+    revealWord
 } = DIContainer.modules.words;
 
 async function getGameboardEvent(io, socketData) {
@@ -97,6 +80,11 @@ async function selectWordEvent(io, socketData, selectedWordText) {
         io.to(socketData.socketId).emit("update_client", teams, users, users[selecterIndex], endTurnSelectors, gameRules, gameProcess);
     }
 
+    // There is a possible cause of the following bug:
+    // When the user selects a word and countdown starts and then user
+    // selects another word and new countdown starts, it visually ends before
+    // it actually reaches the final.
+    // If it's not here then it's on the client side somewhere. Should test it.
     if (await shouldRevealWord()) {
         io.to(socketData.roomId).emit("start_countdown", selectedWordText);
         if (socketData.countdownInterval) {
@@ -130,6 +118,12 @@ async function selectWordEvent(io, socketData, selectedWordText) {
 
 async function processClickEvent(io, socketData, clickedWordText) {
     const room = new RoomContext(socketData.roomId);
+
+    let words = await room.getWords();
+    if (!words.some((word) => word.text === clickedWordText)) {
+        console.log("Invalid word was selected:", clickedWordText);
+        return;
+    }
 
     const userTeamPermissionsLevel = await getUserTeamPermissions(room, socketData.userCodenamesId);
 
