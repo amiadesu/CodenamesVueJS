@@ -117,6 +117,10 @@ if (route.params.roomId === "") {
             </template>
         </template>
         <template v-else-if="$route.params.roomId === 'rules'">
+            <div class="row-wrapper top-row">
+                <LanguageSelector></LanguageSelector>
+                <ThemeToggler></ThemeToggler>
+            </div>
             <CodenamesRulesView></CodenamesRulesView>
         </template>
         <template v-else>
@@ -125,7 +129,7 @@ if (route.params.roomId === "") {
     </div>
 </template>
 
-<style scoped>
+<style>
 #app-wrapper {
     height: 100%;
     width: 100%;
@@ -176,7 +180,7 @@ if (route.params.roomId === "") {
 .row-wrapper {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     flex-direction: row;
 }
 

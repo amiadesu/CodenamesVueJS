@@ -10,6 +10,10 @@ import Background from '../../components/Home/Background.vue';
 import GamePreview from '../../components/Home/GamePreview.vue';
 import LanguageSelector from '../../components/Global/LanguageSelector.vue';
 import ThemeToggler from '../../components/Global/ThemeToggler.vue';
+import GameRules from '@/components/Codenames/Rules/GameRules.vue';
+import GameInterface from '@/components/Codenames/Rules/GameInterface.vue';
+import HostRules from '@/components/Codenames/Rules/HostRules.vue';
+import GameroomCodeInput from '@/components/Home/GameroomCodeInput.vue';
 
 const availableGames = config["availableGames"];
 
@@ -38,12 +42,8 @@ function togglePanel(newPanelIndex) {
 </script>
 
 <template>
-    <div id="app-wrapper">
+    <div id="game-rules-wrapper">
         <Background></Background>
-        <div class="row-wrapper top-row">
-            <LanguageSelector></LanguageSelector>
-            <ThemeToggler></ThemeToggler>
-        </div>
         <div id="game-previews-list-wrapper">
             <div id="rules-switchers-wrapper">
                 <button 
@@ -68,15 +68,13 @@ function togglePanel(newPanelIndex) {
                     Host settings
                 </button>
             </div>
-            <div id="game-previews-list-glass-panel">
-                <div v-if="currentPanelIndex === 0">
-                    {{ currentPanelIndex }}
-                </div>
-                <div v-else-if="currentPanelIndex === 1">
-                    See
-                </div>
-                <div v-else-if="currentPanelIndex === 2">
-                    !!!
+            <div id="game-rules-glass-panel-content-wrapper">
+                <GameRules v-if="currentPanelIndex === 0"></GameRules>
+                <GameInterface v-else-if="currentPanelIndex === 1"></GameInterface>
+                <HostRules v-else="currentPanelIndex === 2"></HostRules>
+                <div id="game-rules-glass-panel-content-bottom-wrapper">
+                    <div class="separator">Done reading?</div>
+                    <GameroomCodeInput></GameroomCodeInput>
                 </div>
             </div>
         </div>
@@ -84,8 +82,8 @@ function togglePanel(newPanelIndex) {
 </template>
 
 <style scoped>
-#app-wrapper {
-    height: 100%;
+#game-rules-wrapper {
+    height: 100vh;
     width: 100%;
 
     background-color: var(--home-view-background-color);
@@ -102,53 +100,50 @@ function togglePanel(newPanelIndex) {
 
 #game-previews-list-wrapper {
     width: 100%;
-    height: max-content;
+    height: auto;
     min-height: 90%;
+    flex-grow: 1;
+    flex-shrink: 0;
+
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    flex-direction: column;
-    /* row-gap: 1rem; */
+
+    margin-bottom: 2rem; 
 }
 
-#game-previews-list-glass-panel {
+#game-rules-glass-panel-content-wrapper {
     width: 80%;
-    height: max-content;
-    min-height: 100%;
-    padding: 2rem;
-    /* margin-top: 4%; */
-    margin-bottom: 2rem;
-
-    border-bottom-right-radius: 1rem;
-    border-bottom-left-radius: 1rem;
+    min-height: 90%;
 
     background-color: --alpha(var(--color-cornflower-blue-100) / 60%);
     backdrop-filter: blur(2px) saturate(1);
     -webkit-backdrop-filter: blur(2px) saturate(1);
 
+    border-bottom-right-radius: 1rem;
+    border-bottom-left-radius: 1rem;
+
+    padding: 0.5rem 1.5rem;
+    
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: flex-start;
     flex-direction: column;
     row-gap: 1rem;
 }
 
-.row-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: right;
-    flex-direction: row;
-}
-
-.row-wrapper.top-row {
-    height: 4%;
+#game-rules-glass-panel-content-bottom-wrapper {
     width: 100%;
-    align-items: start;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 5;
-    padding-right: 15px;
+    height: auto;
+    margin-top: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    
+    row-gap: 0.5rem;
 }
 
 #rules-switchers-wrapper {
@@ -161,13 +156,36 @@ function togglePanel(newPanelIndex) {
 
 .switcher-button {
     width: 100%;
-    height: 100%;
+    height: 2rem;
     background-color: rgb(73, 73, 73);
     text-align: center;
 }
 
 .switcher-button.active {
     background-color: gray;
+}
+
+.separator {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.separator::before,
+.separator::after {
+    content: '';
+    flex: 1;
+    display: block;
+    border-bottom: 1px solid black;
+}
+
+.separator:not(:empty)::before {
+    margin-right: .5rem;
+}
+
+.separator:not(:empty)::after {
+    margin-left: .5rem;
 }
 
 @media screen and (max-width: 1300px) {
