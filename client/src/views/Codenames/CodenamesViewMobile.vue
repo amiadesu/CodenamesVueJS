@@ -22,6 +22,7 @@ import WordPackInfoPanel from '../../components/Codenames/OverlayingPanels/WordP
 import ThemeToggler from '../../components/Global/ThemeToggler.vue';
 import RulesButton from '../../components/Codenames/RulesButton/RulesButton.vue';
 import LanguageSelector from '../../components/Global/LanguageSelector.vue';
+import CodenamesRulesView from './CodenamesRulesView.vue';
 
 const visibility = 'visible';
 let gameData = gameStore();
@@ -98,7 +99,7 @@ const route = useRoute();
             </template>
         </template>
         <template v-else-if="$route.params.roomId === 'rules'">
-        
+            <CodenamesRulesView></CodenamesRulesView>
         </template>
         <template v-else>
 

@@ -26,8 +26,6 @@
 <script>
 import { defineComponent } from 'vue';
 import { gameStore } from '@/stores/gameData';
-// import { io } from 'socket.io-client';
-import { socket } from "@/sockets/codenames";
 
 export default defineComponent({
     computed: {
@@ -40,8 +38,7 @@ export default defineComponent({
         }
     },
     setup(props) {
-        // setup() receives props as the first argument.
-        // console.log(props.teamColor)
+        
     },
     data() {
         return {
@@ -53,36 +50,13 @@ export default defineComponent({
             if (this.codeText !== "") {
                 this.$router.push(`/${this.gameCodename}/${this.codeText}`);
             }
-        },
-        sendClue() {
-            // if (this.textClue === "") {
-            //     return;
-            // }
-            // socket.emit("send_clue", this.textClue + " - " + this.numberClue, this.gameData.userData.teamColor);
-            // this.textClue = "";
-            // this.numberClue = 0;
-        },
-        listenForUpdates() {
-            // socket.on("request_new_gameboard", () => {
-            //     socket.emit("get_gameboard");
-            // });
-
-            // socket.on("send_new_gameboard", (words) => {
-            //     this.words = words;
-            // });
-
-            // this.socket.on("user_connected", (users) => {
-            //     this.users = users
-            // });
         }
     },
     mounted() {
-        // Connect to the WebSocket server
-        // this.socket = io('http://localhost:3000');
+        
     },
     beforeUnmount() {
-        // Clean up the WebSocket connection
-        // this.socket.disconnect();
+        
     },
 });
 </script>
@@ -147,19 +121,47 @@ export default defineComponent({
     background-color: var(--panel-button-hover-background-color-1);
 }
 
-@media screen and (max-width: 1000px) {
-    #clue-input-wrapper {
-        width: 95%;
+@media screen and (max-width: 1300px) {
+    .gameroom-code-input-wrapper {
+        width: 100%;
+        height: 2.5rem;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    .gameroom-code-input-wrapper {
+        height: max-content;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        margin: 0 auto;
+    }
+
+    .gameroom-code-input {
+        width: 70%;
+        height: 2rem;
+    }
+
+    .create-new-gameroom-button {
+        width: 70%;
+        height: 2rem;
+        padding: 0 2px;
+        font-size: 0.9rem;
     }
 }
 
 @media screen and (max-width: 650px) {
-    #clue-text-input {
-        width: 80%;
+    .gameroom-code-input {
+        width: 90%;
+        height: 2rem;
     }
 
-    #clue-number-input {
-        width: 12%;
+    .create-new-gameroom-button {
+        width: 90%;
+        height: 2rem;
+        padding: 0 2px;
+        font-size: 0.9rem;
     }
 }
 </style>

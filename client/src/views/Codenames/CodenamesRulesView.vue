@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { gameStore } from '@/stores/gameData';
 import { globalStore } from '@/stores/globalData';
@@ -14,10 +15,18 @@ const availableGames = config["availableGames"];
 
 const visibility = 'visible';
 let globalData = globalStore();
+const currentPanelIndex = ref(0);
 
 globalData.remInPixels = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
 const route = useRoute();
+
+function togglePanel(newPanelIndex) {
+    if (newPanelIndex === currentPanelIndex.value) {
+        return;
+    }
+    currentPanelIndex.value = newPanelIndex;
+};
 
 // if (route.params.roomId && route.params.roomId !== 'rules') {
 //     if (!socket.connected) {
@@ -36,10 +45,39 @@ const route = useRoute();
             <ThemeToggler></ThemeToggler>
         </div>
         <div id="game-previews-list-wrapper">
+            <div id="rules-switchers-wrapper">
+                <button 
+                    @click="togglePanel(0)"
+                    class="switcher-button"
+                    :class="{active: currentPanelIndex === 0}"
+                >
+                    Game rules
+                </button>
+                <button 
+                    @click="togglePanel(1)"
+                    class="switcher-button"
+                    :class="{active: currentPanelIndex === 1}"
+                >
+                    Game interface
+                </button>
+                <button 
+                    @click="togglePanel(2)"
+                    class="switcher-button"
+                    :class="{active: currentPanelIndex === 2}"
+                >
+                    Host settings
+                </button>
+            </div>
             <div id="game-previews-list-glass-panel">
-                <template v-for="gameCodename in availableGames">
-                    <GamePreview :game-codename="gameCodename"></GamePreview>
-                </template>
+                <div v-if="currentPanelIndex === 0">
+                    {{ currentPanelIndex }}
+                </div>
+                <div v-else-if="currentPanelIndex === 1">
+                    See
+                </div>
+                <div v-else-if="currentPanelIndex === 2">
+                    !!!
+                </div>
             </div>
         </div>
     </div>
@@ -65,21 +103,24 @@ const route = useRoute();
 #game-previews-list-wrapper {
     width: 100%;
     height: max-content;
+    min-height: 90%;
     display: flex;
     align-items: center;
     justify-content: flex-start;
     flex-direction: column;
-    row-gap: 1rem;
+    /* row-gap: 1rem; */
 }
 
 #game-previews-list-glass-panel {
-    width: 66.5%;
+    width: 80%;
     height: max-content;
+    min-height: 100%;
     padding: 2rem;
-    margin-top: 4%;
+    /* margin-top: 4%; */
     margin-bottom: 2rem;
 
-    border-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+    border-bottom-left-radius: 1rem;
 
     background-color: --alpha(var(--color-cornflower-blue-100) / 60%);
     backdrop-filter: blur(2px) saturate(1);
@@ -108,6 +149,25 @@ const route = useRoute();
     left: 0;
     z-index: 5;
     padding-right: 15px;
+}
+
+#rules-switchers-wrapper {
+    width: 80%;
+    height: 2rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    column-gap: 0;
+}
+
+.switcher-button {
+    width: 100%;
+    height: 100%;
+    background-color: rgb(73, 73, 73);
+    text-align: center;
+}
+
+.switcher-button.active {
+    background-color: gray;
 }
 
 @media screen and (max-width: 1300px) {
