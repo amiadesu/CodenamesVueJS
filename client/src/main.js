@@ -29,8 +29,8 @@ const i18n = createI18n({
     messages: messages
 });
 
-app.use(router)
 app.use(i18n);
+app.use(router);
 
 setupSocketStore();
 

@@ -1,0 +1,420 @@
+<template>
+    <div id="edit-clue-panel">
+        <h1 class="centered">
+            Codenames rules:
+        </h1>
+        <span class="centered">
+            Original rules can be found <a href="https://fgbradleys.com/wp-content/uploads/rules/codenames%20-%20rules.pdf">here</a>.
+        </span>
+        <h2>
+            A brief excerpt from the original rules that apply to this version of the game as well:
+        </h2>
+        <ul class="enumerated-list">
+            <li>
+                <span>
+                    Game requires at least 4 players (2 teams of 2 players).
+                </span>
+            </li>
+            <li>
+                <span>
+                    Masters of each team can see the color of words, their teammates cannot.
+                </span>
+            </li>
+            <li>
+                <span>
+                    Each turn master can give 1 clue to their teammates. Rules for giving a clue:
+                </span>
+                <ul class="bullet-list sublist">
+                    <li>
+                        <span>
+                            The clues must consist of 1 word and 1 number. The clue word should link the words you have chosen on the board, and the number of clues should match the number of words on the board.
+                        </span>
+                    </li>
+                    <li>
+                        <span>
+                            You cannot give clues that indicate the location of words on the board, the number of letters in them, etc. Also, you cannot give <i>any</i> additional information about the clue.
+                        </span>
+                    </li>
+                    <li>
+                        <span>
+                            The clue word should be in the language your room is playing. Foreign words are <i>only</i> allowed if other teams approve them.
+                        </span>
+                    </li>
+                    <li>
+                        <span>
+                            The clue word must not repeat, be a compound of or be the same root as any word not yet discovered on the board.
+                        </span>
+                    </li>
+                    <li>
+                        <span>
+                            In contrast to the above rule, words connected by rhyme or ending are left to the reasoning of the room host according to our rules.
+                        </span>
+                    </li>
+                    <li>
+                        <span>
+                            The same goes for homonyms, acronyms and abbreviations.
+                        </span>
+                    </li>
+                    <li>
+                        <span>
+                            The same also applies for compound words, such as <p class="word-example">Greenhouse</p>, but your host can allow also such variants as <p class="word-example">Pack rat</p> and <p class="word-example">Mother-in-law</p>, but in no case should a player be allowed to come up with their own compound words.
+                        </span>
+                    </li>
+                    <li>
+                        <span>
+                            Proper names are always valid if there is only a name, but if you want to clarify if you mean one or the other person, place, building, etc., then you need host confirmation.
+                        </span>
+                    </li>
+                    <li>
+                        <span>
+                            Don't be too strict - the rules about compounds and roots only apply to modern word morphology.
+                        </span>
+                    </li>
+                    <li>
+                        <span>
+                            Clues with the number 0 are allowed - you may give them if you want to show your teammates that they <i>must not</i> choose a word related to the clue you just gave them.
+                        </span>
+                    </li>
+                    <li>
+                        <span>
+                            For more examples, please, refer to the <a href="#clues-examples">Clues examples</a> section.
+                        </span>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <span>
+                    If the other team's master gives an invalid clue on his current turn, he skips his next turn. This rule applies <i>only</i> to the current turn's clue - if no one noticed that it was invalid on the current turn, but noticed it later, the rule <i>does not</i> apply.
+                </span>
+            </li>
+            <li>
+                <span>
+                    Each turn begins with the master's turn. A team cannot make a move until the master has made a move. Both the master's move and the team's move have a time limit. If the master fails to make his move in the given time, he starts spending his team's time.
+                </span>
+            </li>
+            <li>
+                <span>
+                    The team must try to guess the words based on their master's clues, and the team has the right to end their current turn early. Whether to allow guessing words on random is left to the host's judgment.
+                </span>
+            </li>
+            <li>
+                <span>
+                    For guessing words of their own color the team gets extra time, for revealing words of the other team's color or white color the team's turn ends immediately. If a team reveals a word of black color, it is eliminated from the game and can no longer win it <i>even</i> if it has 0 words left.
+                </span>
+            </li>
+            <li>
+                <span>
+                    The team that was able to guess all the words of their color first and, in the process, <i>did not</i> reveal the black color word wins.
+                </span>
+            </li>
+        </ul>
+        <h2>
+            This version-specific rules:
+        </h2>
+        <ul class="enumerated-list">
+            <li>
+                <span>
+                    There can be from 2 to 4 teams.
+                </span>
+            </li>
+            <li>
+                <span>
+                    Word board can have 25, 30, 36, 42 or 49 words. <a href="#footnote-1"><sup>(1.)</sup></a>
+                </span>
+            </li>
+            <li>
+                <span>
+                    There can be any amount of words per team, black words and white words depending on your host's choice.
+                </span>
+            </li>
+            <li>
+                <span>
+                    There may or may not be a guesses limit and/or time limit depending on your host's choice.
+                </span>
+            </li>
+            <li>
+                <span>
+                    There are multiple gamemodes available. Please, refer to the <a href="#gamemodes">Game modes</a> section.
+                </span>
+            </li>
+            <li>
+                <span>
+                    This game version allows you to send a clue with a number from 0 to 10 only. If you need any other number discuss the format of the clue with your host, but remember that clue cannot exceed 30 characters in length.
+                </span>
+            </li>
+            <li>
+                <span>
+                    There is a chat for communication in this version of the game. Masters <i>are not</i> allowed to chat about words on the board during the game process either through chat or by changing their nickname or by any other way.
+                </span>
+            </li>
+            <li>
+                <span>
+                    There can only be 100 clues from any team and 100 chat messages at a time. When a new clue or chat message appears, the oldest one will be deleted.
+                </span>
+            </li>
+        </ul>
+        <h2 id="gamemodes">Game modes:</h2>
+        <ul class="bullet-list">
+            <li>
+                <h3>Standard:</h3>
+                <span class="block">
+                    Nothing special, just a standard game mode with the rules described above.
+                </span>
+            </li>
+            <li>
+                <h3>Traitor:</h3>
+                <span class="block">
+                    Each team has 1 traitor who can be seen by other teams' masters, but not by that team's master. The traitor's goal is to lead their team to defeat by any means necessary. The traitor can see other teams' words and black words, but not white words or their team's words. A traitor cannot be the master of their team.
+                </span>
+                <span class="block">
+                    To play this mode, it is recommended to have at least 8 players in the room (1 to master each of the 2 teams and 3 to each team).
+                </span>
+            </li>
+        </ul>
+        <h2 id="clues-examples">Clues examples:</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Words</th>
+                    <th scope="col">Valid clue</th>
+                    <th scope="col">Comment</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">
+                        Watermelon, strawberry
+                    </th>
+                    <td class="clue-example">
+                        Seed - 2
+                    </td>
+                    <td class="clue-comment">
+                        The clue <p class="word-example">Berry - 2</p> would, generally speaking, be invalid because berry is a compound of strawberry.
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        Theater
+                    </th>
+                    <td class="clue-example">
+                        Spectacle - 1
+                    </td>
+                    <td class="clue-comment">
+                        The clue <p class="word-example">Theater - 1</p> is invalid because theater is another form of the word theater.
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        Cat, girl
+                    </th>
+                    <td class="clue-example">
+                        Adorable - 2
+                    </td>
+                    <td class="clue-comment">
+                        The clue <p class="word-example">Nekomusume - 2</p> is invalid because it's clearly not in English (actually in Japanese) and can be translated into English directly.
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        Japan, mafia
+                    </th>
+                    <td>
+                        Yakuza - 2
+                    </td>
+                    <td>
+                        This clue is correct because although it is written in Japanese, it cannot be translated into English directly and is actually considered a proper name in English.
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        Heart, machine, examination
+                    </th>
+                    <td>
+                        ECG - 3
+                    </td>
+                    <td>
+                        This clue is generally correct because, although it is an abbreviation, it can be written as a single word in its full form. <a href="#footnote-2"><sup>(2.)</sup></a>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        Space, USA
+                    </th>
+                    <td>
+                        Moon - 2
+                    </td>
+                    <td>
+                        The clue <p class="word-example">NASA - 2</p> is generally invalid because it is an acronym that cannot be written as a single word in its full form. However, in your room, this acronym may be recognized as a valid proper name and therefore can be used as a clue.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h2>Footnotes:</h2>
+        <div id="footnote-1">
+            <p><sup>(1.)</sup> If you know that some players in your room are playing from mobiles, the recommended options are only 25, 30, or 36 words.</p>
+        </div>
+        <div id="footnote-2">
+            <p><sup>(2.)</sup> Electrocardiogram.</p>
+        </div>
+    </div>
+</template>
+
+<script>
+import { defineComponent } from 'vue';
+
+export default defineComponent({
+    computed: {
+        
+    },
+    setup(props) {
+        
+    },
+    data() {
+        
+    },
+    methods: {
+        
+    },
+    mounted() {
+        
+    },
+    beforeUnmount() {
+        
+    },
+});
+</script>
+
+<style lang="css" scoped>
+#edit-clue-panel {
+    width: 100%;
+    height: max-content;
+
+    color: var(--panel-text-color-3);
+
+    text-indent: 2rem;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-direction: column;
+    row-gap: 0.2rem;
+}
+
+#edit-clue-panel .centered {
+    align-self: center;
+}
+
+#edit-clue-panel a {
+    color: rgb(135, 218, 253);
+}
+
+#edit-clue-panel h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--panel-text-color-3);
+}
+
+#edit-clue-panel h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--panel-text-color-3);
+}
+
+#edit-clue-panel h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--panel-text-color-3);
+}
+
+span.block {
+    display: block;
+    text-indent: 0;
+}
+
+.word-example {
+    display: inline;
+    color: plum;
+}
+
+i {
+    color:aquamarine;
+}
+
+ul {
+    display: block;
+    margin-block-start: 0.3rem;
+    margin-block-end: 0.3rem;
+    padding-inline-start: 2.5rem;
+    text-indent: 0.5rem;
+}
+
+ul.sublist {
+    padding-inline-start: 1.5rem;
+    text-indent: 0;
+}
+
+ul.bullet-list {
+    list-style-type: disc;
+}
+
+ul.enumerated-list {
+    list-style-type: decimal;
+}
+
+table {
+    table-layout: fixed;
+    width: 90%;
+    margin: auto;
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+th, td {
+    padding: 0.6em;
+}
+
+tr :nth-child(1) {
+  text-align: left;
+  width: 35%;
+}
+
+tr :nth-child(2), tr .clue-example {
+  text-align: center;
+  width: 25%;
+}
+
+tr :nth-child(3), tr .clue-comment {
+    text-align: right;
+    width: 40%;
+}
+
+@media screen and (max-width: 1300px) {
+    #edit-clue-panel {
+        width: 60%;
+    }
+}
+
+@media screen and (max-width: 1000px) {
+    #edit-clue-panel {
+        width: 90%;
+        height: 25%;
+    }
+}
+
+@media screen and (max-width: 650px) {
+    #edit-clue-input-wrapper {
+        width: 95%;
+    }
+
+    #edit-clue-text-input {
+        width: 80%;
+    }
+
+    #edit-clue-number-input {
+        width: 12%;
+    }
+}
+</style>

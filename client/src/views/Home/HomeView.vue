@@ -59,7 +59,9 @@ const route = useRoute();
     justify-content: flex-start;
     flex-direction: column;
     z-index: 1;
-    overflow-y: auto;
+
+    overflow-y: visible;
+    overflow-x: hidden;
 }
 
 #game-previews-list-wrapper {
@@ -70,6 +72,8 @@ const route = useRoute();
     justify-content: flex-start;
     flex-direction: column;
     row-gap: 1rem;
+
+    overflow-y: auto;
 }
 
 #game-previews-list-glass-panel {

@@ -28,6 +28,290 @@
         "create_new_room" : "Create new room"
     },
     "codenames" : {
+        "rules" : {
+            "game_rules" : {
+                "title" : "Codenames rules:",
+                "original_rules_link" : {
+                    "message_text" : "Original rules can be found {link}.",
+                    "url_text" : "here"
+                },
+                "original_rules_excerpt" : "A brief excerpt from the original rules that apply to this version of the game as well:",
+                "original_rules" : [
+                    {
+                        "text" : "Game requires at least 4 players (2 teams of 2 players)."
+                    },
+                    {
+                        "text" : "Masters of each team can see the color of words, their teammates cannot."
+                    },
+                    {
+                        "text" : "Each turn master can give 1 clue to their teammates. Rules for giving a clue:",
+                        "subrules" : [
+                            {
+                                "text" : "The clues must consist of 1 word and 1 number. The clue word should link the words you have chosen on the board, and the number of clues should match the number of words on the board."
+                            },
+                            {
+                                "text" : "You cannot give clues that indicate the location of words on the board, the number of letters in them, etc. Also, you cannot give {italic0} additional information about the clue.",
+                                "italics" : [
+                                    {
+                                        "text" : "any"
+                                    }
+                                ]
+                            },
+                            {
+                                "text" : "The clue word should be in the language your room is playing. Foreign words are {italic0} allowed if other teams approve them.",
+                                "italics" : [
+                                    {
+                                        "text" : "only"
+                                    }
+                                ]
+                            },
+                            {
+                                "text" : "The clue word must not repeat, be a compound of or be the same root as any word {italic0} discovered on the board.",
+                                "italics" : [
+                                    {
+                                        "text" : "not yet"
+                                    }
+                                ]
+                            },
+                            {
+                                "text" : "In contrast to the above rule, words connected by rhyme or ending are left to the reasoning of the room host."
+                            },
+                            {
+                                "text" : "The same goes for homonyms, acronyms and abbreviations."
+                            },
+                            {
+                                "text" : "The same also applies for compound words, such as {word0}, but your host can allow also such variants as {word1} and {word2}, but in no case should a player be allowed to come up with their own compound words.",
+                                "words" : [
+                                    {
+                                        "text" : "Greenhouse"
+                                    },
+                                    {
+                                        "text" : "Pack rat"
+                                    },
+                                    {
+                                        "text" : "Mother-in-law"
+                                    }
+                                ]
+                            },
+                            {
+                                "text" : "Proper names are always valid if there is only a name (one word), but if you want to clarify if you mean one or the other person, place, building, etc., then you need host confirmation."
+                            },
+                            {
+                                "text" : "Don't be too strict - the rules about compounds and roots only apply according to modern word morphology."
+                            },
+                            {
+                                "text" : "Clues with the number 0 are allowed - you may give them if you want to show your teammates that they {italic0} choose a word related to the clue you just gave them.",
+                                "italics" : [
+                                    {
+                                        "text" : "must not"
+                                    }
+                                ]
+                            },
+                            {
+                                "text" : "For more examples, please, refer to the {section0} section.",
+                                "section_links" : [
+                                    {
+                                        "text" : "Clues examples",
+                                        "link" : "#clues-examples"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "If the other team's master gives an invalid clue on his current turn, he skips his next turn. This rule applies {italic0} to the current turn's clue - if no one noticed that it was invalid on the current turn, but noticed it later, the rule {italic1} apply.",
+                        "italics" : [
+                            {
+                                "text" : "only"
+                            },
+                            {
+                                "text" : "does not"
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "Each turn begins with the master's turn. A team cannot make a move until the master has made a move. Both the master's move and the team's move have a time limit. If the master fails to make his move in the given time, he starts spending his team's time."
+                    },
+                    {
+                        "text" : "The team must try to guess the words based on their master's clues, and the team has the right to end their current turn early. Whether to allow guessing words on random is left to the host's judgment."
+                    },
+                    {
+                        "text" : "For guessing words of their own color the team gets extra time, for revealing words of the other team's color or white color the team's turn ends immediately. If a team reveals a word of black color, it is eliminated from the game and can no longer win it {italic0} if it has 0 words left.",
+                        "italics" : [
+                            {
+                                "text" : "even"
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "The team that was able to guess all the words of their color first and, in the process, {italic0} reveal the black color word wins.",
+                        "italics" : [
+                            {
+                                "text" : "did not"
+                            }
+                        ]
+                    }
+                ],
+                "version_specific_rules" : "This version-specific rules:",
+                "version_rules" : [
+                    {
+                        "text" : "There can be from 2 to 4 teams."
+                    },
+                    {
+                        "text" : "Word board can have 25, 30, 36, 42 or 49 words. {footnote0}",
+                        "footnotes" : [
+                            {
+                                "text" : "(1.)",
+                                "link" : "#footnote-1"
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "There can be any amount of words per team, black words and white words depending on your host's choice."
+                    },
+                    {
+                        "text" : "There may or may not be a guesses limit and/or time limit depending on your host's choice."
+                    },
+                    {
+                        "text" : "If the time has expired and the team still has not managed to choose a word unambiguously, the word that the {italic0} of the team players chose will be automatically revealed (players who did not choose anything {italic1} counted).",
+                        "italics" : [
+                            {
+                                "text" : "strict majority"
+                            },
+                            {
+                                "text" : "are also"
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "There are multiple game modes available. Please, refer to the {section0} section.",
+                        "section_links" : [
+                            {
+                                "text" : "Game modes",
+                                "link" : "#game-modes"
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "This game version allows you to send a clue with a number from 0 to 10 only. If you need any other number discuss the format of the clue with your host, but remember that clue cannot exceed 30 characters in length."
+                    },
+                    {
+                        "text" : "There is a chat for communication in this version of the game. Masters {italic0} allowed to chat about words on the board during the game process either through chat or by changing their nickname or by any other way.",
+                        "italics" : [
+                            {
+                                "text" : "are not"
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "There can only be 100 clues from any team and 100 chat messages at a time. When a new clue or chat message appears, the oldest one will be deleted."
+                    }
+                ],
+                "game_modes" : {
+                    "title" : "Game modes:",
+                    "modes" : [
+                        {
+                            "name" : "Standard:",
+                            "description" : "Nothing special, just a standard game mode with the rules described above."
+                        },
+                        {
+                            "name" : "Traitor:",
+                            "description" : "Each team has 1 traitor who can be seen by other teams' masters, but not by that team's master. The traitor's goal is to lead their team to defeat by any means necessary. The traitor can see other teams' words and black words, but not white words or their team's words. A traitor cannot be the master of their team.",
+                            "recommendation" : "To play this mode, it is recommended to have at least 8 players in the room (1 to master each of the 2 teams and 3 to each team)."
+                        }
+                    ]
+                },
+                "clues_examples" : {
+                    "title" : "Clues examples:",
+                    "table" : {
+                        "headers" : ["Words", "Valid clue", "Comment"],
+                        "rows" : [
+                            {
+                                "words" : "Watermelon, strawberry",
+                                "clue" : "Seed - 2",
+                                "comment" : {
+                                    "text" : "The clue {word0} would, generally speaking, be invalid because berry is a compound of strawberry.",
+                                    "words" : [
+                                        {
+                                            "text" : "Berry - 2"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "words" : "Theater",
+                                "clue" : "Spectacle - 1",
+                                "comment" : {
+                                    "text" : "The clue {word0} is invalid because theater is another form of the word theater.",
+                                    "words" : [
+                                        {
+                                            "text" : "Theater - 1"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "words" : "Cat, girl",
+                                "clue" : "Adorable - 2",
+                                "comment" : {
+                                    "text" : "The clue {word0} is invalid because it's clearly not in English (actually in Japanese) and can be translated into English directly.",
+                                    "words" : [
+                                        {
+                                            "text" : "Nekomusume - 2"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "words" : "Japan, mafia",
+                                "clue" : "Yakuza - 2",
+                                "comment" : {
+                                    "text" : "This clue is correct because although it is written in Japanese, it cannot be translated into English directly and is actually considered a proper name in English."
+                                }
+                            },
+                            {
+                                "words" : "Heart, machine, examination",
+                                "clue" : "ECG - 3",
+                                "comment" : {
+                                    "text" : "This clue is generally correct because, although it is an abbreviation, it can be written as a single word in its full form. {footnote0}",
+                                    "footnotes" : [
+                                        {
+                                            "text" : "(2.)",
+                                            "link" : "#footnote-2"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "words" : "Space, USA",
+                                "clue" : "Moon - 2",
+                                "comment" : {
+                                    "text" : "The clue {word0} is generally invalid because it is an acronym that cannot be written as a single word in its full form. However, in your room, this acronym may be recognized as a valid proper name and therefore can be used as a clue.",
+                                    "words" : [
+                                        {
+                                            "text" : "NASA - 2"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                },
+                "footnotes" : {
+                    "title" : "Footnotes:",
+                    "notes" : [
+                        {
+                            "id" : "footnote-1",
+                            "text" : "If you know that some players in your room are playing from mobiles, the recommended options are only 25, 30, or 36 words."
+                        },
+                        {
+                            "id" : "footnote-2",
+                            "text" : "Electrocardiogram."
+                        }
+                    ]
+                }
+            }
+        },
         "loading" : "Loading...",
         "disconnected" : "Disconnected (another session started)",
         "guesses_no_limit" : "There is no limit for guesses!",

@@ -1,52 +1,154 @@
 <template>
-    <div id="edit-clue-panel">
+    <div id="codenames-game-rules-content">
+        <h1 class="centered">
+            {{ $t("codenames.rules.game_rules.title") }}
+        </h1>
+        <p class="centered">
+            <i18n-t keypath="codenames.rules.game_rules.original_rules_link.message_text" tag="span" scope="global">
+                <template v-slot:link>
+                    <a
+                        href="https://fgbradleys.com/wp-content/uploads/rules/codenames%20-%20rules.pdf"
+                        class="external-link"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        {{ $t('codenames.rules.game_rules.original_rules_link.url_text') }}
+                    </a>
+                </template>
+            </i18n-t>
+        </p>
+
         <h2>
-            {{ $t("codenames.panels.edit_clue_panel.edit_clue") }}
+            {{ $t("codenames.rules.game_rules.original_rules_excerpt") }}
         </h2>
-        <div>
-            Officia quis exercitation enim ea qui pariatur quis laborum. Occaecat ad nulla aute officia nisi do fugiat duis exercitation proident exercitation consequat officia irure. Tempor Lorem ut et minim nisi sunt labore quis incididunt id. Est ad deserunt excepteur cillum veniam.
-        </div>
-        <div>
-            Aliquip adipisicing ex dolore tempor laborum mollit amet minim nisi ex. Proident cupidatat culpa excepteur tempor et pariatur. Ut sit in amet deserunt dolore consequat pariatur exercitation incididunt ullamco tempor dolore ullamco sunt.
-        </div>
-        <div>
-            Elit non ut in proident. Consectetur aliquip anim excepteur adipisicing aliquip esse. Est aute nisi cupidatat quis dolor. Tempor est pariatur et nostrud dolore quis nisi. Amet qui ut et reprehenderit nulla aliqua adipisicing officia commodo.
-        </div>
-        <div>
-            Officia quis exercitation enim ea qui pariatur quis laborum. Occaecat ad nulla aute officia nisi do fugiat duis exercitation proident exercitation consequat officia irure. Tempor Lorem ut et minim nisi sunt labore quis incididunt id. Est ad deserunt excepteur cillum veniam.
-        </div>
-        <div>
-            Aliquip adipisicing ex dolore tempor laborum mollit amet minim nisi ex. Proident cupidatat culpa excepteur tempor et pariatur. Ut sit in amet deserunt dolore consequat pariatur exercitation incididunt ullamco tempor dolore ullamco sunt.
-        </div>
-        <div>
-            Elit non ut in proident. Consectetur aliquip anim excepteur adipisicing aliquip esse. Est aute nisi cupidatat quis dolor. Tempor est pariatur et nostrud dolore quis nisi. Amet qui ut et reprehenderit nulla aliqua adipisicing officia commodo.
-        </div>
-        <div>
-            Officia quis exercitation enim ea qui pariatur quis laborum. Occaecat ad nulla aute officia nisi do fugiat duis exercitation proident exercitation consequat officia irure. Tempor Lorem ut et minim nisi sunt labore quis incididunt id. Est ad deserunt excepteur cillum veniam.
-        </div>
-        <div>
-            Aliquip adipisicing ex dolore tempor laborum mollit amet minim nisi ex. Proident cupidatat culpa excepteur tempor et pariatur. Ut sit in amet deserunt dolore consequat pariatur exercitation incididunt ullamco tempor dolore ullamco sunt.
-        </div>
-        <div>
-            Elit non ut in proident. Consectetur aliquip anim excepteur adipisicing aliquip esse. Est aute nisi cupidatat quis dolor. Tempor est pariatur et nostrud dolore quis nisi. Amet qui ut et reprehenderit nulla aliqua adipisicing officia commodo.
-        </div>
-        <div>
-            Officia quis exercitation enim ea qui pariatur quis laborum. Occaecat ad nulla aute officia nisi do fugiat duis exercitation proident exercitation consequat officia irure. Tempor Lorem ut et minim nisi sunt labore quis incididunt id. Est ad deserunt excepteur cillum veniam.
-        </div>
-        <div>
-            Aliquip adipisicing ex dolore tempor laborum mollit amet minim nisi ex. Proident cupidatat culpa excepteur tempor et pariatur. Ut sit in amet deserunt dolore consequat pariatur exercitation incididunt ullamco tempor dolore ullamco sunt.
-        </div>
-        <div>
-            Elit non ut in proident. Consectetur aliquip anim excepteur adipisicing aliquip esse. Est aute nisi cupidatat quis dolor. Tempor est pariatur et nostrud dolore quis nisi. Amet qui ut et reprehenderit nulla aliqua adipisicing officia commodo.
-        </div>
-        <div>
-            Officia quis exercitation enim ea qui pariatur quis laborum. Occaecat ad nulla aute officia nisi do fugiat duis exercitation proident exercitation consequat officia irure. Tempor Lorem ut et minim nisi sunt labore quis incididunt id. Est ad deserunt excepteur cillum veniam.
-        </div>
-        <div>
-            Aliquip adipisicing ex dolore tempor laborum mollit amet minim nisi ex. Proident cupidatat culpa excepteur tempor et pariatur. Ut sit in amet deserunt dolore consequat pariatur exercitation incididunt ullamco tempor dolore ullamco sunt.
-        </div>
-        <div>
-            Elit non ut in proident. Consectetur aliquip anim excepteur adipisicing aliquip esse. Est aute nisi cupidatat quis dolor. Tempor est pariatur et nostrud dolore quis nisi. Amet qui ut et reprehenderit nulla aliqua adipisicing officia commodo.
+        <ul class="enumerated-list">
+            <li v-for="(rule, index) in $tm('codenames.rules.game_rules.original_rules')" :key="index">
+                <i18n-t :keypath="`codenames.rules.game_rules.original_rules[${index}].text`" tag="span" scope="global">
+                    <template v-for="(italic, italicIndex) in rule.italics" #[`italic${italicIndex}`]>
+                        <i class="attention-takeover">{{ italic.text }}</i>
+                    </template>
+                    <template v-for="(word, wordIndex) in rule.words" #[`word${wordIndex}`]>
+                        <span class="word-example">{{ word.text }}</span>
+                    </template>
+                    <template v-for="(section, sectionIndex) in rule.section_links" #[`section${sectionIndex}`]>
+                        <a class="section-link" :href="section.link">{{ section.text }}</a>
+                    </template>
+                    <template v-for="(footnote, footnoteIndex) in rule.footnotes" #[`footnote${footnoteIndex}`]>
+                        <a class="footnote-link" :href="footnote.link"><sup>{{ footnote.text }}</sup></a>
+                    </template>
+                </i18n-t>
+                <ul v-if="rule.subrules" class="bullet-list sublist">
+                    <li v-for="(subrule, subIndex) in rule.subrules" :key="subIndex">
+                        <i18n-t :keypath="`codenames.rules.game_rules.original_rules[${index}].subrules[${subIndex}].text`" tag="span" scope="global">
+                            <template v-for="(italic, italicIndex) in subrule.italics" #[`italic${italicIndex}`]>
+                                <i class="attention-takeover">{{ italic.text }}</i>
+                            </template>
+                            <template v-for="(word, wordIndex) in subrule.words" #[`word${wordIndex}`]>
+                                <span class="word-example">{{ word.text }}</span>
+                            </template>
+                            <template v-for="(section, sectionIndex) in subrule.section_links" #[`section${sectionIndex}`]>
+                                <a class="section-link" :href="section.link">{{ section.text }}</a>
+                            </template>
+                            <template v-for="(footnote, footnoteIndex) in subrule.footnotes" #[`footnote${footnoteIndex}`]>
+                                <a class="footnote-link" :href="footnote.link"><sup>{{ footnote.text }}</sup></a>
+                            </template>
+                        </i18n-t>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2>
+            {{ $t("codenames.rules.game_rules.version_specific_rules") }}
+        </h2>
+        <ul class="enumerated-list">
+            <li v-for="(rule, index) in $tm('codenames.rules.game_rules.version_rules')" :key="index">
+                <i18n-t :keypath="`codenames.rules.game_rules.version_rules[${index}].text`" tag="span" scope="global">
+                    <template v-for="(italic, italicIndex) in rule.italics" #[`italic${italicIndex}`]>
+                        <i class="attention-takeover">{{ italic.text }}</i>
+                    </template>
+                    <template v-for="(word, wordIndex) in rule.words" #[`word${wordIndex}`]>
+                        <span class="word-example">{{ word.text }}</span>
+                    </template>
+                    <template v-for="(section, sectionIndex) in rule.section_links" #[`section${sectionIndex}`]>
+                        <a class="section-link" :href="section.link">{{ section.text }}</a>
+                    </template>
+                    <template v-for="(footnote, footnoteIndex) in rule.footnotes" #[`footnote${footnoteIndex}`]>
+                        <a class="footnote-link" :href="footnote.link"><sup>{{ footnote.text }}</sup></a>
+                    </template>
+                </i18n-t>
+                <ul v-if="rule.subrules" class="bullet-list sublist">
+                    <li v-for="(subrule, subIndex) in rule.subrules" :key="subIndex">
+                        <i18n-t :keypath="`codenames.rules.game_rules.version_rules[${index}].subrules[${subIndex}].text`" tag="span" scope="global">
+                            <template v-for="(italic, italicIndex) in subrule.italics" #[`italic${italicIndex}`]>
+                                <i class="attention-takeover">{{ italic.text }}</i>
+                            </template>
+                            <template v-for="(word, wordIndex) in subrule.words" #[`word${wordIndex}`]>
+                                <span class="word-example">{{ word.text }}</span>
+                            </template>
+                            <template v-for="(section, sectionIndex) in subrule.section_links" #[`section${sectionIndex}`]>
+                                <a class="section-link" :href="section.link">{{ section.text }}</a>
+                            </template>
+                            <template v-for="(footnote, footnoteIndex) in subrule.footnotes" #[`footnote${footnoteIndex}`]>
+                                <a class="footnote-link" :href="footnote.link"><sup>{{ footnote.text }}</sup></a>
+                            </template>
+                        </i18n-t>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2 id="game-modes">
+            {{ $t('codenames.rules.game_rules.game_modes.title') }}
+        </h2>
+        <ul class="bullet-list">
+            <li v-for="(mode, index) in $tm('codenames.rules.game_rules.game_modes.modes')" :key="index">
+                <strong>{{ mode.name }}</strong>
+                <p class="block">{{ mode.description }}</p>
+                <p v-if="mode.recommendation" class="block">{{ mode.recommendation }}</p>
+            </li>
+        </ul>
+
+        <h2 id="clues-examples">
+            {{ $t('codenames.rules.game_rules.clues_examples.title') }}
+        </h2>
+        <table>
+            <thead>
+                <tr>
+                    <th v-for="(header, index) in $tm('codenames.rules.game_rules.clues_examples.table.headers')" :key="index" scope="col">
+                        {{ header }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(row, rowIndex) in $tm('codenames.rules.game_rules.clues_examples.table.rows')" :key="rowIndex">
+                    <th scope="row">{{ row.words }}</th>
+                    <td class="clue-example">{{ row.clue }}</td>
+                    <td class="clue-comment">
+                        <i18n-t :keypath="`codenames.rules.game_rules.clues_examples.table.rows[${rowIndex}].comment.text`" tag="span" scope="global">
+                            <template v-for="(italic, italicIndex) in row.comment.italics" #[`italic${italicIndex}`]>
+                                <i class="attention-takeover">{{ italic.text }}</i>
+                            </template>
+                            <template v-for="(word, wordIndex) in row.comment.words" #[`word${wordIndex}`]>
+                                <span class="word-example">{{ word.text }}</span>
+                            </template>
+                            <template v-for="(section, sectionIndex) in row.comment.section_links" #[`section${sectionIndex}`]>
+                                <a class="section-link" :href="section.link">{{ section.text }}</a>
+                            </template>
+                            <template v-for="(footnote, footnoteIndex) in row.comment.footnotes" #[`footnote${footnoteIndex}`]>
+                                <a class="footnote-link" :href="footnote.link"><sup>{{ footnote.text }}</sup></a>
+                            </template>
+                        </i18n-t>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2 id="footnotes">
+            {{ $t('codenames.rules.game_rules.footnotes.title') }}
+        </h2>
+        <div v-for="(note, index) in $tm('codenames.rules.game_rules.footnotes.notes')" :key="index" :id="note.id">
+            <p><sup>({{ index + 1 }}.)</sup> {{ note.text }}</p>
         </div>
     </div>
 </template>
@@ -59,9 +161,6 @@ export default defineComponent({
         
     },
     setup(props) {
-        
-    },
-    data() {
         
     },
     methods: {
@@ -77,101 +176,127 @@ export default defineComponent({
 </script>
 
 <style lang="css" scoped>
-#edit-clue-panel {
+#codenames-game-rules-content {
     width: 100%;
     height: max-content;
 
-    background-color:var(--panel-background-color-2);
-    backdrop-filter: blur(3px) saturate(1);
-    -webkit-backdrop-filter: blur(3px) saturate(1);
+    color: var(--panel-text-color-3);
 
-    color: var(--panel-text-color-1);
+    text-indent: 2rem;
 
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-start;
     flex-direction: column;
     row-gap: 0.2rem;
 }
 
-#edit-clue-panel > h2 {
+#codenames-game-rules-content .centered {
+    align-self: center;
+}
+
+#codenames-game-rules-content .external-link, .section-link, .footnote-link {
+    color: rgb(135, 218, 253);
+}
+
+#codenames-game-rules-content .word-example {
+    display: inline;
+    color: plum;
+}
+
+#codenames-game-rules-content .attention-takeover {
+    color:aquamarine;
+}
+
+#codenames-game-rules-content h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--panel-text-color-3);
+}
+
+#codenames-game-rules-content h2 {
     font-size: 1.2rem;
-    color: var(--panel-header-2-color-1);
+    font-weight: 600;
+    color: var(--panel-text-color-3);
 }
 
-#edit-clue-input-wrapper {
+#codenames-game-rules-content h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--panel-text-color-3);
+}
+
+#codenames-game-rules-content span.block {
+    display: block;
+    text-indent: 0;
+}
+
+#codenames-game-rules-content ul {
+    display: block;
+    margin-block-start: 0.3rem;
+    margin-block-end: 0.3rem;
+    padding-inline-start: 2.5rem;
+    text-indent: 0.5rem;
+}
+
+#codenames-game-rules-content ul.sublist {
+    padding-inline-start: 1.5rem;
+    text-indent: 0;
+}
+
+#codenames-game-rules-content ul.bullet-list {
+    list-style-type: disc;
+}
+
+#codenames-game-rules-content ul.enumerated-list {
+    list-style-type: decimal;
+}
+
+#codenames-game-rules-content table {
+    table-layout: fixed;
     width: 90%;
-    height: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: row;
+    margin: auto;
+    border-collapse: collapse;
 }
 
-#edit-clue-text-input {
-    height: 100%;
-    width: 87%;
-    padding: 0.1rem;
-    background-color: var(--panel-input-background-color-1);
-    border: 1px solid var(--panel-input-border-color-1);
-    color: var(--panel-input-text-color-1);
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    border-radius: 0.25rem;
-    display: block;
+#codenames-game-rules-content table, th, td {
+    border: 1px solid black;
 }
 
-#edit-clue-number-input {
-    height: 100%;
-    width: 8%;
-    padding: 0.1rem;
-    background-color: var(--panel-input-background-color-1);
-    border: 1px solid var(--panel-input-border-color-1);
-    color: var(--panel-input-text-color-1);
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    border-radius: 0.25rem;
-    display: block;
+#codenames-game-rules-content th, td {
+    padding: 0.6em;
 }
 
-#edit-clue-text-input.inline, #edit-clue-number-input.inline {
-    display: inline-block;
+#codenames-game-rules-content tr :nth-child(1) {
+  text-align: left;
+  width: 35%;
 }
 
-#edit-clue-text-input:focus, #edit-clue-number-input:focus {
-    border-color: var(--panel-input-focus-border-color-1);
-    box-shadow: 0 0 0 3px var(--panel-input-focus-box-shadow-color-1);
+#codenames-game-rules-content tr :nth-child(2), tr .clue-example {
+  text-align: center;
+  width: 25%;
 }
 
-#edit-clue-send-button {
-    aspect-ratio: 1 / 1;
-    height: 100%;
-    width: auto;
-    scale: 1.2;
-
-    padding: 4px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+#codenames-game-rules-content tr :nth-child(3), tr .clue-comment {
+    text-align: right;
+    width: 40%;
 }
 
 @media screen and (max-width: 1300px) {
-    #edit-clue-panel {
+    #codenames-game-rules-content {
         width: 60%;
     }
 }
 
 @media screen and (max-width: 1000px) {
-    #edit-clue-panel {
+    #codenames-game-rules-content {
         width: 90%;
         height: 25%;
     }
 }
 
 @media screen and (max-width: 650px) {
-    #edit-clue-input-wrapper {
+    /* #edit-clue-input-wrapper {
         width: 95%;
     }
 
@@ -181,6 +306,6 @@ export default defineComponent({
 
     #edit-clue-number-input {
         width: 12%;
-    }
+    } */
 }
 </style>

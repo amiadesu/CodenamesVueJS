@@ -142,7 +142,7 @@ if (route.params.roomId === "") {
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    z-index: 1;
+    z-index: 20;
 }
 
 #game {
@@ -188,6 +188,7 @@ if (route.params.roomId === "") {
     height: 4%;
     width: 100%;
     align-items: start;
+    z-index: 5;
 }
 
 .row-wrapper.teams {

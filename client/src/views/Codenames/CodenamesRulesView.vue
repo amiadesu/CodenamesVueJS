@@ -94,8 +94,17 @@ function togglePanel(newPanelIndex) {
     align-items: center;
     justify-content: flex-start;
     flex-direction: column;
-    z-index: 1;
-    overflow-y: auto;
+    z-index: 0;
+
+    overflow-y: visible;
+    overflow-x: hidden;
+}
+
+#home-view-background {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 100vh;
 }
 
 #game-previews-list-wrapper {
@@ -110,7 +119,11 @@ function togglePanel(newPanelIndex) {
     align-items: center;
     justify-content: flex-start;
 
-    margin-bottom: 2rem; 
+    margin-bottom: 2rem;
+
+    overflow-y: auto;
+
+    z-index: 1;
 }
 
 #game-rules-glass-panel-content-wrapper {
