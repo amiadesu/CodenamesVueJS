@@ -30,80 +30,85 @@
     "codenames" : {
         "rules" : {
             "game_rules" : {
-                "title" : "Codenames rules:",
+                "title" : "Правила гри Codenames:",
                 "original_rules_link" : {
-                    "message_text" : "Original rules can be found {link}.",
-                    "url_text" : "here"
+                    "message_text" : "Оригінальні правила можна знайти {link}.",
+                    "url_text" : "тут"
                 },
-                "original_rules_excerpt" : "A brief excerpt from the original rules that apply to this version of the game as well:",
+                "original_rules_excerpt" : "Короткий витяг тих оригінальних правил, які актуальні й для даної версії гри:",
                 "original_rules" : [
                     {
-                        "text" : "Game requires at least 4 players (2 teams of 2 players)."
+                        "text" : "Для даної гри необхідно хоча б 4 гравця (2 команди по 2 гравця)."
                     },
                     {
-                        "text" : "Masters of each team can see the color of words, their teammates cannot.",
+                        "text" : "Майстри кожної команди бачать кольори слів, а члени їхніх команд - ні."
+                    },
+                    {
+                        "text" : "Кожен хід майстер має давати 1 підказку для своєї команди. Правила щодо оформлення підказки:",
                         "subrules" : [
                             {
-                                "text" : "The clues must consist of 1 word and 1 number. The clue word should link the words you have chosen on the board, and the number of clues should match the number of words on the board."
+                                "text" : "Підказка має складатися з 1 слова та 1 числа. Слово підказки має пов'язувати слова, які ви обрали для цього на дошці, а число підказки має відповідати кількості пов'язаних нею слів."
                             },
                             {
-                                "text" : "You cannot give clues that indicate the location of words on the board, the number of letters in them, etc. Also, you cannot give {italic0} additional information about the clue.",
+                                "text" : "Не можна давати підказки, що вказують на розташування слів на дошці, кількість літер у словах тощо. Крім того, заборонено надавати {italic0} додаткову інформацію щодо змісту підказки.",
                                 "italics" : [
                                     {
-                                        "text" : "any"
+                                        "text" : "будь-яку"
                                     }
                                 ]
                             },
                             {
-                                "text" : "The clue word should be in the language your room is playing. Foreign words are {italic0} allowed if other teams approve them.",
+                                "text" : "Підказка має бути тією мовою, якою грає ваша кімната. Іноземні слова дозволені {italic0} за згоди інших команд.",
                                 "italics" : [
                                     {
-                                        "text" : "only"
+                                        "text" : "лише"
                                     }
                                 ]
                             },
                             {
-                                "text" : "The clue word must not repeat, be a compound of or be the same root as any word not yet discovered on the board."
+                                "text" : "Слово підказки не має повторювати, бути частиною чи мати спільний корінь з будь-яким іншим {italic0} відкритим словом на дошці.",
+                                "italics" : [
+                                    {
+                                        "text" : "ще не"
+                                    }
+                                ]
                             },
                             {
-                                "text" : "In contrast to the above rule, words connected by rhyme or ending are left to the reasoning of the room host according to our rules."
+                                "text" : "На противагу попередньому правилу, коректність підказки, що пов'язує слова римою чи закінченням, залишається на розсуд ведучого кімнати."
                             },
                             {
-                                "text" : "The same goes for homonyms, acronyms and abbreviations."
+                                "text" : "Те саме стосується подібних за звучанням слів, акронімів та абревіатур."
                             },
                             {
-                                "text" : "The same also applies for compound words, such as {word0}, but your host can allow also such variants as {word1} and {word2}, but in no case should a player be allowed to come up with their own compound words.",
+                                "text" : "Аналогічне правило діє для складних слів на кшталт {word0}, але ведучий також може дозволити варіанти типу {word1}, проте жоден гравець ні в якому випадку не має права вигадувати власні складні слова.",
                                 "words" : [
                                     {
-                                        "text" : "Greenhouse"
+                                        "text" : "Безглуздий"
                                     },
                                     {
-                                        "text" : "Pack rat"
-                                    },
-                                    {
-                                        "text" : "Mother-in-law"
+                                        "text" : "Хліб-сіль"
                                     }
                                 ]
                             },
                             {
-                                "text" : "Proper names are always valid if there is only a name, but if you want to clarify if you mean one or the other person, place, building, etc., then you need host confirmation."
+                                "text" : "Власні імена завжди дозволені, якщо це лише ім'я (одне слово), але якщо ви хочете вказати більш конкретно, що ви маєте на увазі конкретну особу, місце, будівлю, тощо, тоді вам необхідно отримати дозвіл ведучого на це."
                             },
                             {
-                                "text" : "Don't be too strict - the rules about compounds and roots only apply to modern word morphology."
+                                "text" : "Проте, не будьте надто суворими - правило про спільнокореневі слова та частини слів застосовується лише згідно сучасної морфології слова."
                             },
                             {
-                                "text" : "Clues with the number 0 are allowed - you may give them if you want to show your teammates that they {italic0} choose a word related to the clue you just gave them.",
+                                "text" : "Підказки з числом 0 дозволені - ви можете їх використовувати, щоб підказати своїй команді, що їм {italic0} обирати слово, підказку до якого ви їм надали.",
                                 "italics" : [
                                     {
-                                        "text" : "must not"
+                                        "text" : "не треба"
                                     }
                                 ]
                             },
                             {
-                                "text" : "For more examples, please, refer to the {section0} section.",
+                                "text" : "Більше прикладів підказок ви можете знайти у розділі {section0}.",
                                 "section_links" : [
                                     {
-                                        "text" : "Clues examples",
+                                        "text" : "Приклади підказок",
                                         "link" : "#clues-examples"
                                     }
                                 ]
@@ -111,46 +116,46 @@
                         ]
                     },
                     {
-                        "text" : "If the other team's master gives an invalid clue on his current turn, he skips his next turn. This rule applies {italic0} to the current turn's clue - if no one noticed that it was invalid on the current turn, but noticed it later, the rule {italic1} apply.",
+                        "text" : "Якщо майстер іншої команди дав своїй команді некоректну підказку під час свого ходу, він пропускає наступний хід. Це правило діє {italic0} під час поточного ходу майстра - якщо ніхто не помітив некоректність під час цього ходу, але виявив пізніше, правило {italic1} діяти.",
                         "italics" : [
                             {
-                                "text" : "only"
+                                "text" : "лише"
                             },
                             {
-                                "text" : "does not"
+                                "text" : "перестає"
                             }
                         ]
                     },
                     {
-                        "text" : "Each turn begins with the master's turn. A team cannot make a move until the master has made a move. Both the master's move and the team's move have a time limit. If the master fails to make his move in the given time, he starts spending his team's time."
+                        "text" : "Кожен хід починається з ходу майстра. Команда не може робити свій хід, доки його не зробить її майстер. Ходи як майстра, так і команди, обмежені часом. Якщо майстер не встигає зробити свій хід за відведений йому час, він починає витрачати час команди."
                     },
                     {
-                        "text" : "The team must try to guess the words based on their master's clues, and the team has the right to end their current turn early. Whether to allow guessing words on random is left to the host's judgment."
+                        "text" : "Команда повинна вгадувати слова, базуючись на підказках свого майстра, та має право завершити хід достроково. Дозволяти чи ні вибір слів навмання залишається на розсуд ведучого."
                     },
                     {
-                        "text" : "For guessing words of their own color the team gets extra time, for revealing words of the other team's color or white color the team's turn ends immediately. If a team reveals a word of black color, it is eliminated from the game and can no longer win it {italic0} if it has 0 words left.",
+                        "text" : "Якщо команда розкриє слово свого кольору, вона отримує додатковий час. Якщо команда розкриє слово кольору іншої команди чи біле слово, її хід негайно завершується. Якщо команда розкриє чорне слово, вона вибуває з поточної гри і не зможе перемогти у ній {italic0} якщо в неї залишиться 0 слів.",
                         "italics" : [
                             {
-                                "text" : "even"
+                                "text" : "навіть"
                             }
                         ]
                     },
                     {
-                        "text" : "The team that was able to guess all the words of their color first and, in the process, {italic0} reveal the black color word wins.",
+                        "text" : "Команда, яка першою розкриє всі слова свого кольору і, при цьому, {italic0} розкриє жодного чорного слова, перемагає.",
                         "italics" : [
                             {
-                                "text" : "did not"
+                                "text" : "не"
                             }
                         ]
                     }
                 ],
-                "version_specific_rules" : "This version-specific rules:",
+                "version_specific_rules" : "Правила, унікальні для даної версії гри:",
                 "version_rules" : [
                     {
-                        "text" : "There can be from 2 to 4 teams."
+                        "text" : "У грі може бути від 2 до 4 команд."
                     },
                     {
-                        "text" : "Word board can have 25, 30, 36, 42 or 49 words. {footnote0}",
+                        "text" : "Дошка може містити 25, 30, 36, 42 чи 49 слів. {footnote0}",
                         "footnotes" : [
                             {
                                 "text" : "(1.)",
@@ -159,102 +164,113 @@
                         ]
                     },
                     {
-                        "text" : "There can be any amount of words per team, black words and white words depending on your host's choice."
+                        "text" : "У цій версії гри кількість слів для кожної команди, а також кількість білих і чорних слів, може бути довільною залежно від рішення ведучого."
                     },
                     {
-                        "text" : "There may or may not be a guesses limit and/or time limit depending on your host's choice."
+                        "text" : "У цій версії гри можуть бути або не бути обмеження на кількість відкриттів слів за хід та/або часові обмеження залежно від рішення ведучого."
                     },
                     {
-                        "text" : "There are multiple game modes available. Please, refer to the {section0} section.",
+                        "text" : "Якщо час команди вийшов, а вона так і не визначилася з вибором слова однозначно, слово, обране {italic0} гравців команди, буде автоматично відкрите (гравці, які не обрали жодного слова, {italic1} враховуються).",
+                        "italics" : [
+                            {
+                                "text" : "суворою більшістю"
+                            },
+                            {
+                                "text" : "також"
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "У цій версії гри наявно декілька ігрових режимів. Їхні особливості ви знайдете в розділі {section0}.",
                         "section_links" : [
                             {
-                                "text" : "Game modes",
+                                "text" : "Режими гри",
                                 "link" : "#game-modes"
                             }
                         ]
                     },
                     {
-                        "text" : "This game version allows you to send a clue with a number from 0 to 10 only. If you need any other number discuss the format of the clue with your host, but remember that clue cannot exceed 30 characters in length."
+                        "text" : "Ця версія гри дозволяє майстрам надсилати підказки з числом лише від 0 до 10. Для інших чисел узгодьте формат із ведучим кімнати, але пам'ятайте: підказка не може бути довшою за 30 символів."
                     },
                     {
-                        "text" : "There is a chat for communication in this version of the game. Masters {italic0} allowed to chat about words on the board during the game process either through chat or by changing their nickname or by any other way.",
+                        "text" : "У цій версії гри є текстовий чат. Майстрам {italic0} дозволяється обговорювати слова на дошці під час ігрового процесу через чат, зміну нікнейму чи будь-яким іншим способом.",
                         "italics" : [
                             {
-                                "text" : "are not"
+                                "text" : "не"
                             }
                         ]
                     },
                     {
-                        "text" : "There can only be 100 clues from any team and 100 chat messages at a time. When a new clue or chat message appears, the oldest one will be deleted."
+                        "text" : "У цій версії гри одночасно може бути лише 100 підказок на команду та 100 повідомлень у чаті. При надходженні нової підказки чи нового повідомлення найстаріше видаляється."
                     }
                 ],
                 "game_modes" : {
-                    "title" : "Game modes:",
+                    "title" : "Режими гри:",
                     "modes" : [
                         {
-                            "name" : "Standard:",
-                            "description" : "Nothing special, just a standard game mode with the rules described above."
+                            "name" : "Стандартний:",
+                            "description" : "Звичайний режим гри з вищенаведеними правилами без будь-яких інших особливостей."
                         },
                         {
-                            "name" : "Traitor:",
-                            "description" : "Each team has 1 traitor who can be seen by other teams' masters, but not by that team's master. The traitor's goal is to lead their team to defeat by any means necessary. The traitor can see other teams' words and black words, but not white words or their team's words. A traitor cannot be the master of their team.",
-                            "recommendation" : "To play this mode, it is recommended to have at least 8 players in the room (1 to master each of the 2 teams and 3 to each team)."
+                            "name" : "Зрадник:",
+                            "description" : "У кожній команді є 1 зрадник, якого бачать майстри інших команд, але не майстер його команди. Мета зрадника - привести свою команду до поразки будь-яким чином. Зрадник бачить слова інших команд і чорні слова, але не бачить білі слова та слова своєї команди. Зрадник не може бути майстром своєї команди.",
+                            "recommendation" : "Для цього режиму рекомендується мати кімнату з щонайменше 8 гравцями (по 1 майстру в кожну з 2 команд і по 3 члени команди у кожну команду)."
                         }
                     ]
                 },
                 "clues_examples" : {
-                    "title" : "Clues examples:",
+                    "title" : "Приклади підказок:",
                     "table" : {
-                        "headers" : ["Words", "Valid clue", "Comment"],
+                        "headers" : ["Слова", "Коректна підказка", "Коментар"],
                         "rows" : [
                             {
-                                "words" : "Watermelon, strawberry",
-                                "clue" : "Seed - 2",
+                                "words" : "Чорнозем, бруд",
+                                "clue" : "Ґрунт - 2",
                                 "comment" : {
-                                    "text" : "The clue {word0} would, generally speaking, be invalid because berry is a compound of strawberry.",
+                                    "text" : "Підказка {word0} буде некоректною, оскільки слово земля є спільнокореневим зі словом чорнозем.",
                                     "words" : [
                                         {
-                                            "text" : "Berry - 2"
+                                            "text" : "Земля - 2"
                                         }
                                     ]
                                 }
                             },
                             {
-                                "words" : "Theater",
-                                "clue" : "Spectacle - 1",
+                                "words" : "Мультфільм",
+                                "clue" : "Відео - 1",
                                 "comment" : {
-                                    "text" : "The clue {word0} is invalid because theater is another form of the word theater.",
+                                    "text" : "Підказка {word0} некоректна, оскільки мультик - це сленгова версія слова мультфільм.",
                                     "words" : [
                                         {
-                                            "text" : "Theater - 1"
+                                            "text" : "Мультик - 1"
                                         }
                                     ]
                                 }
                             },
                             {
-                                "words" : "Cat, girl",
-                                "clue" : "Adorable - 2",
+                                "words" : "Кішка, дівчинка",
+                                "clue" : "Мила - 2",
                                 "comment" : {
-                                    "text" : "The clue {word0} is invalid because it's clearly not in English (actually in Japanese) and can be translated into English directly.",
+                                    "text" : "Підказка {word0} некоректна, оскільки вона явно не українською (насправді, японською) і може бути дослівно перекладена українською.",
                                     "words" : [
                                         {
-                                            "text" : "Nekomusume - 2"
+                                            "text" : "Неко-тян - 2"
                                         }
                                     ]
                                 }
                             },
                             {
-                                "words" : "Japan, mafia",
-                                "clue" : "Yakuza - 2",
+                                "words" : "Японія, мафія",
+                                "clue" : "Якудза - 2",
                                 "comment" : {
-                                    "text" : "This clue is correct because although it is written in Japanese, it cannot be translated into English directly and is actually considered a proper name in English."
+                                    "text" : "Підказка коректна, незважаючи на японське походження, оскільки не має дослівного перекладу українською й вважається власною назвою."
                                 }
                             },
                             {
-                                "words" : "Heart, machine, examination",
-                                "clue" : "ECG - 3",
+                                "words" : "Серце, пристрій, огляд",
+                                "clue" : "ЕКГ - 3",
                                 "comment" : {
-                                    "text" : "This clue is generally correct because, although it is an abbreviation, it can be written as a single word in its full form. {footnote0}",
+                                    "text" : "Це слово, загалом, коректне, незважаючи на те, що це абревіатура, оскільки його повна форма може бути записана як єдине цілісне слово українською. {footnote0}",
                                     "footnotes" : [
                                         {
                                             "text" : "(2.)",
@@ -264,13 +280,13 @@
                                 }
                             },
                             {
-                                "words" : "Space, USA",
-                                "clue" : "Moon - 2",
+                                "words" : "Космос, США",
+                                "clue" : "Місяць - 2",
                                 "comment" : {
-                                    "text" : "The clue {word0} is generally invalid because it is an acronym that cannot be written as a single word in its full form. However, in your room, this acronym may be recognized as a valid proper name and therefore can be used as a clue.",
+                                    "text" : "Підказка {word0}, загалом, некоректна, оскільки це акронім, який не може бути записаний як єдине слово у повній формі українською. Однак у вашій кімнаті цей акронім може вважатися власною назвою, і тоді підказка буде коректною.",
                                     "words" : [
                                         {
-                                            "text" : "NASA - 2"
+                                            "text" : "НАСА - 2"
                                         }
                                     ]
                                 }
@@ -283,11 +299,11 @@
                     "notes" : [
                         {
                             "id" : "footnote-1",
-                            "text" : "If you know that some players in your room are playing from mobiles, the recommended options are only 25, 30, or 36 words."
+                            "text" : "Якщо ви знаєте, що у вашій кімнаті є гравці з телефонів, то рекомендується грати з дошкою лише на 25, 30 чи 36 слів."
                         },
                         {
                             "id" : "footnote-2",
-                            "text" : "Electrocardiogram."
+                            "text" : "Електрокардіографія."
                         }
                     ]
                 }
