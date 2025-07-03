@@ -337,8 +337,8 @@
                         @change="updateGameRules"
                         class="admin-panel-input"
                     >
-                        <option value="default" selected>
-                            {{ $t("codenames.admin.game_mode.default") }}
+                        <option value="standard" selected>
+                            {{ $t("codenames.admin.game_mode.standard") }}
                         </option>
                         <option value="traitor">
                             {{ $t("codenames.admin.game_mode.traitor") }}

@@ -1,9 +1,16 @@
+let config = null;
+
 async function loadConfig() {
     const response = await fetch('/config.json');
-    return response.json();
+    config = await response.json();
 }
 
-export const config = await loadConfig();
+console.log("Loading config");
+await loadConfig();
+
+export function getConfig() {
+    return config;
+}
 
 export const useDarkOptions = {
     valueDark: "dark-theme",

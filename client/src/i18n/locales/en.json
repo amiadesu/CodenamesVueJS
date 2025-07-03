@@ -310,6 +310,37 @@
                         }
                     ]
                 }
+            },
+            "game_interface" : {
+
+            },
+            "host_rules" : {
+                "title" : "Host rules:",
+                "description" : "Description:",
+                "rules" : [
+                    {
+                        "id" : "rule-example",
+                        "name" : "teamAmount",
+                        "title" : "Example",
+                        "default" : "Default: 120 {value} {admin-value}",
+                        "min" : "Min: {value}",
+                        "max" : "Max: {value}",
+                        "description" : [
+                            {
+                                "text" : "Example 1"
+                            },
+                            {
+                                "text" : "Example 2"
+                            },
+                            {
+                                "text" : "Example 3"
+                            },
+                            {
+                                "text" : "Example 4"
+                            }
+                        ]
+                    }
+                ]
             }
         },
         "loading" : "Loading...",
@@ -374,7 +405,7 @@
             "card_amount_overflow" : "This is too much. Reduce your total amount of cards!",
             "game_mode" : {
                 "select" : "Select game mode:",
-                "default" : "Default",
+                "standard" : "Standard",
                 "traitor" : "Traitor"
             },
             "word_pack" : {
@@ -412,7 +443,7 @@
             "card_amount_overflow" : "There is card amount overflow. Game cannot be started.",
             "game_mode" : {
                 "message" : "Game mode:",
-                "default" : "Default",
+                "standard" : "Standard",
                 "traitor" : "Traitor"
             },
             "word_pack" : {

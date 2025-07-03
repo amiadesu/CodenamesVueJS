@@ -1,20 +1,22 @@
 import './assets/main.css'
-
+console.log(1);
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import { createI18n } from 'vue-i18n';
 
 import { languages } from './i18n/index.js'
-const messages = Object.assign(languages)
+const messages = Object.assign(languages);
+
+import { getConfig } from "@/utils/config";
+
+const config = getConfig();
+console.log(config);
 
 import { setupSocketStore } from './sockets/codenames'
 import { preferencesStore } from './stores/preferences';
 
-import { config } from "@/utils/config";
-
 import App from './App.vue'
 import router from './router'
-
 
 const app = createApp(App)
 

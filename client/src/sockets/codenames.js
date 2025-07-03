@@ -1,8 +1,9 @@
 import { reactive } from "vue";
 import { io } from "socket.io-client";
 import { gameStore } from '@/stores/gameData';
+import { getConfig } from "@/utils/config";
 
-import { config } from "@/utils/config";
+const config = getConfig();
 
 let gameData = null;
 

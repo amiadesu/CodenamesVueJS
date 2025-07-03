@@ -35,7 +35,7 @@ export const gameStore = defineStore('gameData', () => {
             packId: "english",
             name: ""
         },
-        gamemode: "default",
+        gamemode: "standard",
         locked: false
     });
     const teams = ref({

@@ -5,5 +5,29 @@
     "serverIPs" : {
         "codenames" : "http://localhost:3000/codenames"
     },
-    "availableGames" : ["codenames", "example", "codenames", "example", "codenames", "example", "codenames", "example", "codenames", "example"]
+    "availableGames" : ["codenames", "example", "codenames", "example", "codenames", "example", "codenames", "example", "codenames", "example"],
+    "defaultGameRules" : {
+        "teamAmount": 2,
+        "maximumPlayers": 4,
+        "teamOrder": ["red", "green"],
+        "countdownTime": 0.5,
+        "firstMasterTurnTime": 120,
+        "masterTurnTime": 60,
+        "teamTurnTime": 60,
+        "extraTime": 15,
+        "freezeTime": false,
+        "limitedGuesses": true,
+        "guessesLimit": 0,
+        "baseCards": 7,
+        "extraCards": [3, 2, 1, 0],
+        "blackCards": 1,
+        "maxCards": 36,
+        "fieldSize": "6x6",
+        "wordPack": {
+            "packId": "english",
+            "name": ""
+        },
+        "gamemode": "standard",
+        "locked": false
+    }
 }

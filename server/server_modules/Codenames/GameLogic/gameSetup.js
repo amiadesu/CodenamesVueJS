@@ -47,21 +47,21 @@ async function clearRoles(room) {
 }
 
 async function setupGamemode(room) {
-    let users = await room.getUsers();
-    let teams = await room.getTeams();
-    let traitors = await room.getTraitors();
-    let gameRules = await room.getGameRules();
-
     if (gameRules.game_mode === "traitor") {
+        let users = await room.getUsers();
+        let teams = await room.getTeams();
+        let traitors = await room.getTraitors();
+        let gameRules = await room.getGameRules();
+
         ["red", "yellow", "blue", "green"].forEach((color) => {
             const selectedPlayer = randChoice(teams[color].team);
             if (selectedPlayer) {
                 traitors.push(selectedPlayer);
             }
         });
-    }
 
-    await room.setTraitors(traitors);
+        await room.setTraitors(traitors);
+    }
 }
 
 async function startNewGame(room, randomizeTeamOrder, getNewGameboard) {

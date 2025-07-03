@@ -17,7 +17,6 @@
                 </template>
             </i18n-t>
         </p>
-
         <h2>
             {{ $t("codenames.rules.game_rules.original_rules_excerpt") }}
         </h2>
@@ -57,7 +56,6 @@
                 </ul>
             </li>
         </ul>
-
         <h2>
             {{ $t("codenames.rules.game_rules.version_specific_rules") }}
         </h2>
@@ -97,7 +95,6 @@
                 </ul>
             </li>
         </ul>
-
         <h2 id="game-modes">
             {{ $t('codenames.rules.game_rules.game_modes.title') }}
         </h2>
@@ -108,7 +105,6 @@
                 <p v-if="mode.recommendation" class="block">{{ mode.recommendation }}</p>
             </li>
         </ul>
-
         <h2 id="clues-examples">
             {{ $t('codenames.rules.game_rules.clues_examples.title') }}
         </h2>
@@ -143,11 +139,10 @@
                 </tr>
             </tbody>
         </table>
-
         <h2 id="footnotes">
             {{ $t('codenames.rules.game_rules.footnotes.title') }}
         </h2>
-        <div v-for="(note, index) in $tm('codenames.rules.game_rules.footnotes.notes')" :key="index" :id="note.id">
+        <div class="footnote" v-for="(note, index) in $tm('codenames.rules.game_rules.footnotes.notes')" :key="index" :id="note.id">
             <p><sup>({{ index + 1 }}.)</sup> {{ note.text }}</p>
         </div>
     </div>
@@ -182,8 +177,6 @@ export default defineComponent({
 
     color: var(--panel-text-color-3);
 
-    text-indent: 2rem;
-
     display: flex;
     align-items: flex-start;
     justify-content: flex-start;
@@ -192,7 +185,9 @@ export default defineComponent({
 }
 
 #codenames-game-rules-content .centered {
-    align-self: center;
+    text-indent: 0;
+    display: block;
+    margin: 0 auto;
 }
 
 #codenames-game-rules-content .external-link, .section-link, .footnote-link {
@@ -215,6 +210,7 @@ export default defineComponent({
 }
 
 #codenames-game-rules-content h2 {
+    text-indent: 2rem;
     font-size: 1.2rem;
     font-weight: 600;
     color: var(--panel-text-color-3);
@@ -282,10 +278,8 @@ export default defineComponent({
     width: 40%;
 }
 
-@media screen and (max-width: 1300px) {
-    #codenames-game-rules-content {
-        width: 60%;
-    }
+.footnote {
+    text-indent: 2rem;
 }
 
 @media screen and (max-width: 1000px) {

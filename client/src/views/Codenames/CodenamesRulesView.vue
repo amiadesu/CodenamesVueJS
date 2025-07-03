@@ -4,8 +4,8 @@ import { useRoute } from 'vue-router';
 import { gameStore } from '@/stores/gameData';
 import { globalStore } from '@/stores/globalData';
 import { useDocumentVisibility } from '@vueuse/core';
+import { getConfig } from '@/utils/config';
 
-import { config } from '../../utils/config';
 import Background from '../../components/Home/Background.vue';
 import GamePreview from '../../components/Home/GamePreview.vue';
 import LanguageSelector from '../../components/Global/LanguageSelector.vue';
@@ -14,6 +14,8 @@ import GameRules from '@/components/Codenames/Rules/GameRules.vue';
 import GameInterface from '@/components/Codenames/Rules/GameInterface.vue';
 import HostRules from '@/components/Codenames/Rules/HostRules.vue';
 import GameroomCodeInput from '@/components/Home/GameroomCodeInput.vue';
+
+const config = getConfig();
 
 const availableGames = config["availableGames"];
 

@@ -64,7 +64,7 @@ const gameRulesZodSchemaNonStrict = z.object({
     blackCards: z.int().min(0),
     maxCards: z.literal([25, 30, 36, 42, 49]),
     fieldSize: z.literal(["5x5", "5x6", "6x6", "6x7", "7x7"]),
-    game_mode: z.literal(["default", "traitor"]),
+    game_mode: z.literal(["standard", "traitor"]),
     wordPack: z.object({
         packId: packIdZodSchema,
         name: z.string()

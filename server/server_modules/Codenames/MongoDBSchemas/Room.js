@@ -42,7 +42,7 @@ const roomSchema = new mongoose.Schema({
             blackCards: 1,
             maxCards: 36,
             fieldSize: "6x6",
-            game_mode: "default",
+            game_mode: "standard",
             wordPack: {
                 packId: "english",
                 name: "English word pack (standart)"
