@@ -116,6 +116,7 @@ async function clearAllSelections(room) {
     }
     
     words.forEach(async (word) => {
+        // Need to inverstigate further on this. I don't really like an idea of saving the room for each word.
         await clearWord(room, word.text);
     });
 
