@@ -13,7 +13,7 @@ const {
 } = DIContainer.modules.permissionsValidation;
 const {
     clearAllSelections
-} = DIContainer.modules.words;
+} = DIContainer.modules.wordHelpers;
 const {
     passTurn,
     removeAllPlayers,

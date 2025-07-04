@@ -167,11 +167,15 @@
 
 /**
  * @typedef {Object} WordsModule
+ * @property {function(Room, string): Promise<void>} revealWord
+ * @property {function(Room): Promise<boolean>} wordAutoselect
+ */
+
+/**
+ * @typedef {Object} WordHelpersModule
  * @property {function(Room, string, number, any): Promise<void>} toggleWord
  * @property {function(Room, string, number, any): Promise<void>} toggleWordNoSave
  * @property {function(Room, string): Promise<void>} clearWord
  * @property {function(Room, string): Promise<void>} clearWordNoSave
- * @property {function(Room, string): Promise<void>} revealWord
- * @property {function(Room): Promise<boolean>} wordAutoselect
  * @property {function(Room): Promise<void>} clearAllSelections
  */

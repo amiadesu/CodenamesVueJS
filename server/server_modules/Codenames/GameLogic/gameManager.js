@@ -6,6 +6,9 @@ const {
     randChoice,
     shuffle
 } = require("../../../utils/extra");
+const { 
+    clearAllSelections 
+} = require("./wordHelpers");
 
 let io = null;
 
@@ -56,6 +59,8 @@ async function updateUser(room, newUser) {
 
 async function passTurn(room) {
     await clearTimer(room);
+
+    // await clearAllSelections(room);
 
     let gameRules = await room.getGameRules();
     let gameProcess = await room.getGameProcess();

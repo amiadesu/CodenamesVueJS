@@ -13,9 +13,11 @@ const {
     getGameboard
 } = DIContainer.modules.gameboard;
 const {
-    toggleWord,
     revealWord
 } = DIContainer.modules.words;
+const {
+    toggleWord
+} = DIContainer.modules.wordHelpers
 
 async function getGameboardEvent(io, socketData) {
     const room = new RoomContext(socketData.roomId);

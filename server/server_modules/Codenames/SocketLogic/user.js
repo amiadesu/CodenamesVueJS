@@ -9,7 +9,7 @@ const {
 } = DIContainer.modules.gameManager;
 const {
     toggleWord
-} = DIContainer.modules.words;
+} = DIContainer.modules.wordHelpers;
 const {
     getNewWords,
     getGameboard
