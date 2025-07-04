@@ -7,27 +7,94 @@
     },
     "availableGames" : ["codenames", "example", "codenames", "example", "codenames", "example", "codenames", "example", "codenames", "example"],
     "defaultGameRules" : {
-        "teamAmount": 2,
-        "maximumPlayers": 4,
-        "teamOrder": ["red", "green"],
-        "countdownTime": 0.5,
-        "firstMasterTurnTime": 120,
-        "masterTurnTime": 60,
-        "teamTurnTime": 60,
-        "extraTime": 15,
-        "freezeTime": false,
-        "limitedGuesses": true,
-        "guessesLimit": 0,
-        "baseCards": 7,
-        "extraCards": [3, 2, 1, 0],
-        "blackCards": 1,
-        "maxCards": 36,
-        "fieldSize": "6x6",
+        "teamAmount": {
+            "default" : 2,
+            "min" : 2,
+            "max" : 4
+        },
+        "maximumPlayers": {
+            "default" : 4,
+            "min" : 1,
+            "max" : 10
+        },
+        "teamOrder": {
+            "default" : ["red", "green"]
+        },
+        "countdownTime": {
+            "default" : 0.5,
+            "min" : 0.5,
+            "max" : 0.5
+        },
+        "firstMasterTurnTime": {
+            "default" : 120,
+            "min" : 0,
+            "max" : 3599
+        },
+        "masterTurnTime": {
+            "default" : 60,
+            "min" : 0,
+            "max" : 3599
+        },
+        "teamTurnTime": {
+            "default" : 60,
+            "min" : 0,
+            "max" : 3599
+        },
+        "extraTime": {
+            "default" : 15,
+            "min" : 0,
+            "max" : 3599
+        },
+        "freezeTime": {
+            "default" : false
+        },
+        "limitedGuesses": {
+            "default" : true
+        },
+        "guessesLimit": {
+            "default" : 0,
+            "min" : 0,
+            "max" : 99
+        },
+        "baseCards": {
+            "default" : 7,
+            "min" : 1
+        },
+        "extraCards": [
+            {
+                "default" : 3
+            }, 
+            {
+                "default" : 2
+            }, 
+            {
+                "default" : 1
+            }, 
+            {
+                "default" : 0
+            }
+        ],
+        "blackCards": {
+            "default" : 1,
+            "min" : 0
+        },
+        "maxCards": {
+            "default" : 36
+        },
+        "fieldSize": {
+            "default" : "6x6"
+        },
         "wordPack": {
-            "packId": "english",
+            "packId": {
+                "default" : "english"
+            },
             "name": ""
         },
-        "gamemode": "standard",
-        "locked": false
+        "gamemode": {
+            "default" : "standard"
+        },
+        "locked": {
+            "default" : false
+        }
     }
 }

@@ -17,22 +17,31 @@
                         {{ rule.title }}
                     </h2>
                     <div class="input-info-wrapper">
-                        <i18n-t v-if="rule.default" :keypath="`codenames.rules.host_rules.rules[${index}].default`" tag="span" scope="global">
-                            <template #value>
-                                {{ config.defaultGameRules[rule.name] }}
+                        <i18n-t v-if="rule.default" :keypath="`codenames.rules.host_rules.rules[${index}].default.text`" tag="span" scope="global">
+                            <template v-if="rule.default.type === 'value'" #value>
+                                {{ config.defaultGameRules[rule.name].default }}
                             </template>
-                            <template #admin-value>
-                                20000
+                            <template v-if="rule.default.type === 'extraValue'" #extraValue>
+                                {{ config.defaultGameRules[rule.name][rule.default.index].default }}
+                            </template>
+                            <template v-if="rule.default.type === 'wordPackValue'" #wordPackValue>
+                                {{ config.defaultGameRules[rule.name].packId.default }}
+                            </template>
+                            <template v-if="rule.default.type === 'boolValue'" #boolValue>
+                                {{ $t(`codenames.states.${config.defaultGameRules[rule.name].default}`) }}
+                            </template>
+                            <template v-if="rule.default.type === 'adminValue'" #adminValue>
+                                {{ $t(`codenames.admin.${rule.default.value_path}.${config.defaultGameRules[rule.name].default}`) }}
                             </template>
                         </i18n-t>
-                        <i18n-t v-if="rule.min" :keypath="`codenames.rules.host_rules.rules[${index}].min`" tag="span" scope="global">
-                            <template #value>
-                                20000
+                        <i18n-t v-if="rule.min" :keypath="`codenames.rules.host_rules.rules[${index}].min.text`" tag="span" scope="global">
+                            <template v-if="rule.min.type === 'value'" #value>
+                                {{ config.defaultGameRules[rule.name].min }}
                             </template>
                         </i18n-t>
-                        <i18n-t v-if="rule.max" :keypath="`codenames.rules.host_rules.rules[${index}].max`" tag="span" scope="global">
-                            <template #value>
-                                20000
+                        <i18n-t v-if="rule.max" :keypath="`codenames.rules.host_rules.rules[${index}].max.text`" tag="span" scope="global">
+                            <template v-if="rule.max.type === 'value'" #value>
+                                {{ config.defaultGameRules[rule.name].max }}
                             </template>
                         </i18n-t>
                     </div>
@@ -57,54 +66,34 @@
                             <template v-for="(footnote, footnoteIndex) in row.footnotes" #[`footnote${footnoteIndex}`]>
                                 <a class="footnote-link" :href="footnote.link"><sup>{{ footnote.text }}</sup></a>
                             </template>
+                            <template v-for="(tab, tabIndex) in row.tabs" #[`tab${tabIndex}`]>
+                                <a class="section-link" @click="togglePanel(tab.index)">{{ tab.text }}</a>
+                            </template>
+                            <template v-for="(otherLink, otherLinkIndex) in row.otherLinks" #[`otherLink${otherLinkIndex}`]>
+                                <a 
+                                    class="section-link" 
+                                    @click="() => {togglePanel(otherLink.index); scrollToAnchor(otherLink.link);}"
+                                >
+                                    {{ otherLink.text }}
+                                </a>
+                            </template>
+                            <template v-for="(link, linkIndex) in row.links" #[`link${linkIndex}`]>
+                                <a class="section-link" :href="link.link">{{ link.text }}</a>
+                            </template>
                         </i18n-t>
                     </template>
                 </div>
             </div>
-            <template v-for="i of Array(100).keys()" :key="i">
-                <div class="doc-block">
-                    <div class="title-wrapper">
-                        <h2>
-                            Example
-                        </h2>
-                        <div class="input-info-wrapper">
-                            <p>
-                                Default: 120
-                            </p>
-                            <p>
-                                Min: 0
-                            </p>
-                            <p>
-                                Max: 3599
-                            </p>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="info-wrapper">
-                        <p>
-                            Explanation 1
-                        </p>
-                        <p>
-                            Explanation 2
-                        </p>
-                        <p>
-                            Explanation 3
-                        </p>
-                        <p>
-                            Explanation 4
-                        </p>
-                    </div>
-                </div>
-            </template>
         </div>
     </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue';
+import { defineComponent, inject } from 'vue';
 import { getConfig } from '@/utils/config';
 
 export default defineComponent({
+    inject: ['togglePanel', 'scrollToAnchor'],
     computed: {
         
     },
@@ -120,7 +109,7 @@ export default defineComponent({
         
     },
     mounted() {
-        console.log(config);
+        
     },
     beforeUnmount() {
         
@@ -185,6 +174,7 @@ export default defineComponent({
 }
 
 #codenames-game-rules-content .external-link, .section-link, .footnote-link {
+    cursor: pointer;
     color: rgb(135, 218, 253);
 }
 

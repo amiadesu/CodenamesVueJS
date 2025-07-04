@@ -1,6 +1,7 @@
 import { gameStore } from '@/stores/gameData';
 // import { io } from 'socket.io-client';
 import { socket } from "@/sockets/codenames";
+import { getConfig } from '@/utils/config';
 
 export const adminControlMixin = {
     computed: {
@@ -12,6 +13,7 @@ export const adminControlMixin = {
     },
     data() {
         return {
+            restrictions: getConfig().defaultGameRules,
             opened: false,
             oldAmount: 2,
             isDisabled: false,
@@ -30,73 +32,73 @@ export const adminControlMixin = {
             }
         },
         clampGameRules() {
-            if (this.gameData.gameRules.teamAmount < 2) {
-                this.gameData.gameRules.teamAmount = 2;
+            if (this.gameData.gameRules.teamAmount < this.restrictions.teamAmount.min) {
+                this.gameData.gameRules.teamAmount = this.restrictions.teamAmount.min;
             }
-            if (this.gameData.gameRules.teamAmount > 4) {
-                this.gameData.gameRules.teamAmount = 4;
-            }
-
-            if (this.gameData.gameRules.maximumPlayers < 1) {
-                this.gameData.gameRules.maximumPlayers = 1;
-            }
-            if (this.gameData.gameRules.maximumPlayers > 10) {
-                this.gameData.gameRules.maximumPlayers = 10;
+            if (this.gameData.gameRules.teamAmount > this.restrictions.teamAmount.max) {
+                this.gameData.gameRules.teamAmount = this.restrictions.teamAmount.max;
             }
 
-            if (this.gameData.gameRules.firstMasterTurnTime < 0) {
-                this.gameData.gameRules.firstMasterTurnTime = 0;
+            if (this.gameData.gameRules.maximumPlayers < this.restrictions.maximumPlayers.min) {
+                this.gameData.gameRules.maximumPlayers = this.restrictions.maximumPlayers.min;
             }
-            if (this.gameData.gameRules.firstMasterTurnTime > 3599) {
-                this.gameData.gameRules.firstMasterTurnTime = 3599;
-            }
-
-            if (this.gameData.gameRules.masterTurnTime < 0) {
-                this.gameData.gameRules.masterTurnTime = 0;
-            }
-            if (this.gameData.gameRules.masterTurnTime > 3599) {
-                this.gameData.gameRules.masterTurnTime = 3599;
+            if (this.gameData.gameRules.maximumPlayers > this.restrictions.maximumPlayers.max) {
+                this.gameData.gameRules.maximumPlayers = this.restrictions.maximumPlayers.max;
             }
 
-            if (this.gameData.gameRules.teamTurnTime < 0) {
-                this.gameData.gameRules.teamTurnTime = 0;
+            if (this.gameData.gameRules.firstMasterTurnTime < this.restrictions.firstMasterTurnTime.min) {
+                this.gameData.gameRules.firstMasterTurnTime = this.restrictions.firstMasterTurnTime.min;
             }
-            if (this.gameData.gameRules.teamTurnTime > 3599) {
-                this.gameData.gameRules.teamTurnTime = 3599;
-            }
-
-            if (this.gameData.gameRules.extraTime < 0) {
-                this.gameData.gameRules.extraTime = 0;
-            }
-            if (this.gameData.gameRules.extraTime > 3599) {
-                this.gameData.gameRules.extraTime = 3599;
+            if (this.gameData.gameRules.firstMasterTurnTime > this.restrictions.firstMasterTurnTime.max) {
+                this.gameData.gameRules.firstMasterTurnTime = this.restrictions.firstMasterTurnTime.max;
             }
 
-            if (this.gameData.gameRules.guessesLimit < 0) {
-                this.gameData.gameRules.guessesLimit = 0;
+            if (this.gameData.gameRules.masterTurnTime < this.restrictions.masterTurnTime.min) {
+                this.gameData.gameRules.masterTurnTime = this.restrictions.masterTurnTime.min;
             }
-            if (this.gameData.gameRules.guessesLimit > 99) {
-                this.gameData.gameRules.guessesLimit = 99;
+            if (this.gameData.gameRules.masterTurnTime > this.restrictions.masterTurnTime.max) {
+                this.gameData.gameRules.masterTurnTime = this.restrictions.masterTurnTime.max;
             }
 
-            if (this.gameData.gameRules.baseCards < 1) {
-                this.gameData.gameRules.baseCards = 1;
+            if (this.gameData.gameRules.teamTurnTime < this.restrictions.teamTurnTime.min) {
+                this.gameData.gameRules.teamTurnTime = this.restrictions.teamTurnTime.min;
+            }
+            if (this.gameData.gameRules.teamTurnTime > this.restrictions.teamTurnTime.max) {
+                this.gameData.gameRules.teamTurnTime = this.restrictions.teamTurnTime.max;
+            }
+
+            if (this.gameData.gameRules.extraTime < this.restrictions.extraTime.min) {
+                this.gameData.gameRules.extraTime = this.restrictions.extraTime.min;
+            }
+            if (this.gameData.gameRules.extraTime > this.restrictions.extraTime.max) {
+                this.gameData.gameRules.extraTime = this.restrictions.extraTime.max;
+            }
+
+            if (this.gameData.gameRules.guessesLimit < this.restrictions.guessesLimit.min) {
+                this.gameData.gameRules.guessesLimit = this.restrictions.guessesLimit.min;
+            }
+            if (this.gameData.gameRules.guessesLimit > this.restrictions.guessesLimit.max) {
+                this.gameData.gameRules.guessesLimit = this.restrictions.guessesLimit.max;
+            }
+
+            if (this.gameData.gameRules.baseCards < this.restrictions.baseCards.min) {
+                this.gameData.gameRules.baseCards = this.restrictions.baseCards.min;
             }
             if (this.gameData.gameRules.baseCards > this.gameData.gameRules.maxCards) {
                 this.gameData.gameRules.baseCards = this.gameData.gameRules.maxCards;
             }
 
             for (let i = 0; i < this.gameData.gameRules.teamAmount - 1; i++) {
-                if (this.gameData.gameRules.extraCards[i] < 1 - this.gameData.gameRules.baseCards) {
-                    this.gameData.gameRules.extraCards[i] = 1 - this.gameData.gameRules.baseCards;
+                if (this.gameData.gameRules.extraCards[i] < this.restrictions.baseCards.min - this.gameData.gameRules.baseCards) {
+                    this.gameData.gameRules.extraCards[i] = this.restrictions.baseCards.min - this.gameData.gameRules.baseCards;
                 }
                 if (this.gameData.gameRules.extraCards[i] > this.gameData.gameRules.maxCards) {
                     this.gameData.gameRules.extraCards[i] = this.gameData.gameRules.maxCards;
                 }
             }
 
-            if (this.gameData.gameRules.blackCards < 0) {
-                this.gameData.gameRules.blackCards = 0;
+            if (this.gameData.gameRules.blackCards < this.restrictions.blackCards.min) {
+                this.gameData.gameRules.blackCards = this.restrictions.blackCards.min;
             }
             if (this.gameData.gameRules.blackCards > this.gameData.gameRules.maxCards - this.gameData.gameRules.teamAmount) {
                 this.gameData.gameRules.blackCards = this.gameData.gameRules.maxCards - this.gameData.gameRules.teamAmount;

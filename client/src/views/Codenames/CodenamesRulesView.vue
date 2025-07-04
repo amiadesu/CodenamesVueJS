@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, nextTick, provide } from 'vue';
 import { useRoute } from 'vue-router';
 import { gameStore } from '@/stores/gameData';
 import { globalStore } from '@/stores/globalData';
@@ -16,17 +16,15 @@ import HostRules from '@/components/Codenames/Rules/HostRules.vue';
 import GameroomCodeInput from '@/components/Home/GameroomCodeInput.vue';
 
 const config = getConfig();
-
 const availableGames = config["availableGames"];
-
 const visibility = 'visible';
 let globalData = globalStore();
 const currentPanelIndex = ref(0);
 
 globalData.remInPixels = parseFloat(getComputedStyle(document.documentElement).fontSize);
-
 const route = useRoute();
 
+// Provide this function to child components
 function togglePanel(newPanelIndex) {
     if (newPanelIndex === currentPanelIndex.value) {
         return;
@@ -34,13 +32,35 @@ function togglePanel(newPanelIndex) {
     currentPanelIndex.value = newPanelIndex;
 };
 
+// Provide this function to handle anchor links
+function scrollToAnchor(anchorId) {
+    nextTick(() => {
+        anchorId = anchorId.startsWith('#') ? anchorId.slice(1) : anchorId;
+        const element = document.getElementById(anchorId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+};
+
+// Provide these to child components
+provide('togglePanel', togglePanel);
+provide('scrollToAnchor', scrollToAnchor);
+
+// Handle route hash on component mount
+onMounted(() => {
+    if (route.hash) {
+        const anchor = route.hash.substring(1);
+        scrollToAnchor(anchor);
+    }
+});
+
 // if (route.params.roomId && route.params.roomId !== 'rules') {
 //     if (!socket.connected) {
 //         socket.connect();
 //     }
 //     socket.emit("setup_client", route.params.roomId);
 // }
-
 </script>
 
 <template>

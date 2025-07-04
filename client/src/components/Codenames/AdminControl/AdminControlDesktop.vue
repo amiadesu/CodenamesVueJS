@@ -17,8 +17,8 @@
                     <label for="team-amount-input">{{ $t("codenames.admin.amount_of_teams") }}</label>
                     <input 
                         type="number" 
-                        min="2" 
-                        max="4" 
+                        :min="restrictions.teamAmount.min" 
+                        :max="restrictions.teamAmount.max" 
                         step="1" 
                         :disabled="gameData.gameProcess.isGoing" 
                         v-model="gameData.gameRules.teamAmount" 
@@ -35,7 +35,7 @@
                 </li>
                 <span class="admin-panel-content-row single-line-row">
                     <button 
-                        id="refresh-button" 
+                        id="randomize-team-order-button" 
                         :disabled="gameData.gameProcess.isGoing" 
                         @click="randomizeTeamOrder"
                         class="admin-panel-button"
@@ -49,8 +49,8 @@
                     </label>
                     <input 
                         type="number" 
-                        min="1" 
-                        max="10" 
+                        :min="restrictions.maximumPlayers.min" 
+                        :max="restrictions.maximumPlayers.max" 
                         step="1" 
                         v-model="gameData.gameRules.maximumPlayers" 
                         @change="updateGameRules" 
@@ -60,62 +60,62 @@
                 </span>
                 <hr class="admin-panel-section-divider">
                 <span class="admin-panel-content-row single-line-row">
-                    <label for="players-amount-input">
+                    <label for="first-master-turn-time-input">
                         {{ $t("codenames.admin.first_master_turn_time") }}
                     </label>
                     <input 
                         type="number" 
-                        min="0" 
-                        max="3599" 
+                        :min="restrictions.firstMasterTurnTime.min" 
+                        :max="restrictions.firstMasterTurnTime.max" 
                         step="1" 
                         v-model="gameData.gameRules.firstMasterTurnTime" 
                         @change="updateGameRules" 
-                        id="players-amount-input"
+                        id="first-master-turn-time-input"
                         class="admin-panel-input"
                     >
                 </span>
                 <span class="admin-panel-content-row single-line-row">
-                    <label for="players-amount-input">
+                    <label for="master-turn-time-input">
                         {{ $t("codenames.admin.master_turn_time") }}
                     </label>
                     <input 
                         type="number" 
-                        min="0" 
-                        max="3599" 
+                        :min="restrictions.masterTurnTime.min" 
+                        :max="restrictions.masterTurnTime.max" 
                         step="1" 
                         v-model="gameData.gameRules.masterTurnTime" 
                         @change="updateGameRules" 
-                        id="players-amount-input"
+                        id="master-turn-time-input"
                         class="admin-panel-input"
                     >
                 </span>
                 <span class="admin-panel-content-row single-line-row">
-                    <label for="players-amount-input">
+                    <label for="team-turn-time-input">
                         {{ $t("codenames.admin.team_turn_time") }}
                     </label>
                     <input 
                         type="number" 
-                        min="0" 
-                        max="3599" 
+                        :min="restrictions.teamTurnTime.min" 
+                        :max="restrictions.teamTurnTime.max" 
                         step="1" 
                         v-model="gameData.gameRules.teamTurnTime" 
                         @change="updateGameRules" 
-                        id="players-amount-input"
+                        id="team-turn-time-input"
                         class="admin-panel-input"
                     >
                 </span>
                 <span class="admin-panel-content-row single-line-row">
-                    <label for="players-amount-input">
+                    <label for="extra-time-input">
                         {{ $t("codenames.admin.extra_time") }}
                     </label>
                     <input 
                         type="number" 
-                        min="0" 
-                        max="3599" 
+                        :min="restrictions.extraTime.min" 
+                        :max="restrictions.extraTime.max" 
                         step="1" 
                         v-model="gameData.gameRules.extraTime" 
                         @change="updateGameRules" 
-                        id="players-amount-input"
+                        id="extra-time-input"
                         class="admin-panel-input"
                     >
                 </span>
@@ -125,9 +125,9 @@
                     </label>
                     <input 
                         type="number" 
-                        min="0" 
-                        max="99" 
-                        step="1" 
+                        :min="restrictions.guessesLimit.min" 
+                        :max="restrictions.guessesLimit.max" 
+                        step="1"
                         v-model="gameData.gameRules.guessesLimit" 
                         @change="updateGameRules" 
                         id="word-guesses-input"
@@ -138,14 +138,15 @@
                 <span class="admin-panel-content-row single-line-row space-around">
                     <button 
                         v-if="!gameData.gameRules.locked" 
-                        id="refresh-button" 
+                        id="unlock-button" 
                         @click="lockRoom"
                         class="admin-panel-button"
                     >
                         {{ $t("codenames.admin.lock_room") }}
                     </button>
                     <button 
-                        v-else id="refresh-button" 
+                        v-else 
+                        id="unlock-button" 
                         @click="lockRoom"
                         class="admin-panel-button"
                     >
@@ -153,7 +154,7 @@
                     </button>
                     <button 
                         v-if="!gameData.gameProcess.isGoing" 
-                        id="refresh-button" 
+                        id="start-new-game-button" 
                         @click="startNewGame" 
                         :disabled="gameData.totalCardAmount > gameData.gameRules.maxCards"
                         class="admin-panel-button"
@@ -161,7 +162,8 @@
                         {{ $t("codenames.admin.start_game") }}
                     </button>
                     <button 
-                        v-else id="refresh-button" 
+                        v-else 
+                        id="start-new-game-button" 
                         @click="startNewGame" 
                         :disabled="gameData.totalCardAmount > gameData.gameRules.maxCards"
                         class="admin-panel-button"
@@ -171,14 +173,15 @@
                     <button 
                         v-if="!gameData.gameRules.freezeTime" 
                         :disabled="!gameData.gameProcess.isGoing" 
-                        id="refresh-button" 
+                        id="freeze-time-button" 
                         @click="freezeTime"
                         class="admin-panel-button"
                     >
                         {{ $t("codenames.admin.freeze_time") }}
                     </button>
                     <button 
-                        v-else id="refresh-button" 
+                        v-else 
+                        id="freeze-time-button" 
                         :disabled="!gameData.gameProcess.isGoing" 
                         @click="freezeTime"
                         class="admin-panel-button"
@@ -186,7 +189,7 @@
                         {{ $t("codenames.admin.unfreeze_time") }}
                     </button>
                     <button 
-                        id="refresh-button" 
+                        id="pass-turn-button" 
                         :disabled="!gameData.gameProcess.isGoing" 
                         @click="passTurn"
                         class="admin-panel-button"
@@ -202,14 +205,15 @@
                         :disabled="gameData.gameProcess.isGoing" v-model="gameData.adminOptions.randomizeTeamOrder" />
                 </span>
                 <span class="admin-panel-content-row single-line-row" v-if="!gameData.gameProcess.isGoing">
-                    <label for="get_new_gameboard-checkbox">
+                    <label for="get-new-gameboard-checkbox">
                         {{ $t("codenames.admin.get_new_gameboard") }}
                     </label>
-                    <input type="checkbox" id="get_new_gameboard-checkbox" 
+                    <input type="checkbox" id="get-new-gameboard-checkbox" 
                         :disabled="gameData.gameProcess.isGoing" v-model="gameData.adminOptions.getNewGameboard" />
                 </span>
                 <span class="admin-panel-content-row single-line-row">
                     <button
+                        id="remove-all-players-button"
                         class="admin-panel-button"
                         :disabled="gameData.gameProcess.isGoing" @click="removeAllPlayers"
                     >
@@ -225,6 +229,7 @@
                 </span>
                 <span class="admin-panel-content-row single-line-row">
                     <button
+                        id="randomize-all-players-button"
                         class="admin-panel-button"
                         :disabled="gameData.gameProcess.isGoing" @click="randomizeAllPlayers"
                     >
@@ -264,13 +269,13 @@
                     </label>
                     <input 
                         type="number" 
-                        min="1" 
+                        :min="restrictions.baseCards.min" 
                         :max="gameData.gameRules.maxCards" 
                         step="1" 
                         :disabled="gameData.gameProcess.isGoing" 
                         v-model="gameData.gameRules.baseCards" 
                         @change="updateGameRules" 
-                        id="players-amount-input"
+                        id="base-cards-amount-input"
                         class="admin-panel-input"
                     >
                 </span>
@@ -282,13 +287,13 @@
                             </label>
                             <input 
                                 type="number" 
-                                :min="1 - gameData.gameRules.baseCards" 
+                                :min="restrictions.baseCards.min - gameData.gameRules.baseCards" 
                                 :max="gameData.gameRules.maxCards" 
                                 step="1" 
                                 :disabled="gameData.gameProcess.isGoing" 
                                 v-model="gameData.gameRules.extraCards[index]" 
                                 @change="updateGameRules" 
-                                :id="'players-amount-input-' + index"
+                                :id="`extra-cards-amount-input-${index}`"
                                 class="admin-panel-input"
                             >
                         </span>
@@ -305,13 +310,13 @@
                     </label>
                     <input 
                         type="number" 
-                        min="0" 
+                        :min="restrictions.blackCards.min" 
                         :max="gameData.gameRules.maxCards - gameData.gameRules.teamAmount" 
                         step="1" 
                         :disabled="gameData.gameProcess.isGoing" 
                         v-model="gameData.gameRules.blackCards" 
                         @change="updateGameRules" 
-                        id="players-amount-input"
+                        id="black-cards-amount-input"
                         class="admin-panel-input"
                     >
                 </span>

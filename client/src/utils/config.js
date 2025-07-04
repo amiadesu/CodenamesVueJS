@@ -5,7 +5,6 @@ async function loadConfig() {
     config = await response.json();
 }
 
-console.log("Loading config");
 await loadConfig();
 
 export function getConfig() {
