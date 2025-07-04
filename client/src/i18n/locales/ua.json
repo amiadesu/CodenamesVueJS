@@ -28,6 +28,10 @@
         "create_new_room" : "Створити нову кімнату"
     },
     "codenames" : {
+        "states" : {
+            "true" : "увімкнено",
+            "false" : "вимкнено"
+        },
         "rules" : {
             "game_rules" : {
                 "title" : "Правила гри Codenames:",
@@ -307,6 +311,520 @@
                         }
                     ]
                 }
+            },
+            "game_interface" : {
+
+            },
+            "host_rules" : {
+                "title" : "Host settings:",
+                "description" : "Description:",
+                "rules" : [
+                    {
+                        "id" : "get-new-gameboard-rule",
+                        "title" : "Get new gameboard",
+                        "description" : [
+                            {
+                                "text" : "Removes the current gameboard and gets a new one."
+                            },
+                            {
+                                "text" : "This action is required after changing the gameboard size."
+                            },
+                            {
+                                "text" : "This action {italic0} be used during game process.",
+                                "italics" : [
+                                    {
+                                        "text" : "cannot"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "team-amount-rule",
+                        "name" : "teamAmount",
+                        "title" : "Amount of teams",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "Amount of teams in the room."
+                            },
+                            {
+                                "text" : "Value 2 will enable red and green teams only."
+                            },
+                            {
+                                "text" : "Value 3 will enable red, blue and green teams."
+                            },
+                            {
+                                "text" : "Value 4 will enable red, yellow, blue and green teams."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "randomize-team-order-rule",
+                        "title" : "Randomize team order",
+                        "description" : [
+                            {
+                                "text" : "Randomly determines the order of teams' moves."
+                            },
+                            {
+                                "text" : "After this action the order of teams' moves {italic0} stay the same.",
+                                "italics" : [
+                                    {
+                                        "text" : "can"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "maximum-players-rule",
+                        "name" : "maximumPlayers",
+                        "title" : "Maximum amount of players per team",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "Maximum amount of players that can be in each team (excluding master)."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "first-master-turn-time-rule",
+                        "name" : "firstMasterTurnTime",
+                        "title" : "First master turn time",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "How long will the first move of the game last for the master of the corresponding team (in seconds)."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "master-turn-time-rule",
+                        "name" : "masterTurnTime",
+                        "title" : "Master turn time",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "How long will the every move (besides very first) of the game last for the team masters (in seconds)."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "team-turn-time-rule",
+                        "name" : "teamTurnTime",
+                        "title" : "Team turn time",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "How long will the every move of the game last for the team members (excluding masters) (in seconds)."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "extra-time-rule",
+                        "name" : "extraTime",
+                        "title" : "Extra time",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "How much extra time will the team members get for the current turn for revealing the word with the color equal to the team color (in seconds)."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "guesses-limit-rule",
+                        "name" : "guessesLimit",
+                        "title" : "Word guesses limit",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "How many words can the team members say during their move."
+                            },
+                            {
+                                "text" : "Value 0 means that there will be no restrictions (infinite guesses)."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "start-new-game-rule",
+                        "title" : "Start new game",
+                        "description" : [
+                            {
+                                "text" : "Starts the new game."
+                            },
+                            {
+                                "text" : "If the game is going this action will change to End game and doing it will end the current game."
+                            },
+                            {
+                                "text" : "If the game is ended using this action there {italic0} be any winners.",
+                                "italics" : [
+                                    {
+                                        "text" : "will not"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "freeze-time-rule",
+                        "name" : "freezeTime",
+                        "title" : "Freeze time",
+                        "default" : {
+                            "text" : "Default: {boolValue}",
+                            "type" : "boolValue"
+                        },
+                        "description" : [
+                            {
+                                "text" : "If time is freezed then each team (both master and team members) have infinite turn time."
+                            },
+                            {
+                                "text" : "Resets to default with each new game start."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "lock-room-rule",
+                        "name" : "locked",
+                        "title" : "Lock room",
+                        "default" : {
+                            "text" : "Default: {boolValue}",
+                            "type" : "boolValue"
+                        },
+                        "description" : [
+                            {
+                                "text" : "If room is locked then players can't change their team, become masters or become spectators."
+                            },
+                            {
+                                "text" : "When the room is just created the room will be unlocked by default."
+                            },
+                            {
+                                "text" : "Automatically locks with each new game start."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "pass-turn-rule",
+                        "title" : "Pass turn",
+                        "description" : [
+                            {
+                                "text" : "Ends current turn immideately and starts the next one."
+                            },
+                            {
+                                "text" : "This action {italic0} trigger the word autoselect mechanism.",
+                                "italics" : [
+                                    {
+                                        "text" : "will not"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "remove-all-players-rule",
+                        "title" : "Remove all players",
+                        "description" : [
+                            {
+                                "text" : "Removes all team members from all teams and makes them all spectators."
+                            },
+                            {
+                                "text" : "If the checkbox With masters is checked, then will also do the same with teams' masters."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "randomize-all-players-rule",
+                        "title" : "Randomize all players",
+                        "description" : [
+                            {
+                                "text" : "Shuffles all team members from all teams among each team."
+                            },
+                            {
+                                "text" : "This action guarantees that if there will be enough players then all of the master slots are filled."
+                            },
+                            {
+                                "text" : "If the checkbox With masters is checked, then will also include the teams' masters into the shuffle list."
+                            },
+                            {
+                                "text" : "This action {italic0} include spectators into the shuffle list.",
+                                "italics" : [
+                                    {
+                                        "text" : "will not"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "field-size-rule",
+                        "name" : "fieldSize",
+                        "title" : "Field size",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "Size of the game field (gameboard)."
+                            },
+                            {
+                                "text" : "5x5 = 25 cards, 5x6 = 30 cards, 6x6 = 36 cards, 6x7 = 42 cards, 7x7 = 49 cards."
+                            },
+                            {
+                                "text" : "Changing the field size will require you to get a new gameboard."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "base-amount-of-cards-rule",
+                        "name" : "baseCards",
+                        "title" : "Base amount of cards",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: field size"
+                        },
+                        "description" : [
+                            {
+                                "text" : "Base amount of cards for each team."
+                            },
+                            {
+                                "text" : "Base amount of cards will be the starting point for the next card amount calculations. All of the unassigned cards will be white cards."
+                            },
+                            {
+                                "text" : "Beware: you {italic0} start new game if the resulting cards amount after all calculations will exceed field size.",
+                                "italics" : [
+                                    {
+                                        "text" : "cannot"
+                                    }
+                                ]
+                            },
+                            {
+                                "text" : "The team that is the last in the team order will get this amount of cards in total."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "extra-1-amount-of-cards-rule",
+                        "name" : "extraCards",
+                        "title" : "Extra 1 amount of cards",
+                        "default" : {
+                            "text" : "Default: {extraValue}",
+                            "type" : "extraValue",
+                            "index" : 0
+                        },
+                        "min" : {
+                            "text" : "Min: 1 - base amound"
+                        },
+                        "max" : {
+                            "text" : "Max: field size"
+                        }, 
+                        "description" : [
+                            {
+                                "text" : "Extra amound of cards for the team that is the first in the team order."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "extra-2-amount-of-cards-rule",
+                        "name" : "extraCards",
+                        "title" : "Extra 2 amount of cards",
+                        "default" : {
+                            "text" : "Default: {extraValue}",
+                            "type" : "extraValue",
+                            "index" : 1
+                        },
+                        "min" : {
+                            "text" : "Min: 1 - base amound"
+                        },
+                        "max" : {
+                            "text" : "Max: field size"
+                        }, 
+                        "description" : [
+                            {
+                                "text" : "Extra amound of cards for the team that is the second in the team order."
+                            },
+                            {
+                                "text" : "Will only apply if there is more than 2 teams in the game."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "extra-3-amount-of-cards-rule",
+                        "name" : "extraCards",
+                        "title" : "Extra 3 amount of cards",
+                        "default" : {
+                            "text" : "Default: {extraValue}",
+                            "type" : "extraValue",
+                            "index" : 2
+                        },
+                        "min" : {
+                            "text" : "Min: 1 - base amound"
+                        },
+                        "max" : {
+                            "text" : "Max: field size"
+                        }, 
+                        "description" : [
+                            {
+                                "text" : "Extra amound of cards for the team that is the third in the team order."
+                            },
+                            {
+                                "text" : "Will only apply if there is more than 3 teams in the game."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "black-cards-amount-rule",
+                        "name" : "blackCards",
+                        "title" : "Black cards amount",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: field size"
+                        }, 
+                        "description" : [
+                            {
+                                "text" : "Amount of black cards that will be on the gameboard."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "gamemode-rule",
+                        "name" : "gamemode",
+                        "title" : "Game mode",
+                        "default" : {
+                            "text" : "Default: {adminValue}",
+                            "type" : "adminValue",
+                            "value_path" : "game_mode"
+                        },
+                        "description" : [
+                            {
+                                "text" : "Game mode which will be used in your room."
+                            },
+                            {
+                                "text" : "Read more about game modes in the {tab0} tab in {otherLink0} section.",
+                                "tabs" : [
+                                    {
+                                        "text" : "Game rules",
+                                        "index" : 0
+                                    }
+                                ],
+                                "otherLinks" : [
+                                    {
+                                        "text" : "Game modes",
+                                        "link" : "#game-modes",
+                                        "index" : 0
+                                    }
+                                ],
+                                "links" : [
+
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "word-pack-rule",
+                        "name" : "wordPack",
+                        "title" : "Word pack",
+                        "default" : {
+                            "text" : "Default: {wordPackValue}",
+                            "type" : "wordPackValue"
+                        },
+                        "description" : [
+                            {
+                                "text" : "Word pack from which the words for the game will be chosen."
+                            }
+                        ]
+                    }
+                ]
             }
         },
         "loading" : "Завантаження...",

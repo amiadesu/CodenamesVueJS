@@ -47,11 +47,12 @@ async function clearRoles(room) {
 }
 
 async function setupGamemode(room) {
+    let gameRules = await room.getGameRules();
+
     if (gameRules.game_mode === "traitor") {
         let users = await room.getUsers();
         let teams = await room.getTeams();
         let traitors = await room.getTraitors();
-        let gameRules = await room.getGameRules();
 
         ["red", "yellow", "blue", "green"].forEach((color) => {
             const selectedPlayer = randChoice(teams[color].team);
@@ -72,6 +73,10 @@ async function startNewGame(room, randomizeTeamOrder, getNewGameboard) {
     let gameWinStatus = await room.getGameWinStatus();
 
     gameRules.locked = true;
+
+    // Maybe this needs to be changed if there will be complains
+    gameRules.freezeTime = false;
+    gameProcess.infiniteTime = false;
 
     gameProcess.selectionIsGoing = false;
     gameProcess.isFirstTurn = true;

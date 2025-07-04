@@ -474,7 +474,7 @@
                         },
                         "description" : [
                             {
-                                "text" : "How long will the every move of the game last for the team members (excluding masters) (in seconds)."
+                                "text" : "How long will the every move of the game last for the team members (i.e., excluding masters) (in seconds)."
                             }
                         ]
                     },
@@ -572,7 +572,7 @@
                         },
                         "description" : [
                             {
-                                "text" : "If room is locked then players can't change their team, become masters or become spectators."
+                                "text" : "If room is locked then players can't change their team, become masters or become spectators by themselves."
                             },
                             {
                                 "text" : "When the room is just created the room will be unlocked by default."
@@ -699,14 +699,14 @@
                             "index" : 0
                         },
                         "min" : {
-                            "text" : "Min: 1 - base amound"
+                            "text" : "Min: 1 - base amount"
                         },
                         "max" : {
                             "text" : "Max: field size"
                         }, 
                         "description" : [
                             {
-                                "text" : "Extra amound of cards for the team that is the first in the team order."
+                                "text" : "Extra amount of cards for the team that is the first in the team order."
                             }
                         ]
                     },
@@ -720,14 +720,14 @@
                             "index" : 1
                         },
                         "min" : {
-                            "text" : "Min: 1 - base amound"
+                            "text" : "Min: 1 - base amount"
                         },
                         "max" : {
                             "text" : "Max: field size"
                         }, 
                         "description" : [
                             {
-                                "text" : "Extra amound of cards for the team that is the second in the team order."
+                                "text" : "Extra amount of cards for the team that is the second in the team order."
                             },
                             {
                                 "text" : "Will only apply if there is more than 2 teams in the game."
@@ -744,14 +744,14 @@
                             "index" : 2
                         },
                         "min" : {
-                            "text" : "Min: 1 - base amound"
+                            "text" : "Min: 1 - base amount"
                         },
                         "max" : {
                             "text" : "Max: field size"
                         }, 
                         "description" : [
                             {
-                                "text" : "Extra amound of cards for the team that is the third in the team order."
+                                "text" : "Extra amount of cards for the team that is the third in the team order."
                             },
                             {
                                 "text" : "Will only apply if there is more than 3 teams in the game."
