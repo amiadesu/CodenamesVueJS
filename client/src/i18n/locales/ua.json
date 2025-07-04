@@ -33,7 +33,9 @@
             "false" : "вимкнено"
         },
         "rules" : {
+            "done_reading" : "Дочитали?",
             "game_rules" : {
+                "name" : "Правила гри",
                 "title" : "Правила гри Codenames:",
                 "original_rules_link" : {
                     "message_text" : "Оригінальні правила можна знайти {link}.",
@@ -313,27 +315,28 @@
                 }
             },
             "game_interface" : {
-
+                "name" : "Інтерфейс гри"
             },
             "host_rules" : {
-                "title" : "Host settings:",
-                "description" : "Description:",
+                "name" : "Налаштування ведучого",
+                "title" : "Налаштування ведучого:",
+                "description" : "Опис:",
                 "rules" : [
                     {
                         "id" : "get-new-gameboard-rule",
-                        "title" : "Get new gameboard",
+                        "title" : "Отримати нове ігрове поле",
                         "description" : [
                             {
-                                "text" : "Removes the current gameboard and gets a new one."
+                                "text" : "Видаляє поточне ігрове поле й отримує нове."
                             },
                             {
-                                "text" : "This action is required after changing the gameboard size."
+                                "text" : "Виконання цієї дії необхідне після зміни розміру ігрового поля."
                             },
                             {
-                                "text" : "This action {italic0} be used during game process.",
+                                "text" : "Ця дія {italic0} може бути виконана під час гри.",
                                 "italics" : [
                                     {
-                                        "text" : "cannot"
+                                        "text" : "не"
                                     }
                                 ]
                             }
@@ -342,46 +345,46 @@
                     {
                         "id" : "team-amount-rule",
                         "name" : "teamAmount",
-                        "title" : "Amount of teams",
+                        "title" : "Кількість команд",
                         "default" : {
-                            "text" : "Default: {value}",
+                            "text" : "За замовчуванням: {value}",
                             "type" : "value"
                         },
                         "min" : {
-                            "text" : "Min: {value}",
+                            "text" : "Мін.: {value}",
                             "type" : "value"
                         },
                         "max" : {
-                            "text" : "Max: {value}",
+                            "text" : "Макс.: {value}",
                             "type" : "value"
                         },
                         "description" : [
                             {
-                                "text" : "Amount of teams in the room."
+                                "text" : "Кількість команд у кімнаті."
                             },
                             {
-                                "text" : "Value 2 will enable red and green teams only."
+                                "text" : "За значення 2 у кімнаті будуть лише червона та зелена команди."
                             },
                             {
-                                "text" : "Value 3 will enable red, blue and green teams."
+                                "text" : "За значення 3 у кімнаті будуть червона, синя та зелена команди."
                             },
                             {
-                                "text" : "Value 4 will enable red, yellow, blue and green teams."
+                                "text" : "За значення 4 у кімнаті будуть червона, жовта, синя та зелена команди."
                             }
                         ]
                     },
                     {
                         "id" : "randomize-team-order-rule",
-                        "title" : "Randomize team order",
+                        "title" : "Перемішати порядок команд",
                         "description" : [
                             {
-                                "text" : "Randomly determines the order of teams' moves."
+                                "text" : "Випадковим чином визначає порядок ходів команд."
                             },
                             {
-                                "text" : "After this action the order of teams' moves {italic0} stay the same.",
+                                "text" : "Після виконання цієї дії порядок ходів команд {italic0} залишиться попереднім.",
                                 "italics" : [
                                     {
-                                        "text" : "can"
+                                        "text" : "може"
                                     }
                                 ]
                             }
@@ -390,153 +393,153 @@
                     {
                         "id" : "maximum-players-rule",
                         "name" : "maximumPlayers",
-                        "title" : "Maximum amount of players per team",
+                        "title" : "Максимальна кількість гравців у команді",
                         "default" : {
-                            "text" : "Default: {value}",
+                            "text" : "За замовчуванням: {value}",
                             "type" : "value"
                         },
                         "min" : {
-                            "text" : "Min: {value}",
+                            "text" : "Мін.: {value}",
                             "type" : "value"
                         },
                         "max" : {
-                            "text" : "Max: {value}",
+                            "text" : "Макс.: {value}",
                             "type" : "value"
                         },
                         "description" : [
                             {
-                                "text" : "Maximum amount of players that can be in each team (excluding master)."
+                                "text" : "Максимальна кількість гравців, які можуть бути в одній команді (не враховуючи майстрів)."
                             }
                         ]
                     },
                     {
                         "id" : "first-master-turn-time-rule",
                         "name" : "firstMasterTurnTime",
-                        "title" : "First master turn time",
+                        "title" : "Час першого ходу майстра",
                         "default" : {
-                            "text" : "Default: {value}",
+                            "text" : "За замовчуванням: {value}",
                             "type" : "value"
                         },
                         "min" : {
-                            "text" : "Min: {value}",
+                            "text" : "Мін.: {value}",
                             "type" : "value"
                         },
                         "max" : {
-                            "text" : "Max: {value}",
+                            "text" : "Макс.: {value}",
                             "type" : "value"
                         },
                         "description" : [
                             {
-                                "text" : "How long will the first move of the game last for the master of the corresponding team (in seconds)."
+                                "text" : "Як довго триватиме перший хід гри для майстра команди, яка гратиме найпершою (у секундах)."
                             }
                         ]
                     },
                     {
                         "id" : "master-turn-time-rule",
                         "name" : "masterTurnTime",
-                        "title" : "Master turn time",
+                        "title" : "Час ходу майстра",
                         "default" : {
-                            "text" : "Default: {value}",
+                            "text" : "За замовчуванням: {value}",
                             "type" : "value"
                         },
                         "min" : {
-                            "text" : "Min: {value}",
+                            "text" : "Мін.: {value}",
                             "type" : "value"
                         },
                         "max" : {
-                            "text" : "Max: {value}",
+                            "text" : "Макс.: {value}",
                             "type" : "value"
                         },
                         "description" : [
                             {
-                                "text" : "How long will the every move (besides very first) of the game last for the team masters (in seconds)."
+                                "text" : "Як довго триватиме кожен хід (окрім першого) гри для майстрів кожної команди (у секундах)."
                             }
                         ]
                     },
                     {
                         "id" : "team-turn-time-rule",
                         "name" : "teamTurnTime",
-                        "title" : "Team turn time",
+                        "title" : "Час ходу команди",
                         "default" : {
-                            "text" : "Default: {value}",
+                            "text" : "За замовчуванням: {value}",
                             "type" : "value"
                         },
                         "min" : {
-                            "text" : "Min: {value}",
+                            "text" : "Мін.: {value}",
                             "type" : "value"
                         },
                         "max" : {
-                            "text" : "Max: {value}",
+                            "text" : "Макс.: {value}",
                             "type" : "value"
                         },
                         "description" : [
                             {
-                                "text" : "How long will the every move of the game last for the team members (excluding masters) (in seconds)."
+                                "text" : "Як довго триватиме хід для членів кожної команди (тобто без врахування майстрів) (у секундах)."
                             }
                         ]
                     },
                     {
                         "id" : "extra-time-rule",
                         "name" : "extraTime",
-                        "title" : "Extra time",
+                        "title" : "Додатковий час",
                         "default" : {
-                            "text" : "Default: {value}",
+                            "text" : "За замовчуванням: {value}",
                             "type" : "value"
                         },
                         "min" : {
-                            "text" : "Min: {value}",
+                            "text" : "Мін.: {value}",
                             "type" : "value"
                         },
                         "max" : {
-                            "text" : "Max: {value}",
+                            "text" : "Макс.: {value}",
                             "type" : "value"
                         },
                         "description" : [
                             {
-                                "text" : "How much extra time will the team members get for the current turn for revealing the word with the color equal to the team color (in seconds)."
+                                "text" : "Додатковий час, який члени команди отримають до часу свого поточного ходу за розкриття слова кольору своєї команди (у секундах)."
                             }
                         ]
                     },
                     {
                         "id" : "guesses-limit-rule",
                         "name" : "guessesLimit",
-                        "title" : "Word guesses limit",
+                        "title" : "Ліміт здогадок",
                         "default" : {
-                            "text" : "Default: {value}",
+                            "text" : "За замовчуванням: {value}",
                             "type" : "value"
                         },
                         "min" : {
-                            "text" : "Min: {value}",
+                            "text" : "Мін.: {value}",
                             "type" : "value"
                         },
                         "max" : {
-                            "text" : "Max: {value}",
+                            "text" : "Макс.: {value}",
                             "type" : "value"
                         },
                         "description" : [
                             {
-                                "text" : "How many words can the team members say during their move."
+                                "text" : "Кількість слів, яку команда може максимально розкрити протягом одного свого ходу."
                             },
                             {
-                                "text" : "Value 0 means that there will be no restrictions (infinite guesses)."
+                                "text" : "Значення 0 означає, що цього обмеження в грі не буде (тобто необмежена кількість слів)."
                             }
                         ]
                     },
                     {
                         "id" : "start-new-game-rule",
-                        "title" : "Start new game",
+                        "title" : "Почати гру",
                         "description" : [
                             {
-                                "text" : "Starts the new game."
+                                "text" : "Починає нову гру."
                             },
                             {
-                                "text" : "If the game is going this action will change to End game and doing it will end the current game."
+                                "text" : "Якщо гра вже триває, то ця дія зміниться на \"Завершити гру\" та її виконання миттєво завершить поточну гру."
                             },
                             {
-                                "text" : "If the game is ended using this action there {italic0} be any winners.",
+                                "text" : "Якщо гра завершиться внаслідок виконання цієї дії, переможців {italic0} буде.",
                                 "italics" : [
                                     {
-                                        "text" : "will not"
+                                        "text" : "не"
                                     }
                                 ]
                             }
@@ -545,52 +548,52 @@
                     {
                         "id" : "freeze-time-rule",
                         "name" : "freezeTime",
-                        "title" : "Freeze time",
+                        "title" : "Зупинити час",
                         "default" : {
-                            "text" : "Default: {boolValue}",
+                            "text" : "За замовчуванням: {boolValue}",
                             "type" : "boolValue"
                         },
                         "description" : [
                             {
-                                "text" : "If time is freezed then each team (both master and team members) have infinite turn time."
+                                "text" : "Якщо час зупинено, то кожна команда (і члени команди, і майстри) матимуть нескінченну тривалість ходу."
                             },
                             {
-                                "text" : "Resets to default with each new game start."
+                                "text" : "Скидається до значення за замовчуванням на початку кожної нової гри."
                             }
                         ]
                     },
                     {
                         "id" : "lock-room-rule",
                         "name" : "locked",
-                        "title" : "Lock room",
+                        "title" : "Закрити кімнату",
                         "default" : {
-                            "text" : "Default: {boolValue}",
+                            "text" : "За замовчуванням: {boolValue}",
                             "type" : "boolValue"
                         },
                         "description" : [
                             {
-                                "text" : "If room is locked then players can't change their team, become masters or become spectators."
+                                "text" : "Якщо кімната закрита, то гравці не зможуть змінити команду, стати майстрами або стати спостерігачами самостійно."
                             },
                             {
-                                "text" : "When the room is just created the room will be unlocked by default."
+                                "text" : "При створенні нової кімнати, кімната автоматично відкривається за замовчуванням."
                             },
                             {
-                                "text" : "Automatically locks with each new game start."
+                                "text" : "На початку нової гри, кімната автоматично закривається."
                             }
                         ]
                     },
                     {
                         "id" : "pass-turn-rule",
-                        "title" : "Pass turn",
+                        "title" : "Пропустити хід",
                         "description" : [
                             {
-                                "text" : "Ends current turn immideately and starts the next one."
+                                "text" : "Миттєво завершує поточний хід і починає наступний."
                             },
                             {
-                                "text" : "This action {italic0} trigger the word autoselect mechanism.",
+                                "text" : "Виконання цієї дії {italic0} запустить механізм автоматичного вибору слова.",
                                 "italics" : [
                                     {
-                                        "text" : "will not"
+                                        "text" : "не"
                                     }
                                 ]
                             }
@@ -598,34 +601,34 @@
                     },
                     {
                         "id" : "remove-all-players-rule",
-                        "title" : "Remove all players",
+                        "title" : "Видалити всіх гравців",
                         "description" : [
                             {
-                                "text" : "Removes all team members from all teams and makes them all spectators."
+                                "text" : "Видаляє всіх членів команд з усіх команд і робить їх спостерігачами."
                             },
                             {
-                                "text" : "If the checkbox With masters is checked, then will also do the same with teams' masters."
+                                "text" : "Якщо позначка \"З майстрами\" активована, то зробить аналогічне і з усіма майстрами всіх команд."
                             }
                         ]
                     },
                     {
                         "id" : "randomize-all-players-rule",
-                        "title" : "Randomize all players",
+                        "title" : "Перемішати всіх гравців",
                         "description" : [
                             {
-                                "text" : "Shuffles all team members from all teams among each team."
+                                "text" : "Перемішує членів команд усіх команд між усіма командами."
                             },
                             {
-                                "text" : "This action guarantees that if there will be enough players then all of the master slots are filled."
+                                "text" : "Виконання цієї дії гарантує, що якщо буде достатньо гравців, то у кожній команді буде обраний майстер."
                             },
                             {
-                                "text" : "If the checkbox With masters is checked, then will also include the teams' masters into the shuffle list."
+                                "text" : "Якщо позначка \"З майстрами\" активована, то також включить усіх майстрів усіх команд до списку для перемішування."
                             },
                             {
-                                "text" : "This action {italic0} include spectators into the shuffle list.",
+                                "text" : "Виконання цієї дії {italic0} включить спостерігачів до списку для перемішування.",
                                 "italics" : [
                                     {
-                                        "text" : "will not"
+                                        "text" : "не"
                                     }
                                 ]
                             }
@@ -634,172 +637,172 @@
                     {
                         "id" : "field-size-rule",
                         "name" : "fieldSize",
-                        "title" : "Field size",
+                        "title" : "Розмір ігрового поля",
                         "default" : {
-                            "text" : "Default: {value}",
+                            "text" : "За замовчуванням: {value}",
                             "type" : "value"
                         },
                         "description" : [
                             {
-                                "text" : "Size of the game field (gameboard)."
+                                "text" : "Змінює розмір ігрового поля."
                             },
                             {
-                                "text" : "5x5 = 25 cards, 5x6 = 30 cards, 6x6 = 36 cards, 6x7 = 42 cards, 7x7 = 49 cards."
+                                "text" : "5x5 = 25 карт, 5x6 = 30 карт, 6x6 = 36 карт, 6x7 = 42 карт, 7x7 = 49 карт."
                             },
                             {
-                                "text" : "Changing the field size will require you to get a new gameboard."
+                                "text" : "Зміна розміру ігрового поля вимагатиме отримання нового ігрового поля."
                             }
                         ]
                     },
                     {
                         "id" : "base-amount-of-cards-rule",
                         "name" : "baseCards",
-                        "title" : "Base amount of cards",
+                        "title" : "Базова кількість карт",
                         "default" : {
-                            "text" : "Default: {value}",
+                            "text" : "За замовчуванням: {value}",
                             "type" : "value"
                         },
                         "min" : {
-                            "text" : "Min: {value}",
+                            "text" : "Мін.: {value}",
                             "type" : "value"
                         },
                         "max" : {
-                            "text" : "Max: field size"
+                            "text" : "Макс.: розмір ігрового поля"
                         },
                         "description" : [
                             {
-                                "text" : "Base amount of cards for each team."
+                                "text" : "Базова кількість карт для кожної команди."
                             },
                             {
-                                "text" : "Base amount of cards will be the starting point for the next card amount calculations. All of the unassigned cards will be white cards."
+                                "text" : "Базова кількість карт буде відправною точкою для подальших розрахунків кількості карт. Усі карти, що залишаться після цього неназначеними, стануть білими."
                             },
                             {
-                                "text" : "Beware: you {italic0} start new game if the resulting cards amount after all calculations will exceed field size.",
+                                "text" : "Майте на увазі: ви {italic0} зможете почати нову гру, якщо підсумкова кількість призначених карт після всіх розрахунків перевищить розмір ігрового поля.",
                                 "italics" : [
                                     {
-                                        "text" : "cannot"
+                                        "text" : "не"
                                     }
                                 ]
                             },
                             {
-                                "text" : "The team that is the last in the team order will get this amount of cards in total."
+                                "text" : "Остання в списку порядку команд команда матиме саме цю кількість карт свого кольору."
                             }
                         ]
                     },
                     {
                         "id" : "extra-1-amount-of-cards-rule",
                         "name" : "extraCards",
-                        "title" : "Extra 1 amount of cards",
+                        "title" : "Додаткова кількість карт 1",
                         "default" : {
-                            "text" : "Default: {extraValue}",
+                            "text" : "За замовчуванням: {extraValue}",
                             "type" : "extraValue",
                             "index" : 0
                         },
                         "min" : {
-                            "text" : "Min: 1 - base amound"
+                            "text" : "Мін.: 1 - базова кількість карт"
                         },
                         "max" : {
-                            "text" : "Max: field size"
+                            "text" : "Макс.: розмір ігрового поля"
                         }, 
                         "description" : [
                             {
-                                "text" : "Extra amound of cards for the team that is the first in the team order."
+                                "text" : "Додаткова кількість карт для команди, яка буде першою в порядку команд."
                             }
                         ]
                     },
                     {
                         "id" : "extra-2-amount-of-cards-rule",
                         "name" : "extraCards",
-                        "title" : "Extra 2 amount of cards",
+                        "title" : "Додаткова кількість карт 2",
                         "default" : {
-                            "text" : "Default: {extraValue}",
+                            "text" : "За замовчуванням: {extraValue}",
                             "type" : "extraValue",
                             "index" : 1
                         },
                         "min" : {
-                            "text" : "Min: 1 - base amound"
+                            "text" : "Мін.: 1 - базова кількість карт"
                         },
                         "max" : {
-                            "text" : "Max: field size"
+                            "text" : "Макс.: розмір ігрового поля"
                         }, 
                         "description" : [
                             {
-                                "text" : "Extra amound of cards for the team that is the second in the team order."
+                                "text" : "Додаткова кількість карт для команди, яка буде другою в порядку команд."
                             },
                             {
-                                "text" : "Will only apply if there is more than 2 teams in the game."
+                                "text" : "Це правило діятиме лише якщо у кімнаті більше ніж 2 команди."
                             }
                         ]
                     },
                     {
                         "id" : "extra-3-amount-of-cards-rule",
                         "name" : "extraCards",
-                        "title" : "Extra 3 amount of cards",
+                        "title" : "Додаткова кількість карт 3",
                         "default" : {
-                            "text" : "Default: {extraValue}",
+                            "text" : "За замовчуванням: {extraValue}",
                             "type" : "extraValue",
                             "index" : 2
                         },
                         "min" : {
-                            "text" : "Min: 1 - base amound"
+                            "text" : "Мін.: 1 - базова кількість карт"
                         },
                         "max" : {
-                            "text" : "Max: field size"
+                            "text" : "Макс.: розмір ігрового поля"
                         }, 
                         "description" : [
                             {
-                                "text" : "Extra amound of cards for the team that is the third in the team order."
+                                "text" : "Додаткова кількість карт для команди, яка буде третьою в порядку команд."
                             },
                             {
-                                "text" : "Will only apply if there is more than 3 teams in the game."
+                                "text" : "Це правило діятиме лише якщо у кімнаті більше ніж 3 команди."
                             }
                         ]
                     },
                     {
                         "id" : "black-cards-amount-rule",
                         "name" : "blackCards",
-                        "title" : "Black cards amount",
+                        "title" : "Кількість чорних карт",
                         "default" : {
-                            "text" : "Default: {value}",
+                            "text" : "За замовчуванням: {value}",
                             "type" : "value"
                         },
                         "min" : {
-                            "text" : "Min: {value}",
+                            "text" : "Мін.: {value}",
                             "type" : "value"
                         },
                         "max" : {
-                            "text" : "Max: field size"
+                            "text" : "Макс.: розмір ігрового поля"
                         }, 
                         "description" : [
                             {
-                                "text" : "Amount of black cards that will be on the gameboard."
+                                "text" : "Кількість чорних карт, які будуть присутні на ігровому полі."
                             }
                         ]
                     },
                     {
                         "id" : "gamemode-rule",
                         "name" : "gamemode",
-                        "title" : "Game mode",
+                        "title" : "Режим гри",
                         "default" : {
-                            "text" : "Default: {adminValue}",
+                            "text" : "За замовчуванням: {adminValue}",
                             "type" : "adminValue",
                             "value_path" : "game_mode"
                         },
                         "description" : [
                             {
-                                "text" : "Game mode which will be used in your room."
+                                "text" : "Режим гри, за правилами якого проходитиме гра у вашій кімнаті."
                             },
                             {
-                                "text" : "Read more about game modes in the {tab0} tab in {otherLink0} section.",
+                                "text" : "Більше про режими гри ви можете знайти у вкладці {tab0} у розділі {otherLink0}.",
                                 "tabs" : [
                                     {
-                                        "text" : "Game rules",
+                                        "text" : "Правила гри",
                                         "index" : 0
                                     }
                                 ],
                                 "otherLinks" : [
                                     {
-                                        "text" : "Game modes",
+                                        "text" : "Режими гри",
                                         "link" : "#game-modes",
                                         "index" : 0
                                     }
@@ -813,14 +816,14 @@
                     {
                         "id" : "word-pack-rule",
                         "name" : "wordPack",
-                        "title" : "Word pack",
+                        "title" : "Набір слів",
                         "default" : {
-                            "text" : "Default: {wordPackValue}",
+                            "text" : "За замовчуванням: {wordPackValue}",
                             "type" : "wordPackValue"
                         },
                         "description" : [
                             {
-                                "text" : "Word pack from which the words for the game will be chosen."
+                                "text" : "Набір слів, з якого будуть обрані слова для ігрового поля."
                             }
                         ]
                     }
@@ -862,13 +865,13 @@
                 "blue" : "Синя команда",
                 "green" : "Зелена команда"
             },
-            "randomize_team_order" : "Рандомізувати порядок команд",
+            "randomize_team_order" : "Перемішати порядок команд",
             "maximum_amount_of_players_per_team" : "Виберіть максимальну кількість гравців у команді:",
             "first_master_turn_time" : "Час першого ходу майстра (в с):",
             "master_turn_time" : "Час ходу майстра (в с):",
             "team_turn_time" : "Час ходу команди (в с):",
             "extra_time" : "Додатковий час за вгадане слово (в с):",
-            "word_guesses_limit" : "Ліміт здогадок для слова:",
+            "word_guesses_limit" : "Ліміт здогадок для слів:",
             "start_game" : "Почати гру",
             "end_game" : "Завершити гру",
             "freeze_time" : "Зупинити час",
@@ -879,7 +882,7 @@
             "remove_all_players" : "Видалити всіх гравців",
             "randomize_all_players" : "Перемішати всіх гравців",
             "with_masters" : "З майстрами",
-            "field_size" : "Виберіть розмір поля:",
+            "field_size" : "Виберіть розмір ігрового поля:",
             "base_amount_of_cards" : "Виберіть базову кількість карт:",
             "extra_amount_of_cards" : "Виберіть додаткову кількість карт {num}:",
             "calculated_cards_amount" : "Розрахована кількість: {amount}",

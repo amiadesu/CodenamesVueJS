@@ -73,21 +73,21 @@ onMounted(() => {
                     class="switcher-button"
                     :class="{active: currentPanelIndex === 0}"
                 >
-                    Game rules
+                    {{ $t("codenames.rules.game_rules.name") }}
                 </button>
                 <button 
                     @click="togglePanel(1)"
                     class="switcher-button"
                     :class="{active: currentPanelIndex === 1}"
                 >
-                    Game interface
+                {{ $t("codenames.rules.game_interface.name") }}
                 </button>
                 <button 
                     @click="togglePanel(2)"
                     class="switcher-button"
                     :class="{active: currentPanelIndex === 2}"
                 >
-                    Host settings
+                {{ $t("codenames.rules.host_rules.name") }}
                 </button>
             </div>
             <div id="game-rules-glass-panel-content-wrapper">
@@ -95,7 +95,9 @@ onMounted(() => {
                 <GameInterface v-else-if="currentPanelIndex === 1"></GameInterface>
                 <HostRules v-else="currentPanelIndex === 2"></HostRules>
                 <div id="game-rules-glass-panel-content-bottom-wrapper">
-                    <div class="separator">Done reading?</div>
+                    <div class="separator">
+                        {{ $t("codenames.rules.done_reading") }}
+                    </div>
                     <GameroomCodeInput></GameroomCodeInput>
                 </div>
             </div>

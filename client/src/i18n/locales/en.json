@@ -33,8 +33,10 @@
             "false" : "disabled"
         },
         "rules" : {
+            "done_reading" : "Done reading?",
             "game_rules" : {
-                "title" : "Codenames rules:",
+                "name" : "Game rules",
+                "title" : "Codenames game rules:",
                 "original_rules_link" : {
                     "message_text" : "Original rules can be found {link}.",
                     "url_text" : "here"
@@ -316,9 +318,10 @@
                 }
             },
             "game_interface" : {
-
+                "name" : "Game interface"
             },
             "host_rules" : {
+                "name" : "Host settings",
                 "title" : "Host settings:",
                 "description" : "Description:",
                 "rules" : [
@@ -430,7 +433,7 @@
                         },
                         "description" : [
                             {
-                                "text" : "How long will the first move of the game last for the master of the corresponding team (in seconds)."
+                                "text" : "How long will the first move of the game last for the master of the team that will play first (in seconds)."
                             }
                         ]
                     },
