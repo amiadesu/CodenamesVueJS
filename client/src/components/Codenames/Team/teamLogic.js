@@ -92,9 +92,6 @@ export const teamMixin = {
             });
         },
         listenForUpdates() {
-            setInterval(() => {
-                console.log(this.gameData.clues[this.teamColorValue]);
-            }, 3000);
             this.$watch(
                 () => this.gameData.teams,
                 (newValue, oldValue) => {
