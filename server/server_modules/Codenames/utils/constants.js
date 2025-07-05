@@ -35,7 +35,7 @@ const defaultRoomData = { // MUST NOT include roomId
         teamTurnTime: 60,
         extraTime: 15,
         freezeTime: false,
-        limitedGuesses: true,
+        limitedGuesses: false,
         guessesLimit: 0,
         baseCards: 7,
         extraCards: [3, 2, 1, 0],
