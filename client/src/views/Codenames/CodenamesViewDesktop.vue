@@ -194,6 +194,7 @@ if (route.params.roomId === "") {
 .row-wrapper.teams {
     height: 85%;
     width: 20%;
+    justify-content: center;
 }
 
 .column-wrapper {
