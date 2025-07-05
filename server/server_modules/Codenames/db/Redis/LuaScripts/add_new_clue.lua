@@ -35,10 +35,28 @@ if #clues[teamColor] > tonumber(ARGV[3]) then
 end
 
 -- Ensure the entire structure maintains array types
-setmetatable(clues, cjson.array_mt)
+-- Helper: force empty arrays to stay arrays
+local function force_empty_array(t)
+    if type(t) == "table" and #t == 0 then
+        t[1] = "__DUMMY__"
+        return true
+    end
+    return false
+end
+
+-- Fix empty fields
+for team, cluesList in pairs(clues) do
+    force_empty_array(clues[team])
+end
+
+-- Encode words
+local encoded = cjson.encode(clues)
+
+-- Clean up dummy ["__DUMMY__"] → []
+encoded = string.gsub(encoded, '%["__DUMMY__"%]', '[]')
 
 -- Update Redis
-redis.call('SET', KEYS[1], cjson.encode(clues), 'EX', ARGV[4])
+redis.call('SET', KEYS[1], encoded, 'EX', ARGV[4])
 
 -- version increment and updatedAt set
 redis.call('SET', KEYS[#KEYS], ARGV[#ARGV], 'EX', ARGV[4])

@@ -56,20 +56,15 @@ local function force_empty_array(t)
 end
 
 -- Fix empty selectedBy fields
-local dummyIndexes = {}
 for i = 1, #words do
-    if force_empty_array(words[i].selectedBy) then
-        table.insert(dummyIndexes, i)
-    end
+    force_empty_array(words[i].selectedBy)
 end
 
 -- Encode words
 local encoded = cjson.encode(words)
 
 -- Clean up dummy ["__DUMMY__"] → []
-for _, i in ipairs(dummyIndexes) do
-    encoded = string.gsub(encoded, '%["__DUMMY__"%]', '[]')
-end
+encoded = string.gsub(encoded, '%["__DUMMY__"%]', '[]')
 
 -- Update Redis
 redis.call('SET', KEYS[1], encoded, 'EX', ARGV[3])
