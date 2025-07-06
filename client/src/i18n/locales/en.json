@@ -318,7 +318,113 @@
                 }
             },
             "game_interface" : {
-                "name" : "Game interface"
+                "name" : "Game interface",
+                "title" : "Game interface:",
+                "words" : [
+                    "ALIEN",
+                    "AMAZON",
+                    "BARK",
+                    "BATTERY",
+                    "BEIJING",
+                    "BOLT",
+                    "BUCK",
+                    "CAPITAL",
+                    "CHEST",
+                    "COMIC",
+                    "CRANE",
+                    "CZECH",
+                    "DRAFT",
+                    "EMBASSY",
+                    "FENCE",
+                    "GOLD",
+                    "HOSPITAL",
+                    "JET",
+                    "KETCHUP",
+                    "LEMON",
+                    "TOKYO",
+                    "NINJA",
+                    "OCTOPUS",
+                    "PIRATE",
+                    "PLATYPUS",
+                    "REVOLUTION",
+                    "SCORPION",
+                    "SOLDIER",
+                    "TORCH",
+                    "WITCH"
+                ],
+                "team_design" : {
+                    "desktop" : "Desktop team design",
+                    "mobile" : "Mobile team design"
+                },
+                "alerts" : {
+                    "remove_player" : "In the real game, that player would become a spectator.",
+                    "promote_player" : "In the real game, that player would become a host.",
+                    "edit_clue" : "In the real game, this would open the Edit clue panel."
+                },
+                "messages" : {
+                    "top" : [
+                        {
+                            "text" : "Very simplified version of game interface for familiarization purposes."
+                        },
+                        {
+                            "text" : "Keep in mind that in this version, many game features have been simplified or completely changed. {footnote0}",
+                            "footnotes" : [
+                                {
+                                    "text" : "(1.)",
+                                    "link" : "#footnote-1"
+                                }
+                            ]
+                        }
+                    ],
+                    "center" : [
+                        {
+                            "text" : "Example of admin panel that you can find as a host in your room. In the real game you can open it by pressing O key outside of any input element. {footnote0}",
+                            "footnotes" : [
+                                {
+                                    "text" : "(2.)",
+                                    "link" : "#footnote-2"
+                                }
+                            ]
+                        },
+                        {
+                            "text" : "More about the functions of this panel in the actual game can be found in the {tab0} tab.",
+                            "tabs" : [
+                                {
+                                    "text" : "Host settings",
+                                    "index" : 2
+                                }
+                            ]
+                        }
+                    ],
+                    "bottom" : [
+                        {
+                            "text" : "In the real game you can also open a text chat by pressing P key outside of any input element. {footnote0}",
+                            "footnotes" : [
+                                {
+                                    "text" : "(3.)",
+                                    "link" : "#footnote-3"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "footnotes" : {
+                    "title" : "Footnotes:",
+                    "notes" : [
+                        {
+                            "id" : "footnote-1",
+                            "text" : "In particular, in this version there is no time limit, only the red team makes all of the turns, the size of the game board has been reduced, as well as the layout of the interface elements is different from what you will see in the real game."
+                        },
+                        {
+                            "id" : "footnote-2",
+                            "text" : "Or you can open it by clicking on the triangle button in the center near the left border of the screen."
+                        },
+                        {
+                            "id" : "footnote-3",
+                            "text" : "Or you can open it by clicking on the triangle button in the center near the right border of the screen."
+                        }
+                    ]
+                }
             },
             "host_rules" : {
                 "name" : "Host settings",

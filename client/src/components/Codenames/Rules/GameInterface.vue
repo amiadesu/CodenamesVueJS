@@ -1,88 +1,192 @@
 <template>
-    <div id="edit-clue-panel">
-        <h2>
-            {{ $t("codenames.panels.edit_clue_panel.edit_clue") }}
+    <div id="game-interface-content">
+        <h1 class="centered">
+            {{ $t("codenames.rules.game_interface.title") }}
+        </h1>
+        <span
+            v-for="(message, index) in $tm('codenames.rules.game_interface.messages.top')"
+            :key="message"
+        >
+            <i18n-t :keypath="`codenames.rules.game_interface.messages.top[${index}].text`" tag="p" scope="global">
+                <template v-for="(footnote, footnoteIndex) in message.footnotes" #[`footnote${footnoteIndex}`]>
+                    <a class="footnote-link" @click="scrollToAnchor(footnote.link)"><sup>{{ footnote.text }}</sup></a>
+                </template>
+                <template v-for="(tab, tabIndex) in message.tabs" #[`tab${tabIndex}`]>
+                    <a class="section-link" @click="togglePanel(tab.index, true)">{{ tab.text }}</a>
+                </template>
+            </i18n-t>
+        </span>
+        <hr class="section-divider">
+        <TeamsWrapperExample></TeamsWrapperExample>
+        <WordBoardExample></WordBoardExample>
+        <ClueInputExample v-if="interfaceData.player.state.master 
+            && interfaceData.player.state.teamColor === interfaceData.gameProcess.currentTurn 
+            && interfaceData.gameProcess.masterTurn"
+        ></ClueInputExample>
+        <div v-else id="clue-input-wrapper">
+            <p>
+                {{ $t("codenames.guesses_no_limit") }}
+            </p>
+        </div>
+        <hr class="section-divider">
+        <span
+            v-for="(message, index) in $tm('codenames.rules.game_interface.messages.center')"
+            :key="message"
+        >
+            <i18n-t :keypath="`codenames.rules.game_interface.messages.center[${index}].text`" tag="p" scope="global">
+                <template v-for="(footnote, footnoteIndex) in message.footnotes" #[`footnote${footnoteIndex}`]>
+                    <a class="footnote-link" @click="scrollToAnchor(footnote.link)"><sup>{{ footnote.text }}</sup></a>
+                </template>
+                <template v-for="(tab, tabIndex) in message.tabs" #[`tab${tabIndex}`]>
+                    <a class="section-link" @click="togglePanel(tab.index, true)">{{ tab.text }}</a>
+                </template>
+            </i18n-t>
+        </span>
+        <AdminPanelExample></AdminPanelExample>
+        <hr class="section-divider">
+        <span
+            v-for="(message, index) in $tm('codenames.rules.game_interface.messages.bottom')"
+            :key="message"
+        >
+            <i18n-t :keypath="`codenames.rules.game_interface.messages.bottom[${index}].text`" tag="p" scope="global">
+                <template v-for="(footnote, footnoteIndex) in message.footnotes" #[`footnote${footnoteIndex}`]>
+                    <a class="footnote-link" @click="scrollToAnchor(footnote.link)"><sup>{{ footnote.text }}</sup></a>
+                </template>
+                <template v-for="(tab, tabIndex) in message.tabs" #[`tab${tabIndex}`]>
+                    <a class="section-link" @click="togglePanel(tab.index, true)">{{ tab.text }}</a>
+                </template>
+            </i18n-t>
+        </span>
+        <hr class="section-divider">
+        <h2 id="footnotes">
+            {{ $t('codenames.rules.game_interface.footnotes.title') }}
         </h2>
-        <div id="edit-clue-input-wrapper">
-            <input type="text" id="edit-clue-text-input" :placeholder="$t(`codenames.clues.${cluePlaceholder}`)" 
-               v-model="clueObject.text" maxlength="30" autocomplete="off" v-on:keyup.enter="sendClue">
-            <select id="edit-clue-number-input" size="1" v-model="clueObject.number" >
-                <option value="10">10</option>
-                <option value="9">9</option>
-                <option value="8">8</option>
-                <option value="7">7</option>
-                <option value="6">6</option>
-                <option value="5">5</option>
-                <option value="4">4</option>
-                <option value="3">3</option>
-                <option value="2">2</option>
-                <option value="1">1</option>
-                <option value="0" selected>0</option>
-            </select>
-            <svg 
-                id="edit-clue-send-button"
-                xmlns="http://www.w3.org/2000/svg" 
-                class="ionicon" 
-                viewBox="0 0 512 512"
-                @click="editClue"
-            >
-                <path d="M476.59 227.05l-.16-.07L49.35 49.84A23.56 23.56 0 0027.14 52 24.65 24.65 0 0016 72.59v113.29a24 24 0 0019.52 23.57l232.93 43.07a4 4 0 010 7.86L35.53 303.45A24 24 0 0016 327v113.31A23.57 23.57 0 0026.59 460a23.94 23.94 0 0013.22 4 24.55 24.55 0 009.52-1.93L476.4 285.94l.19-.09a32 32 0 000-58.8z"/>
-            </svg>
+        <div class="footnote" v-for="(note, index) in $tm('codenames.rules.game_interface.footnotes.notes')" :key="index" :id="note.id">
+            <p><sup>({{ index + 1 }}.)</sup> {{ note.text }}</p>
         </div>
     </div>
 </template>
 
 <script>
-import { defineComponent } from 'vue';
-import { gameStore } from '@/stores/gameData';
-import { socket } from "@/sockets/codenames";
+import { defineComponent, reactive } from 'vue';
+import ClueInputExample from './Interface/ClueInputExample/ClueInputExample.vue';
+import TeamsWrapperExample from './Interface/TeamExample/TeamsWrapperExample.vue';
+import WordBoardExample from './Interface/WordBoardExample/WordBoardExample.vue';
+import AdminPanelExample from './Interface/AdminPanelExample/AdminPanelExample.vue';
 
 export default defineComponent({
+    components: {
+        TeamsWrapperExample,
+        WordBoardExample,
+        ClueInputExample,
+        AdminPanelExample
+    },
     computed: {
-        gameData: () => gameStore()
+        
     },
     setup(props) {
         
     },
     data() {
         return {
-            clueValue: "",
-            cluePlaceholder: 0,
-            clueObject: {
-                text: "",
-                number: "",
-                id: 0
-            }
+            interfaceData: reactive({
+                clues: {
+                    red: [],
+                    green: []
+                },
+                player: {
+                    name: "You",
+                    color: "#ff00ff",
+                    id: "example-id",
+                    roomId: "rules",
+                    state: {
+                        teamColor: "red",
+                        master: false,
+                        selecting: ""
+                    },
+                    online: true,
+                    host: true,
+                    traitor: false,
+                    clicker: false
+                },
+                examplePlayer: {
+                    name: "Example player",
+                    color: "#00ffff",
+                    id: "example-2-id",
+                    roomId: "rules",
+                    state: {
+                        teamColor: "green",
+                        master: false,
+                        selecting: ""
+                    },
+                    online: true,
+                    host: false,
+                    traitor: true,
+                    clicker: false
+                },
+                gameRules : {
+                    teamAmount: 2,
+                    maximumPlayers: 2,
+                    teamOrder: ["red", "green"],
+                    countdownTime: 0.5,
+                    firstMasterTurnTime: 120,
+                    masterTurnTime: 60,
+                    teamTurnTime: 60,
+                    extraTime: 15,
+                    freezeTime: false,
+                    limitedGuesses: false,
+                    guessesLimit: 0,
+                    baseCards: 2,
+                    extraCards: [0, 0, 0, 0],
+                    blackCards: 1,
+                    maxCards: 9,
+                    fieldSize: "3x3",
+                    wordPack: {
+                        packId: "english",
+                        name: ""
+                    },
+                    gamemode: "standard",
+                    locked: false
+                },
+                gameProcess : {
+                    isGoing: true,
+                    wordsCount: {
+                        "red": 0,
+                        "green": 0,
+                        "white": 0,
+                        "black": 0
+                    },
+                    currentTurn: "red",
+                    guessesCount: 0,
+                    isFirstTurn: true,
+                    masterTurn: true,
+                    timeLeft: 3599,
+                    teamTimeStarted: false,
+                    infiniteTime: false,
+                    blacklisted: {
+                        "red" : false,
+                        "yellow" : false,
+                        "blue" : false,
+                        "green" : false
+                    }
+                },
+                winner: "",
+                selecting: "",
+                shouldGetNewGameboard: true
+            })
+        }
+    },
+    inject: ['togglePanel', 'scrollToAnchor'],
+    provide() {
+        return {
+            interfaceData: this.interfaceData
         }
     },
     methods: {
-        randomizeCluePlaceholder() {
-            this.cluePlaceholder = Math.floor(Math.random() * 10);
-        },
-        editClue() {
-            const clue = {
-                text: this.clueObject.text + " - " + this.clueObject.number,
-                id: this.clueObject.id
-            };
-            socket.emit("edit_clue", clue);
-            this.gameData.openedPanels.editCluePanel = false;
-            let anyOpened = false;
-            for (let key in this.gameData.openedPanels) {
-                if (this.gameData.openedPanels[key] === true && key !== "anything") {
-                    anyOpened = true;
-                    break;
-                }
-            }
-            this.gameData.openedPanels.anything = anyOpened;
-        },
-        listenForUpdates() {
-            
-        }
+        
     },
     mounted() {
-        this.clueObject = this.gameData.openedPanels.passedObject;
-        this.gameData.openedPanels.passedObject = null;
-        this.randomizeCluePlaceholder();
+        
     },
     beforeUnmount() {
         
@@ -91,102 +195,133 @@ export default defineComponent({
 </script>
 
 <style lang="css" scoped>
-#edit-clue-panel {
-    width: 40%;
-    height: 20%;
-    border-radius: 15px;
+#game-interface-content {
+    width: 100%;
+    height: max-content;
 
-    background-color:var(--panel-background-color-2);
-    backdrop-filter: blur(3px) saturate(1);
-    -webkit-backdrop-filter: blur(3px) saturate(1);
-
-    color: var(--panel-text-color-1);
+    /* color: var(--panel-text-color-3); */
 
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
     flex-direction: column;
-    row-gap: 1rem;
+    row-gap: 0.2rem;
 }
 
-#edit-clue-panel > h2 {
-    font-size: 1.2rem;
-    color: var(--panel-header-2-color-1);
-}
-
-#edit-clue-input-wrapper {
-    width: 90%;
-    height: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: row;
-}
-
-#edit-clue-text-input {
-    height: 100%;
-    width: 87%;
-    padding: 0.1rem;
-    background-color: var(--panel-input-background-color-1);
-    border: 1px solid var(--panel-input-border-color-1);
-    color: var(--panel-input-text-color-1);
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    border-radius: 0.25rem;
+#game-interface-content .centered {
+    text-indent: 0;
     display: block;
+    margin: 0 auto;
 }
 
-#edit-clue-number-input {
-    height: 100%;
-    width: 8%;
-    padding: 0.1rem;
-    background-color: var(--panel-input-background-color-1);
-    border: 1px solid var(--panel-input-border-color-1);
-    color: var(--panel-input-text-color-1);
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    border-radius: 0.25rem;
-    display: block;
-}
-
-#edit-clue-text-input.inline, #edit-clue-number-input.inline {
-    display: inline-block;
-}
-
-#edit-clue-text-input:focus, #edit-clue-number-input:focus {
-    border-color: var(--panel-input-focus-border-color-1);
-    box-shadow: 0 0 0 3px var(--panel-input-focus-box-shadow-color-1);
-}
-
-#edit-clue-send-button {
-    aspect-ratio: 1 / 1;
-    height: 100%;
-    width: auto;
-    scale: 1.2;
-
-    padding: 4px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
+#game-interface-content .external-link, .section-link, .footnote-link {
+    color: rgb(135, 218, 253);
     cursor: pointer;
 }
 
-@media screen and (max-width: 1300px) {
-    #edit-clue-panel {
-        width: 60%;
-    }
+#game-interface-content .word-example {
+    display: inline;
+    color: plum;
+}
+
+#game-interface-content .attention-takeover {
+    color:aquamarine;
+}
+
+#game-interface-content h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--panel-text-color-3);
+}
+
+#game-interface-content h2 {
+    text-indent: 2rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--panel-text-color-3);
+}
+
+#game-interface-content h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--panel-text-color-3);
+}
+
+#game-interface-content span.block {
+    display: block;
+    text-indent: 0;
+}
+
+#game-interface-content ul {
+    display: block;
+    margin-block-start: 0.3rem;
+    margin-block-end: 0.3rem;
+    padding-inline-start: 2.5rem;
+    text-indent: 0.5rem;
+}
+
+#game-interface-content ul.sublist {
+    padding-inline-start: 1.5rem;
+    text-indent: 0;
+}
+
+#game-interface-content ul.bullet-list {
+    list-style-type: disc;
+}
+
+#game-interface-content ul.enumerated-list {
+    list-style-type: decimal;
+}
+
+#game-interface-content table {
+    table-layout: fixed;
+    width: 90%;
+    margin: auto;
+    border-collapse: collapse;
+}
+
+#game-interface-content table, th, td {
+    border: 1px solid black;
+}
+
+#game-interface-content th, td {
+    padding: 0.6em;
+}
+
+#game-interface-content tr :nth-child(1) {
+  text-align: left;
+  width: 35%;
+}
+
+#game-interface-content tr :nth-child(2), tr .clue-example {
+  text-align: center;
+  width: 25%;
+}
+
+#game-interface-content tr :nth-child(3), tr .clue-comment {
+    text-align: right;
+    width: 40%;
+}
+
+.footnote {
+    text-indent: 2rem;
+}
+
+.section-divider {
+    height: 2px;
+    width: 98%;
+    margin: 0.25rem auto;
 }
 
 @media screen and (max-width: 1000px) {
-    #edit-clue-panel {
+    #game-interface-content {
         width: 90%;
         height: 25%;
     }
 }
 
 @media screen and (max-width: 650px) {
-    #edit-clue-input-wrapper {
+    /* #edit-clue-input-wrapper {
         width: 95%;
     }
 
@@ -196,6 +331,6 @@ export default defineComponent({
 
     #edit-clue-number-input {
         width: 12%;
-    }
+    } */
 }
 </style>

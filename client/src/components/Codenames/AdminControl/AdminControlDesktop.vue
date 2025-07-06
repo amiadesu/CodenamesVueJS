@@ -327,7 +327,7 @@
                     {{ $t("codenames.admin.white_cards", {amount: gameData.gameRules.maxCards - gameData.totalCardAmount}) }}
                 </p>
                 <p class="admin-panel-content-row single-line-row" v-else>
-                    {{ $t("codenames.admin.cards_amount_overflow") }}
+                    {{ $t("codenames.admin.card_amount_overflow") }}
                 </p>
                 <hr class="admin-panel-section-divider">
                 <span class="admin-panel-content-row single-line-row">
