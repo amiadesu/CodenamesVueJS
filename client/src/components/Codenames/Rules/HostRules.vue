@@ -67,7 +67,7 @@
                                 <a class="footnote-link" :href="footnote.link"><sup>{{ footnote.text }}</sup></a>
                             </template>
                             <template v-for="(tab, tabIndex) in row.tabs" #[`tab${tabIndex}`]>
-                                <a class="section-link" @click="togglePanel(tab.index)">{{ tab.text }}</a>
+                                <a class="section-link" @click="togglePanel(tab.index, true)">{{ tab.text }}</a>
                             </template>
                             <template v-for="(otherLink, otherLinkIndex) in row.otherLinks" #[`otherLink${otherLinkIndex}`]>
                                 <a 

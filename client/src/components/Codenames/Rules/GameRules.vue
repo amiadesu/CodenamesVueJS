@@ -33,7 +33,7 @@
                         <a class="section-link" :href="section.link">{{ section.text }}</a>
                     </template>
                     <template v-for="(footnote, footnoteIndex) in rule.footnotes" #[`footnote${footnoteIndex}`]>
-                        <a class="footnote-link" :href="footnote.link"><sup>{{ footnote.text }}</sup></a>
+                        <a class="footnote-link" @click="scrollToAnchor(footnote.link)"><sup>{{ footnote.text }}</sup></a>
                     </template>
                 </i18n-t>
                 <ul v-if="rule.subrules" class="bullet-list sublist">
@@ -49,7 +49,7 @@
                                 <a class="section-link" :href="section.link">{{ section.text }}</a>
                             </template>
                             <template v-for="(footnote, footnoteIndex) in subrule.footnotes" #[`footnote${footnoteIndex}`]>
-                                <a class="footnote-link" :href="footnote.link"><sup>{{ footnote.text }}</sup></a>
+                                <a class="footnote-link" @click="scrollToAnchor(footnote.link)"><sup>{{ footnote.text }}</sup></a>
                             </template>
                         </i18n-t>
                     </li>
@@ -72,7 +72,7 @@
                         <a class="section-link" :href="section.link">{{ section.text }}</a>
                     </template>
                     <template v-for="(footnote, footnoteIndex) in rule.footnotes" #[`footnote${footnoteIndex}`]>
-                        <a class="footnote-link" :href="footnote.link"><sup>{{ footnote.text }}</sup></a>
+                        <a class="footnote-link" @click="scrollToAnchor(footnote.link)"><sup>{{ footnote.text }}</sup></a>
                     </template>
                 </i18n-t>
                 <ul v-if="rule.subrules" class="bullet-list sublist">
@@ -88,7 +88,7 @@
                                 <a class="section-link" :href="section.link">{{ section.text }}</a>
                             </template>
                             <template v-for="(footnote, footnoteIndex) in subrule.footnotes" #[`footnote${footnoteIndex}`]>
-                                <a class="footnote-link" :href="footnote.link"><sup>{{ footnote.text }}</sup></a>
+                                <a class="footnote-link" @click="scrollToAnchor(footnote.link)"><sup>{{ footnote.text }}</sup></a>
                             </template>
                         </i18n-t>
                     </li>
@@ -132,7 +132,7 @@
                                 <a class="section-link" :href="section.link">{{ section.text }}</a>
                             </template>
                             <template v-for="(footnote, footnoteIndex) in row.comment.footnotes" #[`footnote${footnoteIndex}`]>
-                                <a class="footnote-link" :href="footnote.link"><sup>{{ footnote.text }}</sup></a>
+                                <a class="footnote-link" @click="scrollToAnchor(footnote.link)"><sup>{{ footnote.text }}</sup></a>
                             </template>
                         </i18n-t>
                     </td>
@@ -158,6 +158,7 @@ export default defineComponent({
     setup(props) {
         
     },
+    inject: ['scrollToAnchor'],
     methods: {
         
     },
@@ -192,6 +193,7 @@ export default defineComponent({
 
 #codenames-game-rules-content .external-link, .section-link, .footnote-link {
     color: rgb(135, 218, 253);
+    cursor: pointer;
 }
 
 #codenames-game-rules-content .word-example {

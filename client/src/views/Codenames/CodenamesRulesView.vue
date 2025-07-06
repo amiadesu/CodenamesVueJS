@@ -25,7 +25,13 @@ globalData.remInPixels = parseFloat(getComputedStyle(document.documentElement).f
 const route = useRoute();
 
 // Provide this function to child components
-function togglePanel(newPanelIndex) {
+function togglePanel(newPanelIndex, scrollToTop = false) {
+    if (scrollToTop) {
+        const element = document.getElementById("rules-switchers-wrapper");
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
     if (newPanelIndex === currentPanelIndex.value) {
         return;
     }
