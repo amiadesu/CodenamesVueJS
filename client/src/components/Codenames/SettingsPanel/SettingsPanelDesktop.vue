@@ -109,7 +109,7 @@
                     {{ $t("codenames.settings.white_cards", {amount: gameData.gameRules.maxCards - gameData.totalCardAmount}) }}
                 </p>
                 <p v-else>
-                    {{ $t("codenames.settings.cards_amount_overflow") }}
+                    {{ $t("codenames.settings.card_amount_overflow") }}
                 </p>
                 <hr class="settings-panel-section-divider">
                 <span class="settings-panel-content-row single-line-row">

@@ -99,6 +99,10 @@ const route = useRoute();
             </template>
         </template>
         <template v-else-if="$route.params.roomId === 'rules'">
+            <div class="row-wrapper top-row">
+                <LanguageSelector></LanguageSelector>
+                <ThemeToggler></ThemeToggler>
+            </div>
             <CodenamesRulesView></CodenamesRulesView>
         </template>
         <template v-else>
@@ -167,7 +171,7 @@ const route = useRoute();
 .row-wrapper.top-row {
     height: 4%;
     width: 100%;
-    justify-content: left;
+    justify-content: right;
 }
 
 .row-wrapper.teams {
