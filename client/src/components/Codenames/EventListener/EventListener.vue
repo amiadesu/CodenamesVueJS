@@ -27,6 +27,18 @@ export default defineComponent({
             }
             socket.emit("setup_client", this.$route.params.roomId);
         },
+        handleKeydownPanelToggle(event) {
+            // console.log(event);
+            if (['INPUT', 'TEXTAREA'].includes(event.target.tagName) || event.target.isContentEditable) {
+                return;
+            }
+            if (event.key === 'o') {
+                this.gameData.toggles.adminPanel = true;
+            }
+            else if (event.key === 'p') {
+                this.gameData.toggles.chatPanel = true;
+            }
+        },
         processClicker(clickerId) {
             if (this.gameData.clickers.includes(clickerId)) {
                 this.gameData.clickers = this.gameData.clickers.filter(id => id !== clickerId);
@@ -191,9 +203,10 @@ export default defineComponent({
     mounted() {
         this.listenForUpdates();
         this.setupClient();
+        window.addEventListener('keydown', this.handleKeydownPanelToggle);
     },
     beforeUnmount() {
-        
+        window.removeEventListener('keydown', this.handleKeydownPanelToggle);
     },
 });
 </script>

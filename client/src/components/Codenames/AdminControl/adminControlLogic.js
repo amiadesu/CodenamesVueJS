@@ -195,13 +195,15 @@ export const adminControlMixin = {
             }, 100);
         },
         listenForUpdates() {
-            // socket.on("notify_client_about_change", () => {
-            //     this.updateData();
-            // });
-
-            // this.socket.on("user_connected", (users) => {
-            //     this.users = users
-            // });
+            this.$watch(
+                () => this.gameData.toggles.adminPanel,
+                (newValue, oldValue) => {
+                    if (newValue) {
+                        this.togglePanel();
+                        this.gameData.toggles.adminPanel = false;
+                    }
+                }
+            );
         }
     },
     mounted() {

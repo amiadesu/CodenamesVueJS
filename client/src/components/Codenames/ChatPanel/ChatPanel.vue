@@ -99,6 +99,15 @@ export default defineComponent({
                     }
                 }
             );
+            this.$watch(
+                () => this.gameData.toggles.chatPanel,
+                (newValue, oldValue) => {
+                    if (newValue) {
+                        this.togglePanel();
+                        this.gameData.toggles.chatPanel = false;
+                    }
+                }
+            );
         }
     },
     mounted() {

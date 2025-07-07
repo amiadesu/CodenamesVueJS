@@ -139,6 +139,10 @@ export const gameStore = defineStore('gameData', () => {
         online: true,
         disconnected: false
     });
+    const toggles = ref({
+        adminPanel: false,
+        chatPanel: false
+    });
 
     return {
         players, 
@@ -158,6 +162,7 @@ export const gameStore = defineStore('gameData', () => {
         totalCardAmount, 
         clickers,
         shouldScrollDownChat,
-        serverState
+        serverState,
+        toggles
     };
 });
