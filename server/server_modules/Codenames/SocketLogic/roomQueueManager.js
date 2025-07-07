@@ -52,6 +52,7 @@ class RoomQueueManager {
 
         this.queues = new Map();
         this.mutexes = new Map();
+        this.socketContextMap = new Map(); // <socketId, SocketContext>
         this.io = io;
         
         this.redisClient = redis.createClient(config.redis.clientOptions);
@@ -179,115 +180,154 @@ class RoomQueueManager {
         }
     }
 
+    // Socket-related methods
+    addSocket(socketId, socketContext) {
+        this.socketContextMap.set(socketId, socketContext);
+    }
+
+    removeSocket(socketId) {
+        this.socketContextMap.delete(socketId);
+    }
+
+    getSocketContext(socketId) {
+        return this.socketContextMap.get(socketId);
+    }
+
     // Processor methods now take positional arguments
-    async processGetGameboard(socketData) {
+    async processGetGameboard (socketId) {
+        const socketData = this.getSocketContext(socketId);
         return await getGameboardEvent(this.io, socketData);
     }
 
-    async processSelectWord(socketData, selectedWordText) {
+    async processSelectWord (socketId, selectedWordText) {
+        const socketData = this.getSocketContext(socketId);
         return await selectWordEvent(this.io, socketData, selectedWordText);
     }
 
-    async processProcessClick(socketData, clickedWordText) {
+    async processProcessClick (socketId, clickedWordText) {
+        const socketData = this.getSocketContext(socketId);
         return await processClickEvent(this.io, socketData, clickedWordText);
     }
 
 
 
-    async processSendClue(socketData, clueText, teamColor) {
+    async processSendClue (socketId, clueText, teamColor) {
+        const socketData = this.getSocketContext(socketId);
         return await sendClueEvent(this.io, socketData, clueText, teamColor);
     }
 
-    async processEditClue(socketData, newClue) {
+    async processEditClue (socketId, newClue) {
+        const socketData = this.getSocketContext(socketId);
         return await editClueEvent(this.io, socketData, newClue);
     }
 
-    async processGetClues(socketData) {
+    async processGetClues (socketId) {
+        const socketData = this.getSocketContext(socketId);
         return await getCluesEvent(this.io, socketData);
     }
 
 
 
-    async processSetupClient(socketData) {
-        return await setupClientEvent(this.io, socketData);
+    async processSetupClient (socketId) {
+        const socketData = this.getSocketContext(socketId);
+        const res = await setupClientEvent(this.io, socketData);
+        return res;
     }
 
-    async processEditUserName(socketData, newName) {
+    async processEditUserName (socketId, newName) {
+        const socketData = this.getSocketContext(socketId);
         return await editUserNameEvent(this.io, socketData, newName);
     }
 
-    async processChangeUserColor(socketData) {
+    async processChangeUserColor (socketId) {
+        const socketData = this.getSocketContext(socketId);
         return await changeUserColorEvent(this.io, socketData);
     }
 
-    async processStateChanged(socketData, previousColor, newUser) {
+    async processStateChanged (socketId, previousColor, newUser) {
+        const socketData = this.getSocketContext(socketId);
         return await stateChangedEvent(this.io, socketData, previousColor, newUser);
     }
 
 
 
-    async processGetAllWordPacks(socketData) {
+    async processGetAllWordPacks (socketId) {
+        const socketData = this.getSocketContext(socketId);
         return await getAllWordPacksEvent(this.io, socketData);
     }
 
-    async processGetWordPackNoWords(socketData, packId) {
+    async processGetWordPackNoWords (socketId, packId) {
+        const socketData = this.getSocketContext(socketId);
         return await getWordPackNoWordsEvent(this.io, socketData, packId);
     }
 
-    async processGetWordsFromWordPack(socketData, packId) {
+    async processGetWordsFromWordPack (socketId, packId) {
+        const socketData = this.getSocketContext(socketId);
         return await getWordsFromWordPackEvent(this.io, socketData, packId);
     }
 
 
 
     // Requires mutex
-    async processSetNewGameRules(socketData, newGameRules) {
+    async processSetNewGameRules (socketId, newGameRules) {
+        const socketData = this.getSocketContext(socketId);
         return await setNewGameRulesEvent(this.io, socketData, newGameRules);
     }
 
-    async processRefreshGameboard(socketData) {
+    async processRefreshGameboard (socketId) {
+        const socketData = this.getSocketContext(socketId);
         return await refreshGameboardEvent(this.io, socketData);
     }
 
-    async processRandomizeTeamOrder(socketData) {
+    async processRandomizeTeamOrder (socketId) {
+        const socketData = this.getSocketContext(socketId);
         return await randomizeTeamOrderEvent(this.io, socketData);
     }
 
-    async processPassTurn(socketData) {
+    async processPassTurn (socketId) {
+        const socketData = this.getSocketContext(socketId);
         return await passTurnEvent(this.io, socketData);
     }
 
-    async processRemoveAllPlayers(socketData, withMasters) {
+    async processRemoveAllPlayers (socketId, withMasters) {
+        const socketData = this.getSocketContext(socketId);
         return await removeAllPlayersEvent(this.io, socketData, withMasters);
     }
 
-    async processRemovePlayer(socketData, playerId) {
+    async processRemovePlayer (socketId, playerId) {
+        const socketData = this.getSocketContext(socketId);
         return await removePlayerEvent(this.io, socketData, playerId);
     }
 
-    async processRandomizePlayers(socketData, withMasters) {
+    async processRandomizePlayers (socketId, withMasters) {
+        const socketData = this.getSocketContext(socketId);
         return await randomizePlayersEvent(this.io, socketData, withMasters);
     }
 
-    async processTransferHost(socketData, playerId) {
+    async processTransferHost (socketId, playerId) {
+        const socketData = this.getSocketContext(socketId);
         return await transferHostEvent(this.io, socketData, playerId);
     }
 
 
 
-    async processStartNewGame(socketData, randomizeTeamOrder, getNewGameboard) {
+    async processStartNewGame (socketId, randomizeTeamOrder, getNewGameboard) {
+        const socketData = this.getSocketContext(socketId);
         return await startNewGameEvent(this.io, socketData, randomizeTeamOrder, getNewGameboard);
     }
 
-    async processGetTraitors(socketData) {
+    async processGetTraitors (socketId) {
+        const socketData = this.getSocketContext(socketId);
         return await getTraitorsEvent(this.io, socketData);
     }
 
-    async processGetGameProcess(socketData) {
+    async processGetGameProcess (socketId) {
+        const socketData = this.getSocketContext(socketId);
         return await getGameProcessEvent(this.io, socketData);
     }
 
-    async processSendNewMessage(socketData, messageText) {
+    async processSendNewMessage (socketId, messageText) {
+        const socketData = this.getSocketContext(socketId);
         return await sendNewChatMessageEvent(this.io, socketData, messageText);
     }
 

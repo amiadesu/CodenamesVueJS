@@ -46,6 +46,7 @@ const {
 } = require("./utils/rateLimiters");
 
 const RoomQueueManager = require("./SocketLogic/roomQueueManager");
+const SocketContext = require("./SocketLogic/socketContext");
 
 const RoomContext = require("./db/roomContext");
 
@@ -81,23 +82,8 @@ function createIOListener() {
     io.on('connection', async (socket) => {
         console.log('User connected:', socket.id);
 
-        const socketData = {
-            socketId: socket.id,
-            userData: socket.userData,
-            userId: socket.userData.userID,
-            userCodenamesId: socket.userData.codenamesID,
-            user: null,
-            roomId: "default",
-            settedUp: false,
-            countdownInterval: null,
-            timerInterval: null,
-            status: {
-                settedUp: false,
-                setup_event: {
-                    active: false
-                }
-            }
-        };
+        const socketData = new SocketContext(socket);
+
         console.log('User id:', socketData.userId);
         console.log("User Codenames ID:", socketData.userCodenamesId);
 
@@ -131,15 +117,15 @@ function createIOListener() {
                 if (!userIsAuthorized) {
                     return next(new Error('Unauthorized event'));
                 }
+                if (!socketData.status.settedUp) {
+                    socket.emit("request_setup");
+                    return;
+                }
             }
             else {
                 if (!(typeof data === 'string' || data instanceof String || !data) || data === "default") {
                     return next(new Error('Unauthorized event'));
                 }
-            }
-            if (!socketData.settedUp) {
-                socket.emit("request_setup");
-                return;
             }
             next();
         });
@@ -205,9 +191,12 @@ function createIOListener() {
             newRoomId = result.data;
 
             if (socketData.status.setup_event.active) {
+                console.log(111);
                 socket.emit("error_message", { error_code: "still_being_set_up", error: "Your session is still being set up by the server." });
                 return;
             }
+
+            roomQueueManager.addSocket(socketData.socketId, socketData);
 
             socketData.status.setup_event.active = true;
 
@@ -215,7 +204,8 @@ function createIOListener() {
             socket.join(socketData.roomId);
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "setup_client", socketData);
+                const job = await roomQueueManager.addToRoomQueue(socketData.roomId, "setup_client", socketData.socketId);
+                const completedRes = await job.finished();
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -235,7 +225,7 @@ function createIOListener() {
             newName = result.data;
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "edit_user_name", socketData, newName);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "edit_user_name", socketData.socketId, newName);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -244,7 +234,7 @@ function createIOListener() {
 
         socket.on("change_user_color", async () => {
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "change_user_color", socketData);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "change_user_color", socketData.socketId);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -271,7 +261,7 @@ function createIOListener() {
             }
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "state_changed", socketData, previousColor, newUser);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "state_changed", socketData.socketId, previousColor, newUser);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -282,7 +272,7 @@ function createIOListener() {
 
         socket.on("get_gameboard", async () => {
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_gameboard", socketData);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_gameboard", socketData.socketId);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -298,7 +288,8 @@ function createIOListener() {
             selectedWordText = result.data;
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "select_word", socketData, selectedWordText);
+                const job = await roomQueueManager.addToRoomQueue(socketData.roomId, "select_word", socketData.socketId, selectedWordText);
+                const completedRes = await job.finished();
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -314,7 +305,7 @@ function createIOListener() {
             clickedWordText = result.data;
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "process_click", socketData, clickedWordText);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "process_click", socketData.socketId, clickedWordText);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -325,7 +316,7 @@ function createIOListener() {
     
         socket.on("get_all_word_packs", async () => {
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_all_word_packs", socketData);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_all_word_packs", socketData.socketId);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -341,7 +332,7 @@ function createIOListener() {
             packId = resultPackId.data;
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_word_pack_no_words", socketData, packId);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_word_pack_no_words", socketData.socketId, packId);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -357,7 +348,7 @@ function createIOListener() {
             packId = resultPackId.data;
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_words_from_word_pack", socketData, packId);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_words_from_word_pack", socketData.socketId, packId);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -375,7 +366,7 @@ function createIOListener() {
             newGameRules = result.data;
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "set_new_game_rules", socketData, newGameRules);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "set_new_game_rules", socketData.socketId, newGameRules);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -396,7 +387,7 @@ function createIOListener() {
             }
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "refresh_gameboard", socketData);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "refresh_gameboard", socketData.socketId);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -405,7 +396,7 @@ function createIOListener() {
 
         socket.on("randomize_team_order", async () => {
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "randomize_team_order", socketData);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "randomize_team_order", socketData.socketId);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -414,7 +405,7 @@ function createIOListener() {
 
         socket.on("pass_turn", async () => {
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "pass_turn", socketData);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "pass_turn", socketData.socketId);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -430,7 +421,7 @@ function createIOListener() {
             withMasters = result.data;
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "remove_all_players", socketData, withMasters);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "remove_all_players", socketData.socketId, withMasters);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -446,7 +437,7 @@ function createIOListener() {
             playerId = result.data;
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "remove_player", socketData, playerId);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "remove_player", socketData.socketId, playerId);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -462,7 +453,7 @@ function createIOListener() {
             withMasters = result.data;
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "randomize_players", socketData, withMasters);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "randomize_players", socketData.socketId, withMasters);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -478,7 +469,7 @@ function createIOListener() {
             playerId = result.data;
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "transfer_host", socketData, playerId);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "transfer_host", socketData.socketId, playerId);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -514,7 +505,8 @@ function createIOListener() {
             getNewGameboard = resultGetNewGameboard.data;
 
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "start_new_game", socketData, randomizeTeamOrder, getNewGameboard);
+                const job = await roomQueueManager.addToRoomQueue(socketData.roomId, "start_new_game", socketData.socketId, randomizeTeamOrder, getNewGameboard);
+                const completedRes = await job.finished();
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -523,7 +515,7 @@ function createIOListener() {
     
         socket.on("get_traitors", async () => {
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_traitors", socketData);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_traitors", socketData.socketId);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -532,7 +524,7 @@ function createIOListener() {
 
         socket.on("get_game_process", async () => {
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_game_process", socketData);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_game_process", socketData.socketId);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -556,7 +548,7 @@ function createIOListener() {
             teamColor = resultTeamColor.data;
             
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "send_clue", socketData, clueText, teamColor);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "send_clue", socketData.socketId, clueText, teamColor);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -572,7 +564,7 @@ function createIOListener() {
             newClue = result.data;
             
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "edit_clue", socketData, newClue);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "edit_clue", socketData.socketId, newClue);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -581,7 +573,7 @@ function createIOListener() {
     
         socket.on("get_clues", async () => {
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_clues", socketData);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "get_clues", socketData.socketId);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -599,7 +591,7 @@ function createIOListener() {
             messageText = resultChatMessages.data;
             
             try {
-                await roomQueueManager.addToRoomQueue(socketData.roomId, "send_new_chat_message", socketData, messageText);
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "send_new_chat_message", socketData.socketId, messageText);
             } catch (error) {
                 console.error('Error queuing event:', error);
                 socket.emit('error', 'Failed to queue event');
@@ -608,6 +600,8 @@ function createIOListener() {
     
         socket.on('disconnect', async () => {
             const room = new RoomContext(socketData.roomId);
+
+            roomQueueManager.removeSocket(socketData.socketId);
 
             if (!socketData.status.settedUp) {
                 console.log("Some shit is going on... user was not setted up");
