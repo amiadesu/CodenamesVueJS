@@ -53,6 +53,10 @@ export default defineComponent({
                 console.log("Hearing something...");
             });
 
+            socket.on("request_setup", () => {
+                this.setupClient();
+            });
+
             socket.on("request_clues", () => {
                 socket.emit("get_clues");
             });

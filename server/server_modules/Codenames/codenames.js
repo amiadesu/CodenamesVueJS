@@ -137,6 +137,10 @@ function createIOListener() {
                     return next(new Error('Unauthorized event'));
                 }
             }
+            if (!socketData.settedUp) {
+                socket.emit("request_setup");
+                return;
+            }
             next();
         });
         
