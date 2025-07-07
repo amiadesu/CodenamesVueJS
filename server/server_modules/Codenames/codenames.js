@@ -644,3 +644,4 @@ module.exports = {
 // TODO:
 // move disconnect to /SocketLogic/user.js (or should I?)
 // clean up code that left
+// investigate select_word and start_new_game further - possibly, they don't need a const job = ... approach
