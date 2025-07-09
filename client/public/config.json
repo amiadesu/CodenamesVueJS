@@ -5,7 +5,7 @@
     "serverIPs" : {
         "codenames" : "http://localhost:3000/codenames"
     },
-    "availableGames" : ["codenames", "example", "codenames", "example", "codenames", "example", "codenames", "example", "codenames", "example"],
+    "availableGames" : ["codenames"],
     "defaultGameRules" : {
         "teamAmount": {
             "default" : 2,
