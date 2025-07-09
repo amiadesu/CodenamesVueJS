@@ -133,7 +133,7 @@ export default defineComponent({
     background-color: rgb(255, 186, 163);
     border: 3px solid rgb(136, 61, 7);
     width: 100%;
-    height: 100%;
+    height: max(45px, 100%);
     border-radius: 5px;
 
     display: flex;

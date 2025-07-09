@@ -15,7 +15,6 @@
 import { defineComponent } from 'vue';
 import { preferencesStore } from '@/stores/preferences';
 import WordBlockExample from '../WordBlockExample/WordBlockExample.vue';
-import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
     computed: {
@@ -145,7 +144,14 @@ export default defineComponent({
                     this.getBoard(true);
                     this.interfaceData.shouldGetNewGameboard = false;
                 }
-            )
+            );
+            this.$watch(
+                () => this.interfaceData.gameRules.fieldSize,
+                (newValue, oldValue) => {
+                    this.getBoard(true);
+                    this.interfaceData.shouldGetNewGameboard = false;
+                }
+            );
         }
     },
     mounted() {
@@ -162,7 +168,7 @@ export default defineComponent({
 <style lang="css" scoped>
 #gamefield {
     width: 100%;
-    height: 80%;
+    min-height: 240px;
 
     display: flex;
     align-items: center;
@@ -211,8 +217,12 @@ export default defineComponent({
 }
 
 @media screen and (max-width: 1000px) {
+    #gamefield {
+        min-height: 200px;
+    }
+
     #word-blocks-wrapper {
-        width: 95%;
+        width: 98%;
         height: 100%;
         column-gap: 0.3em;
         row-gap: 0.3em;

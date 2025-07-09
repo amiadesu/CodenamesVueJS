@@ -1,15 +1,10 @@
 <script setup>
 import { ref, onMounted, nextTick, provide } from 'vue';
 import { useRoute } from 'vue-router';
-import { gameStore } from '@/stores/gameData';
 import { globalStore } from '@/stores/globalData';
-import { useDocumentVisibility } from '@vueuse/core';
 import { getConfig } from '@/utils/config';
 
 import Background from '../../components/Home/Background.vue';
-import GamePreview from '../../components/Home/GamePreview.vue';
-import LanguageSelector from '../../components/Global/LanguageSelector.vue';
-import ThemeToggler from '../../components/Global/ThemeToggler.vue';
 import GameRules from '@/components/Codenames/Rules/GameRules.vue';
 import GameInterface from '@/components/Codenames/Rules/GameInterface.vue';
 import HostRules from '@/components/Codenames/Rules/HostRules.vue';
@@ -60,13 +55,6 @@ onMounted(() => {
         scrollToAnchor(anchor);
     }
 });
-
-// if (route.params.roomId && route.params.roomId !== 'rules') {
-//     if (!socket.connected) {
-//         socket.connect();
-//     }
-//     socket.emit("setup_client", route.params.roomId);
-// }
 </script>
 
 <template>
@@ -135,6 +123,7 @@ onMounted(() => {
     bottom: 0;
     left: 0;
     height: 100vh;
+    background-color: var(--home-view-background-color);
 }
 
 #game-previews-list-wrapper {
@@ -160,7 +149,7 @@ onMounted(() => {
     width: 80%;
     min-height: 90%;
 
-    background-color: --alpha(var(--color-cornflower-blue-100) / 60%);
+    background-color: var(--preview-glass-panel-color);
     backdrop-filter: blur(2px) saturate(1);
     -webkit-backdrop-filter: blur(2px) saturate(1);
 
@@ -200,12 +189,12 @@ onMounted(() => {
 .switcher-button {
     width: 100%;
     height: 2rem;
-    background-color: rgb(73, 73, 73);
+    background-color: var(--switcher-button-non-active-color);
     text-align: center;
 }
 
 .switcher-button.active {
-    background-color: gray;
+    background-color: var(--switcher-button-active-color);
 }
 
 .separator {
@@ -232,13 +221,23 @@ onMounted(() => {
 }
 
 @media screen and (max-width: 1300px) {
-    #game-previews-list-glass-panel {
-        width: 80%;
+    #game-rules-glass-panel-content-wrapper {
+        width: 85%;
+        padding: 0.5rem 0.5rem;
+    }
+
+    #rules-switchers-wrapper {
+        width: 85%;
     }
 }
 
 @media screen and (max-width: 650px) {
-    #game-previews-list-glass-panel {
+    #game-rules-glass-panel-content-wrapper {
+        width: 90%;
+        padding: 0.5rem 0;
+    }
+
+    #rules-switchers-wrapper {
         width: 90%;
     }
 }

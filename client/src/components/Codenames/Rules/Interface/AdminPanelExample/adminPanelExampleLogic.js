@@ -5,8 +5,7 @@ export const adminPanelExampleMixin = {
         
     },
     setup(props) {
-        // setup() receives props as the first argument.
-        // console.log(props.teamColor)
+        
     },
     data() {
         return {

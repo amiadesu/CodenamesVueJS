@@ -199,7 +199,7 @@ export default defineComponent({
     width: 100%;
     height: max-content;
 
-    /* color: var(--panel-text-color-3); */
+    color: var(--preview-text-color-1);
 
     display: flex;
     align-items: flex-start;
@@ -214,37 +214,41 @@ export default defineComponent({
     margin: 0 auto;
 }
 
+#clue-input-wrapper {
+    margin: 0 auto;
+}
+
 #game-interface-content .external-link, .section-link, .footnote-link {
-    color: rgb(135, 218, 253);
+    color: var(--preview-link-color);
     cursor: pointer;
 }
 
 #game-interface-content .word-example {
+    color: var(--preview-highlight-color);
     display: inline;
-    color: plum;
 }
 
 #game-interface-content .attention-takeover {
-    color:aquamarine;
+    color: var(--preview-italic-color);
 }
 
 #game-interface-content h1 {
     font-size: 1.5rem;
     font-weight: bold;
-    color: var(--panel-text-color-3);
+    color: var(--preview-text-color-1);
 }
 
 #game-interface-content h2 {
     text-indent: 2rem;
     font-size: 1.2rem;
     font-weight: 600;
-    color: var(--panel-text-color-3);
+    color: var(--preview-text-color-1);
 }
 
 #game-interface-content h3 {
     font-size: 1.1rem;
     font-weight: 500;
-    color: var(--panel-text-color-3);
+    color: var(--preview-text-color-1);
 }
 
 #game-interface-content span.block {
@@ -313,24 +317,35 @@ export default defineComponent({
     margin: 0.25rem auto;
 }
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1100px) {
     #game-interface-content {
-        width: 90%;
+        width: 95%;
         height: 25%;
+        text-indent: 0.5rem;
+    }
+
+    #game-interface-content h2 {
+        text-indent: 0;
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    #game-interface-content ul {
+        padding-inline-start: 1.5rem;
+    }
+
+    #game-interface-content ul.sublist {
+        padding-inline-start: 1rem;
+    }
+
+    .footnote {
+        text-indent: 0.5rem;
     }
 }
 
 @media screen and (max-width: 650px) {
-    /* #edit-clue-input-wrapper {
-        width: 95%;
+    #game-interface-content th, td {
+        padding: 0.3rem;
     }
-
-    #edit-clue-text-input {
-        width: 80%;
-    }
-
-    #edit-clue-number-input {
-        width: 12%;
-    } */
 }
 </style>

@@ -80,7 +80,7 @@ export default defineComponent({
 }
 
 #team-examples-wrapper {
-    height: 810px;
+    height: auto;
     width: 100%;
     max-width: 100%;
     display: flex;
@@ -109,34 +109,18 @@ export default defineComponent({
 .switcher-button {
     width: 100%;
     height: 2rem;
-    background-color: rgb(73, 73, 73);
+    background-color: var(--switcher-button-non-active-color);
     text-align: center;
 }
 
 .switcher-button.active {
-    background-color: gray;
+    background-color: var(--switcher-button-active-color);
 }
 
 @media screen and (max-width: 650px) {
     #teams-wrapper {
         width: 98%;
         max-width: 98%;
-    }
-}
-
-@media screen and (max-width: 550px) {
-    #teams-wrapper .team-content-wrapper {
-        width: 50%;
-        min-width: 50%;
-        max-width: 50%;
-    }
-}
-
-@media screen and (max-width: 440px) {
-    #teams-wrapper .team-content-wrapper {
-        width: 50%;
-        min-width: 50%;
-        max-width: 50%;
     }
 }
 </style>

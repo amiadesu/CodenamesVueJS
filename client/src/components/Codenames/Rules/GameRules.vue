@@ -176,7 +176,7 @@ export default defineComponent({
     width: 100%;
     height: max-content;
 
-    color: var(--panel-text-color-3);
+    color: var(--preview-text-color-1);
 
     display: flex;
     align-items: flex-start;
@@ -192,36 +192,36 @@ export default defineComponent({
 }
 
 #codenames-game-rules-content .external-link, .section-link, .footnote-link {
-    color: rgb(135, 218, 253);
+    color: var(--preview-link-color);
     cursor: pointer;
 }
 
 #codenames-game-rules-content .word-example {
+    color: var(--preview-highlight-color);
     display: inline;
-    color: plum;
 }
 
 #codenames-game-rules-content .attention-takeover {
-    color:aquamarine;
+    color: var(--preview-italic-color);
 }
 
 #codenames-game-rules-content h1 {
     font-size: 1.5rem;
     font-weight: bold;
-    color: var(--panel-text-color-3);
+    color: var(--preview-text-color-1);
 }
 
 #codenames-game-rules-content h2 {
     text-indent: 2rem;
     font-size: 1.2rem;
     font-weight: 600;
-    color: var(--panel-text-color-3);
+    color: var(--preview-text-color-1);
 }
 
 #codenames-game-rules-content h3 {
     font-size: 1.1rem;
     font-weight: 500;
-    color: var(--panel-text-color-3);
+    color: var(--preview-text-color-1);
 }
 
 #codenames-game-rules-content span.block {
@@ -262,17 +262,17 @@ export default defineComponent({
 }
 
 #codenames-game-rules-content th, td {
-    padding: 0.6em;
+    padding: 0.6rem;
 }
 
 #codenames-game-rules-content tr :nth-child(1) {
-  text-align: left;
-  width: 35%;
+    text-align: left;
+    width: 35%;
 }
 
 #codenames-game-rules-content tr :nth-child(2), tr .clue-example {
-  text-align: center;
-  width: 25%;
+    text-align: center;
+    width: 25%;
 }
 
 #codenames-game-rules-content tr :nth-child(3), tr .clue-comment {
@@ -284,24 +284,35 @@ export default defineComponent({
     text-indent: 2rem;
 }
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 1100px) {
     #codenames-game-rules-content {
-        width: 90%;
+        width: 95%;
         height: 25%;
+        text-indent: 0.5rem;
+    }
+
+    #codenames-game-rules-content h2 {
+        text-indent: 0;
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    #codenames-game-rules-content ul {
+        padding-inline-start: 1.5rem;
+    }
+
+    #codenames-game-rules-content ul.sublist {
+        padding-inline-start: 1rem;
+    }
+
+    .footnote {
+        text-indent: 0.5rem;
     }
 }
 
 @media screen and (max-width: 650px) {
-    /* #edit-clue-input-wrapper {
-        width: 95%;
+    #codenames-game-rules-content th, td {
+        padding: 0.3rem;
     }
-
-    #edit-clue-text-input {
-        width: 80%;
-    }
-
-    #edit-clue-number-input {
-        width: 12%;
-    } */
 }
 </style>

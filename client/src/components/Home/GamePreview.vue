@@ -77,7 +77,7 @@ export default defineComponent({
 
 .game-preview-wrapper {
     width: 100%;
-    background-color: gray;
+    background-color: var(--preview-element-block-background-color);
     display: flex;
     flex-direction: column;
     row-gap: 0.5rem;

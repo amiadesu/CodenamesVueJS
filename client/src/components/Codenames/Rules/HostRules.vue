@@ -1,5 +1,5 @@
 <template>
-    <div id="codenames-game-rules-content">
+    <div id="codenames-host-rules-content">
         <h1 class="centered">
             {{ $t("codenames.rules.host_rules.title") }}
         </h1>
@@ -89,7 +89,7 @@
 </template>
 
 <script>
-import { defineComponent, inject } from 'vue';
+import { defineComponent } from 'vue';
 import { getConfig } from '@/utils/config';
 
 export default defineComponent({
@@ -118,11 +118,11 @@ export default defineComponent({
 </script>
 
 <style lang="css" scoped>
-#codenames-game-rules-content {
+#codenames-host-rules-content {
     width: 100%;
     height: max-content;
 
-    color: var(--panel-text-color-3);
+    color: var(--preview-text-color-1);
 
     display: flex;
     align-items: flex-start;
@@ -145,18 +145,21 @@ export default defineComponent({
     width: 100%;
     max-width: 100%;
     height: 100%;
-    background-color: gray;
+    background-color: var(--preview-element-block-background-color);
     border-radius: 0.75rem;
     display: flex;
     flex-direction: column;
     padding: 0.5rem;
     overflow: hidden;
     word-wrap: break-word;
+    flex-grow: 1;
+    flex-shrink: 0;
 }
 
 .title-wrapper {
     width: 100%;
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     align-items: center;
 }
@@ -165,52 +168,54 @@ export default defineComponent({
     display: flex;
     justify-content: space-evenly;
     column-gap: 2rem;
+    text-indent: 0;
+    text-align: center;
 }
 
-#codenames-game-rules-content .centered {
+#codenames-host-rules-content .centered {
     text-indent: 0;
     display: block;
     margin: 0 auto;
 }
 
-#codenames-game-rules-content .external-link, .section-link, .footnote-link {
+#codenames-host-rules-content .external-link, .section-link, .footnote-link {
+    color: var(--preview-link-color);
     cursor: pointer;
-    color: rgb(135, 218, 253);
 }
 
-#codenames-game-rules-content .word-example {
+#codenames-host-rules-content .word-example {
+    color: var(--preview-highlight-color);
     display: inline;
-    color: plum;
 }
 
-#codenames-game-rules-content .attention-takeover {
-    color:aquamarine;
+#codenames-host-rules-content .attention-takeover {
+    color: var(--preview-italic-color);
 }
 
-#codenames-game-rules-content h1 {
+#codenames-host-rules-content h1 {
     font-size: 1.5rem;
     font-weight: bold;
-    color: var(--panel-text-color-3);
+    color: var(--preview-text-color-1);
 }
 
-#codenames-game-rules-content h2 {
+#codenames-host-rules-content h2 {
     font-size: 1.2rem;
     font-weight: 600;
-    color: var(--panel-text-color-3);
+    color: var(--preview-text-color-1);
 }
 
-#codenames-game-rules-content h3 {
+#codenames-host-rules-content h3 {
     font-size: 1.1rem;
     font-weight: 500;
-    color: var(--panel-text-color-3);
+    color: var(--preview-text-color-1);
 }
 
-#codenames-game-rules-content span.block {
+#codenames-host-rules-content span.block {
     display: block;
     text-indent: 0;
 }
 
-#codenames-game-rules-content ul {
+#codenames-host-rules-content ul {
     display: block;
     margin-block-start: 0.3rem;
     margin-block-end: 0.3rem;
@@ -218,67 +223,87 @@ export default defineComponent({
     text-indent: 0.5rem;
 }
 
-#codenames-game-rules-content ul.sublist {
+#codenames-host-rules-content ul.sublist {
     padding-inline-start: 1.5rem;
     text-indent: 0;
 }
 
-#codenames-game-rules-content ul.bullet-list {
+#codenames-host-rules-content ul.bullet-list {
     list-style-type: disc;
 }
 
-#codenames-game-rules-content ul.enumerated-list {
+#codenames-host-rules-content ul.enumerated-list {
     list-style-type: decimal;
 }
 
-#codenames-game-rules-content table {
+#codenames-host-rules-content table {
     table-layout: fixed;
     width: 90%;
     margin: auto;
     border-collapse: collapse;
 }
 
-#codenames-game-rules-content table, th, td {
+#codenames-host-rules-content table, th, td {
     border: 1px solid black;
 }
 
-#codenames-game-rules-content th, td {
+#codenames-host-rules-content th, td {
     padding: 0.6em;
 }
 
-#codenames-game-rules-content tr :nth-child(1) {
-  text-align: left;
-  width: 35%;
+#codenames-host-rules-content tr :nth-child(1) {
+    text-align: left;
+    width: 35%;
 }
 
-#codenames-game-rules-content tr :nth-child(2), tr .clue-example {
-  text-align: center;
-  width: 25%;
+#codenames-host-rules-content tr :nth-child(2), tr .clue-example {
+    text-align: center;
+    width: 25%;
 }
 
-#codenames-game-rules-content tr :nth-child(3), tr .clue-comment {
+#codenames-host-rules-content tr :nth-child(3), tr .clue-comment {
     text-align: right;
     width: 40%;
 }
 
-@media screen and (max-width: 1000px) {
-    #codenames-game-rules-content {
-        width: 90%;
+@media screen and (max-width: 1100px) {
+    #codenames-host-rules-content {
+        width: 95%;
         height: 25%;
+        text-indent: 0.5rem;
+    }
+
+    #codenames-host-rules-content h2 {
+        text-indent: 0;
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    #codenames-host-rules-content ul {
+        padding-inline-start: 1.5rem;
+    }
+
+    #codenames-host-rules-content ul.sublist {
+        padding-inline-start: 1rem;
+    }
+
+    .footnote {
+        text-indent: 0.5rem;
     }
 }
 
-@media screen and (max-width: 650px) {
-    /* #edit-clue-input-wrapper {
-        width: 95%;
+@media screen and (max-width: 800px) {
+    #codenames-host-rules-content th, td {
+        padding: 0.3rem;
     }
 
-    #edit-clue-text-input {
-        width: 80%;
+    .input-info-wrapper {
+        flex-direction: column;
+        row-gap: 0.125rem;
     }
 
-    #edit-clue-number-input {
-        width: 12%;
-    } */
+    .input-info-wrapper > * {
+        margin: 0 auto;
+    }
 }
 </style>
