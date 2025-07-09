@@ -2,8 +2,7 @@
 import { useRoute } from 'vue-router';
 import { gameStore } from '@/stores/gameData';
 import { globalStore } from '@/stores/globalData';
-import { useDocumentVisibility } from '@vueuse/core';
-import { socket, state } from "@/sockets/codenames";
+import { state } from "@/sockets/codenames";
 
 import TeamsWrapperMobile from '../../components/Codenames/Team/TeamsWrapperMobile.vue';
 import EventListener from '../../components/Codenames/EventListener/EventListener.vue';
@@ -31,14 +30,6 @@ let globalData = globalStore();
 globalData.remInPixels = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
 const route = useRoute();
-
-// if (route.params.roomId && route.params.roomId !== 'rules') {
-//     if (!socket.connected) {
-//         socket.connect();
-//     }
-//     socket.emit("setup_client", route.params.roomId);
-// }
-
 </script>
 
 <template>

@@ -28,7 +28,6 @@ export default defineComponent({
             socket.emit("setup_client", this.$route.params.roomId);
         },
         handleKeydownPanelToggle(event) {
-            // console.log(event);
             if (['INPUT', 'TEXTAREA'].includes(event.target.tagName) || event.target.isContentEditable) {
                 return;
             }
@@ -66,7 +65,6 @@ export default defineComponent({
             });
 
             socket.on("update_client_setup", (teams, users, client, gameRules, gameProcess, endTurnSelectors, clues, gameWinStatus, chatMessages) => {
-                // console.log("Updating:", teams, users, client, gameRules, gameProcess, gameWinStatus, chatMessages);
                 this.gameData.players = users;
 
                 this.gameData.teams = teams;
@@ -88,7 +86,6 @@ export default defineComponent({
             });
 
             socket.on("update_client", (teams, users, client, endTurnSelectors, gameRules, gameProcess) => {
-                // console.log("Updating:", teams, users, client, gameRules, gameProcess);
                 this.gameData.players = users;
 
                 this.gameData.teams = teams;
@@ -107,7 +104,6 @@ export default defineComponent({
             });
 
             socket.on('update_users', (teams, users) => {
-                // console.log("Updating:", teams, users);
                 this.gameData.players = users;
 
                 this.gameData.teams = teams;
@@ -122,7 +118,6 @@ export default defineComponent({
             });
 
             socket.on("update_game_rules", (gameRules) => {
-                // console.log(gameRules);
                 this.gameData.gameRules = gameRules;
                 if (this.gameData.gameRules.maxCards !== this.gameData.wordBoardData.words.length) {
                     this.gameData.wordBoardData.wordBoardHidden = true;
@@ -175,7 +170,6 @@ export default defineComponent({
             });
 
             socket.on("update_countdown", (newProgress) => {
-                // console.log(newProgress);
                 this.gameData.selectProgress.percentage = newProgress;
             });
 

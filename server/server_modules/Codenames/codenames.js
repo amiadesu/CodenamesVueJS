@@ -92,11 +92,12 @@ function createIOListener() {
             const wrapped = (...args) => {
                 try {
                     const result = handler(...args);
-                    if (result?.catch) {
-                        result.catch((err) => {
-                            console.error(`[Socket Error - async handler: "${event}"]`, err);
-                        });
+                    if (!result?.catch) {
+                        return;
                     }
+                    result.catch((err) => {
+                        console.error(`[Socket Error - async handler: "${event}"]`, err);
+                    });
                 } catch (err) {
                     console.error(`[Socket Error - sync handler: "${event}"]`, err);
                 }
@@ -122,10 +123,8 @@ function createIOListener() {
                     return;
                 }
             }
-            else {
-                if (!(typeof data === 'string' || data instanceof String || !data) || data === "default") {
-                    return next(new Error('Unauthorized event'));
-                }
+            else if (!(typeof data === 'string' || data instanceof String || !data) || data === "default") {
+                return next(new Error('Unauthorized event'));
             }
             next();
         });

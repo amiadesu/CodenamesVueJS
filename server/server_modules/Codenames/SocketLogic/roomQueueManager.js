@@ -138,7 +138,6 @@ class RoomQueueManager {
             queue.process(async (job) => {
                 try {
                     const { eventType, args } = job.data;
-                    // console.log(`Processing ${eventType} for room ${roomId}`, args);
                     
                     if (this.eventProcessors[eventType]) {
                         // Spread the args array into positional parameters

@@ -11,9 +11,9 @@
                 <p>
                     {{ $t("codenames.settings.team.order") }}
                 </p>
-                <li v-for="team in gameData.gameRules.teamOrder">
+                <span v-for="team in gameData.gameRules.teamOrder">
                     {{ $t(`codenames.settings.team.${team}`) }}
-                </li>
+                </span>
                 <span  class="settings-panel-content-row single-line-row">
                     <p>
                         {{ $t("codenames.settings.maximum_amount_of_players_per_team") }}
@@ -319,7 +319,6 @@ export default defineComponent({
 }
 
 .settings-panel-bottom {
-    align-items: flex-end;
     width: 100%;
     height: 2rem;
 

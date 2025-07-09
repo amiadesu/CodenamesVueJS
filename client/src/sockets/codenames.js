@@ -24,8 +24,6 @@ export const socket = io(URL, {
     autoConnect: false,
     auth: {
         userID: localStorage.userID || "",
-        // username: localStorage.username || "",
-        // color: localStorage.color || ""
     }
 });
 

@@ -2,7 +2,6 @@
 import { useRoute, useRouter } from 'vue-router';
 import { gameStore } from '@/stores/gameData';
 import { globalStore } from '@/stores/globalData';
-import { useDocumentVisibility } from '@vueuse/core';
 import { socket, state } from "@/sockets/codenames";
 
 import TeamDesktop from '../../components/Codenames/Team/TeamDesktop.vue';
@@ -42,14 +41,6 @@ if (route.params.roomId === "") {
         router.push(`/codenames/${roomCode}`);
     });
 }
-
-// if (route.params.roomId && route.params.roomId !== 'rules') {
-//     if (!socket.connected) {
-//         socket.connect();
-//     }
-//     socket.emit("setup_client", route.params.roomId);
-// }
-
 </script>
 
 <template>

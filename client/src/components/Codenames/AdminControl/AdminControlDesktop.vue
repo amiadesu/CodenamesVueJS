@@ -30,9 +30,9 @@
                 <p>
                     {{ $t("codenames.admin.team.order") }}
                 </p>
-                <li v-for="team in gameData.gameRules.teamOrder">
+                <span v-for="team in gameData.gameRules.teamOrder">
                     {{ $t(`codenames.admin.team.${team}`) }}
-                </li>
+                </span>
                 <span class="admin-panel-content-row single-line-row">
                     <button 
                         id="randomize-team-order-button" 
@@ -421,7 +421,7 @@ export default defineComponent({
     pointer-events: all;
 
     z-index: 5;
-    /* overflow-x: scroll; */
+
 }
 
 .admin-panel.opens {
@@ -454,9 +454,7 @@ export default defineComponent({
     background-color: var(--panel-button-hover-background-color-1);
 }
 
-/* bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 */
 .admin-panel-input {
-    /* width: 100%; */
     padding: 0.1rem;
     margin: 0.15rem 0;
     background-color: var(--panel-input-background-color-1);
@@ -507,7 +505,7 @@ export default defineComponent({
     width: 95%;
     display: flex;
     flex-direction: column;
-    /* justify-content: space-between; */
+    
     align-items: center;
     text-align: left;
 }
@@ -556,18 +554,6 @@ export default defineComponent({
     width: 18%;
 }
 
-/* .admin-panel-open-button-wrapper {
-    position: relative;
-    top: 50%;
-    right: -20px;
-    width: 20px;
-    height: 20px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-} */
-
 #admin-panel-open-button {
     position: fixed;
     top: 50%;
@@ -587,7 +573,6 @@ export default defineComponent({
 }
 
 .admin-panel-bottom {
-    align-items: flex-end;
     width: 100%;
     height: 2rem;
 

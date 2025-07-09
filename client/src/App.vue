@@ -1,8 +1,8 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-const { t, availableLocales, locale, fallbackLocale } = useI18n();
-import { RouterLink, RouterView } from 'vue-router'
+const { availableLocales, locale, fallbackLocale } = useI18n();
+import { RouterView } from 'vue-router'
 import { preferencesStore } from './stores/preferences';
 
 const preferencesData = preferencesStore();

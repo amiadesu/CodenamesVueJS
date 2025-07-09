@@ -82,11 +82,6 @@ async function selectWordEvent(io, socketData, selectedWordText) {
         io.to(socketData.socketId).emit("update_client", teams, users, users[selecterIndex], endTurnSelectors, gameRules, gameProcess);
     }
 
-    // There is a possible cause of the following bug:
-    // When the user selects a word and countdown starts and then user
-    // selects another word and new countdown starts, it visually ends before
-    // it actually reaches the final.
-    // If it's not here then it's on the client side somewhere. Should test it.
     if (await shouldRevealWord()) {
         io.to(socketData.roomId).emit("start_countdown", selectedWordText);
         if (socketData.countdownInterval) {
