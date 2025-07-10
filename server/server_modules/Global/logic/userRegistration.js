@@ -1,4 +1,5 @@
 // @ts-check
+const { logger } = require("../../../utils/logger");
 
 const GlobalDB = require("../db/globalDB");
 const crypto = require("crypto");
@@ -10,10 +11,11 @@ async function setupUserRegistration() {
 async function processUser(userId, socketId, allSockets) {
     const resultNewUser = await GlobalDB.createUserEntry(userId);
     if (!resultNewUser.success) {
-        console.log(resultNewUser.error);
+        logger.warn(resultNewUser.error);
         return null;
     }
-    const { newUser, realUserID } = resultNewUser;
+    const newUser = resultNewUser.newUser;
+    const realUserID = resultNewUser.realUserID;
 
     if (!newUser) {
         await disconnectAllSockets(realUserID, allSockets);
@@ -21,7 +23,7 @@ async function processUser(userId, socketId, allSockets) {
 
     let resultGetSockets = await GlobalDB.getUserData(realUserID, "sockets");
     if (!resultGetSockets.success) {
-        console.log(resultGetSockets.error);
+        logger.warn(resultGetSockets.error);
         return null;
     }
     let sockets = resultGetSockets.value;
@@ -30,13 +32,13 @@ async function processUser(userId, socketId, allSockets) {
 
     const resultSetSockets = await GlobalDB.setUserData(realUserID, "sockets", sockets);
     if (!resultSetSockets.success) {
-        console.log(resultSetSockets.error);
+        logger.warn(resultSetSockets.error);
         return null;
     }
 
     let resultUserData = await GlobalDB.getFullUserData(realUserID);
     if (!resultUserData.success) {
-        console.log(resultUserData.error);
+        logger.warn(resultUserData.error);
         return null;
     }
     let userData = resultUserData.value;
@@ -55,7 +57,7 @@ async function updateGlobalUser(userId, newUserData) {
     }
     const resultUpdate = await GlobalDB.updateUserData(userId, dataToUpdate);
     if (!resultUpdate.success) {
-        console.log(resultUpdate.error);
+        logger.warn(resultUpdate.error);
         return null;
     }
 }
@@ -63,14 +65,13 @@ async function updateGlobalUser(userId, newUserData) {
 async function disconnectAllSockets(userId, allSockets) {
     const resultGetSockets = await GlobalDB.getUserData(userId, "sockets");
     if (!resultGetSockets.success) {
-        console.log(resultGetSockets.error);
+        logger.warn(resultGetSockets.error);
         return null;
     }
     let sockets = resultGetSockets.value;
 
     sockets.forEach((socketId) => {
         const socket = allSockets.get(socketId);
-        console.log(socket, socketId);
         if (socket) {
             socket.emit("stop_session");
             socket.disconnect();
@@ -79,7 +80,7 @@ async function disconnectAllSockets(userId, allSockets) {
 
     const resultSetSockets = await GlobalDB.setUserData(userId, "sockets", []);
     if (!resultSetSockets.success) {
-        console.log(resultSetSockets.error);
+        logger.warn(resultSetSockets.error);
         return null;
     }
 }

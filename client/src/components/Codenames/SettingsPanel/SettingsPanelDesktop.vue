@@ -11,9 +11,9 @@
                 <p>
                     {{ $t("codenames.settings.team.order") }}
                 </p>
-                <li v-for="team in gameData.gameRules.teamOrder">
+                <span v-for="team in gameData.gameRules.teamOrder">
                     {{ $t(`codenames.settings.team.${team}`) }}
-                </li>
+                </span>
                 <span  class="settings-panel-content-row single-line-row">
                     <p>
                         {{ $t("codenames.settings.maximum_amount_of_players_per_team") }}
@@ -109,7 +109,7 @@
                     {{ $t("codenames.settings.white_cards", {amount: gameData.gameRules.maxCards - gameData.totalCardAmount}) }}
                 </p>
                 <p v-else>
-                    {{ $t("codenames.settings.cards_amount_overflow") }}
+                    {{ $t("codenames.settings.card_amount_overflow") }}
                 </p>
                 <hr class="settings-panel-section-divider">
                 <span class="settings-panel-content-row single-line-row">
@@ -141,7 +141,7 @@
         </button>
         <div class="settings-panel-bottom">
             <button class="settings-panel-button" @click="openEditNamePanel">
-                {{ $t("codenames.settings.edit_name") }}
+                {{ $t("codenames.settings.edit_user_name") }}
             </button>
         </div>
     </div>
@@ -319,7 +319,6 @@ export default defineComponent({
 }
 
 .settings-panel-bottom {
-    align-items: flex-end;
     width: 100%;
     height: 2rem;
 

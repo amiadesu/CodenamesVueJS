@@ -87,19 +87,7 @@ export default defineComponent({
     },
     methods: {
         changeColor() {
-            let user = this.gameData.players.find((player) => player.id === this.gameData.userData.id);
-            user.name = this.nameValue;
-            this.gameData.userData.name = this.nameValue;
-            this.gameData.openedPanels.editNamePanel = false;
-            let anyOpened = false;
-            for (let key in this.gameData.openedPanels) {
-                if (this.gameData.openedPanels[key] === true && key !== "anything") {
-                    anyOpened = true;
-                    break;
-                }
-            }
-            this.gameData.openedPanels.anything = anyOpened;
-            socket.emit("change_color");
+            socket.emit("change_user_color");
         },
         removePlayer() {
             socket.emit("remove_player", this.player.id);

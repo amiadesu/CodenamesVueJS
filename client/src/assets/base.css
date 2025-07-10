@@ -21,6 +21,18 @@
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 
+  --color-background: var(--vt-c-white);
+  --color-background-soft: var(--vt-c-white-soft);
+  --color-background-mute: var(--vt-c-white-mute);
+
+  --color-border: var(--vt-c-divider-light-2);
+  --color-border-hover: var(--vt-c-divider-light-1);
+
+  --color-heading: var(--vt-c-text-light-1);
+  --color-text: var(--vt-c-text-light-1);
+
+  --section-gap: 160px;
+
   --color-yellow-250: #fde868;
   --color-cornflower-blue: oklch(60.563% 0.21892 292.72);
   --color-cornflower-blue-50: oklch(83.521% 0.08768 298.54);
@@ -35,23 +47,45 @@
   --color-cornflower-blue-900: oklch(3.0377% 0.02105 264.05);
   --color-cornflower-blue-950: oklch(0% 0 none);
 
-  --star-color-1: var(--color-red-300);
-  --star-color-2: var(--color-green-300);
-  --star-color-3: var(--color-blue-300);
-  --star-color-4: var(--color-yellow-300);
-  --star-color-5: var(--color-pink-300);
-
   --main-background-color: var(--color-neutral-200);
   --main-text-color: var(--color-neutral-800);
 
-  --spectators-bar-background-color: var(--color-neutral-400);
+  --error-color: var(--color-red-700);
+
+  --home-view-background-color: var(--color-indigo-200);
+
+  --star-color-1: var(--color-red-500);
+  --star-color-2: var(--color-green-500);
+  --star-color-3: var(--color-blue-500);
+  --star-color-4: var(--color-yellow-500);
+  --star-color-5: var(--color-pink-500);
+
+  --preview-top-row-background-color: var(--color-neutral-300);
+  --preview-glass-panel-color: --alpha(var(--color-violet-400) / 30%);
+  --switcher-button-active-color: #C2C5CC;
+  --switcher-button-non-active-color: var(--color-neutral-500);
+  --preview-text-color-1: var(--color-neutral-800);
+  --preview-link-color: var(--color-fuchsia-500);
+  --preview-italic-color: var(--color-amber-600);
+  --preview-highlight-color: var(--color-red-700);
+  --preview-element-block-background-color: --alpha(var(--color-zinc-300) / 60%);
+  --preview-element-block-border-color: var(--color-zinc-700);
+  --preview-divider-color: var(--color-zinc-700);
+
+  --notification-color: var(--color-amber-600);
+
+  --spectators-bar-background-color: var(--color-slate-300);
   --spectators-bar-text-color: var(--color-neutral-800);
+
+  --overlaying-panel-dimming-color: rgba(0, 0, 0, 0.5);
 
   --panel-background-color-1: --alpha(var(--color-cornflower-blue-100) / 80%);
   --panel-background-color-2: --alpha(var(--color-cornflower-blue-50) / 90%);
-  --panel-background-color-dark-1: --alpha(var(--color-neutral-600) / 80%);
+  --panel-background-color-dark-1: --alpha(var(--color-slate-400) / 80%);
+  --panel-background-color-dark-2: --alpha(var(--color-neutral-600) / 80%);
   --panel-text-color-1: var(--color-gray-800);
   --panel-text-color-2: var(--color-gray-800);
+  --panel-text-color-3: var(--color-neutral-300);
   --panel-header-1-color-1: var(--color-gray-800);
   --panel-header-2-color-1: var(--color-gray-800);
 
@@ -77,11 +111,14 @@
   --team-color-blue: --alpha(var(--color-blue-500) / 60%);
   --team-color-yellow: --alpha(var(--color-yellow-300) / 60%);
   --team-color-blacklisted: rgba(0, 0, 0, 0.4);
+  --team-text-color-warning: var(--color-red-700);
 
   --team-selection-color-red: var(--color-red-600);
   --team-selection-color-green: var(--color-green-600);
   --team-selection-color-blue: var(--color-blue-600);
   --team-selection-color-yellow: var(--color-amber-500);
+
+  --team-toggle-display-button-color: var(--color-neutral-300);
 
   --crown-color-red: --alpha(var(--color-red-500) / 90%);
   --crown-color-green: --alpha(var(--color-green-500) / 90%);
@@ -124,28 +161,13 @@
   --word-block-color-text-black: var(--color-neutral-300);
 }
 
-/* semantic color variables for this project */
-:root {
-  --color-background: var(--vt-c-white);
-  --color-background-soft: var(--vt-c-white-soft);
-  --color-background-mute: var(--vt-c-white-mute);
-
-  --color-border: var(--vt-c-divider-light-2);
-  --color-border-hover: var(--vt-c-divider-light-1);
-
-  --color-heading: var(--vt-c-text-light-1);
-  --color-text: var(--vt-c-text-light-1);
-
-  --section-gap: 160px;
-}
-
 html.light-theme {
   --main-background-color: var(--color-neutral-200);
   --main-text-color: var(--color-neutral-800);
 
   --error-color: var(--color-red-700);
 
-  --home-view-background-color: var(--color-slate-300);
+  --home-view-background-color: var(--color-indigo-200);
 
   --star-color-1: var(--color-red-500);
   --star-color-2: var(--color-green-500);
@@ -153,10 +175,24 @@ html.light-theme {
   --star-color-4: var(--color-yellow-500);
   --star-color-5: var(--color-pink-500);
 
+  --preview-top-row-background-color: var(--color-neutral-300);
+  --preview-glass-panel-color: --alpha(var(--color-violet-400) / 30%);
+  --switcher-button-active-color: #C2C5CC;
+  --switcher-button-non-active-color: var(--color-neutral-500);
+  --preview-text-color-1: var(--color-neutral-800);
+  --preview-link-color: var(--color-fuchsia-500);
+  --preview-italic-color: var(--color-amber-600);
+  --preview-highlight-color: var(--color-red-700);
+  --preview-element-block-background-color: --alpha(var(--color-zinc-300) / 60%);
+  --preview-element-block-border-color: var(--color-zinc-700);
+  --preview-divider-color: var(--color-zinc-700);
+
   --notification-color: var(--color-amber-600);
 
   --spectators-bar-background-color: var(--color-slate-300);
   --spectators-bar-text-color: var(--color-neutral-800);
+
+  --overlaying-panel-dimming-color: rgba(0, 0, 0, 0.5);
 
   --panel-background-color-1: --alpha(var(--color-cornflower-blue-100) / 80%);
   --panel-background-color-2: --alpha(var(--color-cornflower-blue-50) / 90%);
@@ -254,10 +290,24 @@ html.dark-theme {
   --star-color-4: var(--color-yellow-300);
   --star-color-5: var(--color-pink-300);
 
+  --preview-top-row-background-color: var(--color-neutral-600);
+  --preview-glass-panel-color: --alpha(var(--color-cornflower-blue-100) / 60%);
+  --switcher-button-active-color: var(--color-neutral-500);
+  --switcher-button-non-active-color: var(--color-neutral-700);
+  --preview-text-color-1: var(--color-neutral-300);
+  --preview-link-color: var(--color-sky-300);
+  --preview-italic-color: var(--color-lime-300);
+  --preview-highlight-color: var(--color-pink-300);
+  --preview-element-block-background-color: var(--color-zinc-500);
+  --preview-element-block-border-color: var(--color-zinc-700);
+  --preview-divider-color: var(--color-zinc-700);
+
   --notification-color: var(--color-yellow-300);
 
   --spectators-bar-background-color: var(--color-neutral-600);
   --spectators-bar-text-color: var(--color-neutral-200);
+
+  --overlaying-panel-dimming-color: rgba(0, 0, 0, 0.5);
 
   --panel-background-color-1: --alpha(var(--color-cornflower-blue-100) / 80%);
   --panel-background-color-2: --alpha(var(--color-cornflower-blue-50) / 90%);

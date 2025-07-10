@@ -43,7 +43,6 @@
 <script>
 import { defineComponent } from 'vue';
 import { gameStore } from '@/stores/gameData';
-// import { io } from 'socket.io-client';
 import { socket } from "@/sockets/codenames";
 
 
@@ -52,8 +51,7 @@ export default defineComponent({
         gameData: () => gameStore()
     },
     setup(props) {
-        // setup() receives props as the first argument.
-        // console.log(props.teamColor)
+        
     },
     data() {
         return {
@@ -99,16 +97,22 @@ export default defineComponent({
                     }
                 }
             );
+            this.$watch(
+                () => this.gameData.toggles.chatPanel,
+                (newValue, oldValue) => {
+                    if (newValue) {
+                        this.togglePanel();
+                        this.gameData.toggles.chatPanel = false;
+                    }
+                }
+            );
         }
     },
     mounted() {
-        // Connect to the WebSocket server
-        // this.socket = io('http://localhost:3000');
         this.listenForUpdates();
     },
     beforeUnmount() {
-        // Clean up the WebSocket connection
-        // this.socket.disconnect();
+        
     },
 });
 </script>
@@ -134,7 +138,6 @@ export default defineComponent({
     pointer-events: all;
 
     z-index: 5;
-    /* overflow-x: scroll; */
 }
 
 .chat-panel.opens {
@@ -235,7 +238,6 @@ export default defineComponent({
 }
 
 .chat-panel-input {
-    /* width: 100%; */
     padding: 0.1rem;
     margin: 0.15rem 0;
     background-color: var(--panel-input-background-color-1);
@@ -255,18 +257,6 @@ export default defineComponent({
     border-color: var(--panel-input-focus-border-color-1);
     box-shadow: 0 0 0 3px var(--panel-input-focus-box-shadow-color-1);
 }
-
-/* .chat-panel-open-button-wrapper {
-    position: relative;
-    top: 50%;
-    right: -20px;
-    width: 20px;
-    height: 20px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-} */
 
 #chat-panel-open-button {
     position: fixed;

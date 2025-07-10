@@ -53,7 +53,7 @@
                 <p>{{ displayTime() }}</p>
             </div>
             <hr class="team-divider">
-            <div class="clues-wrapper scrollable-container">
+            <div class="clues-wrapper scrollable-container" ref="cluesContainer">
                 <div class="scrollable-content">
                     <div class="clue-wrapper" v-for="clue in gameData.clues[teamColorValue]">
                         <p>{{ clue.text }}</p>

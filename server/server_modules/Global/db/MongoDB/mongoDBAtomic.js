@@ -1,21 +1,7 @@
 // @ts-check
-const crypto = require("crypto");
+const { logger } = require("../../../../utils/logger");
 
 const userSchema = require("../../MongoDBSchemas/User");
-
-const {
-    deleteAfterMNumber,
-    updateAfterMNumber,
-    deleteAfterS,
-    updateAfterS,
-    expireAfterS,
-    deleteAfterMs,
-    updateAfterMs,
-    expireAfterMs,
-    messagesLimitNumber,
-    cluesLimitNumber,
-    LOCK_TTL
-} = require("../../utils/constants");
 
 class MongoDBAtomic {
     constructor() {
@@ -56,10 +42,10 @@ class MongoDBAtomic {
             };
         } catch (error) {
             if (error.code === 11000) { // Dublicate Key Error code
-                console.log("Dublicate key detected:", error.message);
+                logger.warn(`Dublicate key ${userId} detected: ${error.message}`);
                 return { success: false, error: error.message, retryable: true };
             }
-            console.log("Error while creating user:", error);
+            logger.error(`Error while creating user: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -75,7 +61,7 @@ class MongoDBAtomic {
 
             return { success: true, value: value };
         } catch (error) {
-            console.log("Error while getting user data:", error);
+            logger.error(`Error while getting user data: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -88,7 +74,7 @@ class MongoDBAtomic {
 
             return { success: true, value: result };
         } catch (error) {
-            console.log("Error while getting user data:", error);
+            logger.error(`Error while getting user data: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -125,7 +111,7 @@ class MongoDBAtomic {
         
             return { success: true, message: "Setted user data successfully" };
         } catch (error) {
-            console.log("Error while setting user data:", error);
+            logger.error(`Error while setting user data: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -147,7 +133,7 @@ class MongoDBAtomic {
         
             return { success: true, message: "Updated user data successfully" };
         } catch (error) {
-            console.log("Error while updating user data:", error);
+            logger.error(`Error while updating user data: ${error}`);
             return { success: false, error: error.message };
         }
     }

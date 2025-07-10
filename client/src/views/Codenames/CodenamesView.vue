@@ -30,7 +30,3 @@ onUnmounted(() => {
     <CodenamesViewMobile v-else></CodenamesViewMobile>
   </template>
 </template>
-
-<style scoped>
-
-</style>

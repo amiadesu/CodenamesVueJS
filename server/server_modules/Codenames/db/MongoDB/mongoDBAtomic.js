@@ -2,21 +2,14 @@
 const roomSchema = require("../../MongoDBSchemas/Room");
 const wordPackSchema = require("../../MongoDBSchemas/WordPack");
 
+const { logger } = require("../../../../utils/logger");
+
 const {
     validTeamColors,
     defaultRoomData,
-    bannedRooms,
-    deleteAfterMNumber,
-    updateAfterMNumber,
-    deleteAfterS,
-    updateAfterS,
-    expireAfterS,
     deleteAfterMs,
-    updateAfterMs,
-    expireAfterMs,
     messagesLimitNumber,
-    cluesLimitNumber,
-    LOCK_TTL
+    cluesLimitNumber
 } = require("../../utils/constants");
 
 class MongoDBAtomic {
@@ -74,7 +67,7 @@ class MongoDBAtomic {
             if (error.code === 11000) { // Duplicate Key Error code                
                 return { success: false, message: "Room already exists" };
             }
-            console.log("Error while creating room:", error);
+            logger.error(`Error while creating room: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -90,7 +83,7 @@ class MongoDBAtomic {
 
             return { success: true, value: value };
         } catch (error) {
-            console.log("Error while getting room data:", error);
+            logger.error(`Error while getting room data: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -127,7 +120,7 @@ class MongoDBAtomic {
         
             return { success: true, message: "Setted room data successfully" };
         } catch (error) {
-            console.log("Error while setting room data:", error);
+            logger.error(`Error while setting room data: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -156,7 +149,7 @@ class MongoDBAtomic {
         
             return { success: true, message: "Added new message successfully" };
         } catch (error) {
-            console.log("Error while adding message:", error);
+            logger.error(`Error while adding message: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -186,7 +179,7 @@ class MongoDBAtomic {
         
             return { success: true, message: "Added new clue successfully" };
         } catch (error) {
-            console.log("Error while adding clue:", error);
+            logger.error(`Error while adding clue: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -225,7 +218,7 @@ class MongoDBAtomic {
     
             return { success: true, message: "Clue updated successfully" };
         } catch (error) {
-            console.log("Error while updating clue:", error);
+            logger.error(`Error while updating clue: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -253,7 +246,7 @@ class MongoDBAtomic {
         
             return { success: true, message: "Added end turn selector successfully" };
         } catch (error) {
-            console.log("Error while adding end turn selector:", error);
+            logger.error(`Error while adding end turn selector: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -282,7 +275,7 @@ class MongoDBAtomic {
         
             return { success: true, message: "Removed end turn selector successfully" };
         } catch (error) {
-            console.log("Error while removing end turn selector:", error);
+            logger.error(`Error while removing end turn selector: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -312,7 +305,7 @@ class MongoDBAtomic {
         
             return { success: true, message: "Added word selector successfully" };
         } catch (error) {
-            console.log("Error while adding word selector:", error);
+            logger.error(`Error while adding word selector: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -344,7 +337,7 @@ class MongoDBAtomic {
         
             return { success: true, message: "Removed word selector successfully" };
         } catch (error) {
-            console.log("Error while removing word selector:", error);
+            logger.error(`Error while removing word selector: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -360,7 +353,7 @@ class MongoDBAtomic {
             }
             return { success: true, value: null, message: `Couldn't find word pack with id ${packId}` };
         } catch(error) {
-            console.log("Error while getting word pack:", error);
+            logger.error(`Error while getting word pack: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -379,7 +372,7 @@ class MongoDBAtomic {
             }
             return { success: true, value: null, message: `Word pack with id ${packId} has no version attribute` };
         } catch(error) {
-            console.log("Error while getting word pack:", error);
+            logger.error(`Error while getting word pack: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -395,7 +388,7 @@ class MongoDBAtomic {
             }
             return { success: true, value: null, message: `Couldn't find word pack with id ${packId}` };
         } catch(error) {
-            console.log("Error while getting word pack without words:", error);
+            logger.error(`Error while getting word pack without words: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -414,7 +407,7 @@ class MongoDBAtomic {
             }
             return { success: true, value: [], message: `Word pack with id ${packId} has no words` };
         } catch(error) {
-            console.log("Error while getting words from word pack:", error);
+            logger.error(`Error while getting words from word pack: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -430,7 +423,7 @@ class MongoDBAtomic {
             }
             return { success: true, value: null, message: "No word packs were found" };
         } catch(error) {
-            console.log("Error while getting all word packs:", error);
+            logger.error(`Error while getting all word packs: ${error}`);
             return { success: false, error: error.message };
         }
     }

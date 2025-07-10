@@ -72,7 +72,7 @@ export default defineComponent({
                 socket.emit("select_word", wordText);
             } else if (!this.gameData.userData.isMaster && 
                 (this.gameData.gameProcess.masterTurn || this.gameData.userData.teamColor !== this.gameData.gameProcess.currentTurn)) {
-                socket.emit("proceed_click", this.word.text);
+                socket.emit("process_click", this.word.text);
             }
         },
         setClickAnimation(index) {

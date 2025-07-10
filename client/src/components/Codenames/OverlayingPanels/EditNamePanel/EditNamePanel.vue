@@ -56,7 +56,7 @@ export default defineComponent({
             if (this.nameValue === "") {
                 return;
             }
-            socket.emit("edit_name", this.nameValue);
+            socket.emit("edit_user_name", this.nameValue);
         },
         listenForUpdates() {
             

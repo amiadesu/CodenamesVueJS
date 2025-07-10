@@ -5,16 +5,17 @@ import { createPinia } from 'pinia'
 import { createI18n } from 'vue-i18n';
 
 import { languages } from './i18n/index.js'
-const messages = Object.assign(languages)
+const messages = Object.assign(languages);
 
 import { setupSocketStore } from './sockets/codenames'
 import { preferencesStore } from './stores/preferences';
 
-import { config } from "@/utils/config";
-
 import App from './App.vue'
 import router from './router'
 
+import { getConfig } from "@/utils/config";
+
+const config = getConfig();
 
 const app = createApp(App)
 
@@ -29,8 +30,8 @@ const i18n = createI18n({
     messages: messages
 });
 
-app.use(router)
 app.use(i18n);
+app.use(router);
 
 setupSocketStore();
 

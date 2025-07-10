@@ -18,8 +18,6 @@
 <script>
 import { defineComponent } from 'vue';
 import { gameStore } from '@/stores/gameData';
-// import { io } from 'socket.io-client';
-import { socket } from "@/sockets/codenames";
 
 export default defineComponent({
     computed: {

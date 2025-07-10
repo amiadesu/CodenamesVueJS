@@ -27,6 +27,17 @@ export default defineComponent({
             }
             socket.emit("setup_client", this.$route.params.roomId);
         },
+        handleKeydownPanelToggle(event) {
+            if (['INPUT', 'TEXTAREA'].includes(event.target.tagName) || event.target.isContentEditable) {
+                return;
+            }
+            if (event.key === 'o') {
+                this.gameData.toggles.adminPanel = true;
+            }
+            else if (event.key === 'p') {
+                this.gameData.toggles.chatPanel = true;
+            }
+        },
         processClicker(clickerId) {
             if (this.gameData.clickers.includes(clickerId)) {
                 this.gameData.clickers = this.gameData.clickers.filter(id => id !== clickerId);
@@ -41,6 +52,10 @@ export default defineComponent({
                 console.log("Hearing something...");
             });
 
+            socket.on("request_setup", () => {
+                this.setupClient();
+            });
+
             socket.on("request_clues", () => {
                 socket.emit("get_clues");
             });
@@ -50,7 +65,6 @@ export default defineComponent({
             });
 
             socket.on("update_client_setup", (teams, users, client, gameRules, gameProcess, endTurnSelectors, clues, gameWinStatus, chatMessages) => {
-                // console.log("Updating:", teams, users, client, gameRules, gameProcess, gameWinStatus, chatMessages);
                 this.gameData.players = users;
 
                 this.gameData.teams = teams;
@@ -72,7 +86,6 @@ export default defineComponent({
             });
 
             socket.on("update_client", (teams, users, client, endTurnSelectors, gameRules, gameProcess) => {
-                // console.log("Updating:", teams, users, client, gameRules, gameProcess);
                 this.gameData.players = users;
 
                 this.gameData.teams = teams;
@@ -91,7 +104,6 @@ export default defineComponent({
             });
 
             socket.on('update_users', (teams, users) => {
-                // console.log("Updating:", teams, users);
                 this.gameData.players = users;
 
                 this.gameData.teams = teams;
@@ -106,7 +118,6 @@ export default defineComponent({
             });
 
             socket.on("update_game_rules", (gameRules) => {
-                // console.log(gameRules);
                 this.gameData.gameRules = gameRules;
                 if (this.gameData.gameRules.maxCards !== this.gameData.wordBoardData.words.length) {
                     this.gameData.wordBoardData.wordBoardHidden = true;
@@ -153,13 +164,16 @@ export default defineComponent({
                 this.gameData.wordBoardData.words = words;
             });
 
+            socket.on("update_end_turn_selectors", (endTurnSelectors) => {
+                this.gameData.endTurnSelectors = endTurnSelectors;
+            });
+
             socket.on("start_countdown", (word) => {
                 this.gameData.selectProgress.selectedObject = word;
                 this.gameData.selectProgress.percentage = 0;
             });
 
             socket.on("update_countdown", (newProgress) => {
-                // console.log(newProgress);
                 this.gameData.selectProgress.percentage = newProgress;
             });
 
@@ -191,9 +205,10 @@ export default defineComponent({
     mounted() {
         this.listenForUpdates();
         this.setupClient();
+        window.addEventListener('keydown', this.handleKeydownPanelToggle);
     },
     beforeUnmount() {
-        
+        window.removeEventListener('keydown', this.handleKeydownPanelToggle);
     },
 });
 </script>

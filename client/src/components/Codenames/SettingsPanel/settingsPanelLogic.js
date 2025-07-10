@@ -1,5 +1,4 @@
 import { gameStore } from '@/stores/gameData';
-import { socket } from "@/sockets/codenames";
 
 export const settingsPanelMixin = {
     computed: {

@@ -85,14 +85,27 @@ export const teamMixin = {
             this.gameData.openedPanels.editCluePanel = true;
             this.gameData.openedPanels.passedObject = preprocessedClue;
         },
+        scrollToBottom() {
+            this.$nextTick(() => {
+                const container = this.$refs.cluesContainer;
+                container.scrollTop = container.scrollHeight;
+            });
+        },
         listenForUpdates() {
             this.$watch(
                 () => this.gameData.teams,
                 (newValue, oldValue) => {
-                    // console.log(this.teamColorValue, newValue, oldValue);
                     this.updateData();
                 }
             );
+            this.$watch(
+                () => [...this.gameData.clues[this.teamColorValue]],
+                (newValue, oldValue) => {
+                    if (oldValue.length < newValue.length) {
+                        this.scrollToBottom();
+                    }
+                }
+            )
         }
     },
     mounted() {

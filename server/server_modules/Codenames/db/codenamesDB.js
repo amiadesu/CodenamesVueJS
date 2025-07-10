@@ -6,21 +6,15 @@ const mongoose = require("mongoose");
 const roomSchema = require("../MongoDBSchemas/Room");
 const wordPackSchema = require("../MongoDBSchemas/WordPack");
 
+const { logger } = require("../../../utils/logger");
+
 const { config } = require("../../../utils/config");
 
 const {
     validTeamColorZodSchema,
-    validPlayerTeamColorZodSchema,
-    validWordColorZodSchema,
-    packIdZodSchema,
-    gameRulesZodSchemaNonStrict,
-    gameRulesZodSchemaStrict,
-    clueTextZodSchema,
     clueZodSchema,
     playerIdZodSchema,
-    playerZodSchema,
     selectorZodSchema,
-    wordZodSchema,
     chatMessageZodSchema
 } = require("../ZodSchemas/codenamesZodSchemas");
 
@@ -58,7 +52,7 @@ class CodenamesDB {
 
     constructor() {
         this.#redisClient = createClient(config.redis.clientOptions);
-        this.#redisClient.on('error', err => console.log('Redis Codenames Client Error', err));
+        this.#redisClient.on('error', err => logger.error(`Redis Codenames Client Error: ${err}`));
     }
 
     async initialize() {
@@ -69,24 +63,22 @@ class CodenamesDB {
 
             await mongoDBAtomic.init(this.#mongoDBClient);
 
-            console.log('Connected to Codenames MongoDB');
+            logger.info('Connected to Codenames MongoDB');
         } catch (error) {
-            console.error('Could not connect to Codenames MongoDB:', error);
+            logger.error(`Could not connect to Codenames MongoDB: ${error}`);
             throw error;
         }
         try {
             await this.#redisClient.connect();
             await redisAtomic.init(this.#redisClient);
-    
-            // await this.#redisClient.flushAll("ASYNC");
             
-            console.log('Connected to Codenames Redis');
+            logger.info('Connected to Codenames Redis');
 
             this.#redisAvailable = true;
             this.#setupAutomaticRoomPropagation();
     
         } catch (error) {
-            console.error('Could not connect to Codenames Redis:', error);
+            logger.error(`Could not connect to Codenames Redis: ${error}`);
             this.#redisAvailable = false;
         }
     }
@@ -98,7 +90,6 @@ class CodenamesDB {
     async #fetchDataFromMongoDB(roomId, key) {
         try {
             const result = await mongoDBAtomic.getRoomData(roomId, key);
-            console.log(result);
 
             const value = result.success ? result.value : null;
 
@@ -108,7 +99,7 @@ class CodenamesDB {
 
             return { success: true, value: value };
         } catch (error) {
-            console.log("Error while fetching data from MongoDB:", error);
+            logger.error(`Error while fetching data from MongoDB: ${error}`);
             return { success: false, error: error.message };
         }
         
@@ -128,7 +119,7 @@ class CodenamesDB {
             if (!exists) {
                 const result = await this.#fetchDataFromMongoDB(roomId, key);
                 if (!result.success) {
-                    console.error("Failed to fetch from Mongo during Redis entry creation:", result.error);
+                    logger.error(`Failed to fetch from Mongo during Redis entry creation: ${result.error}`);
                 }
             }
         };
@@ -150,7 +141,7 @@ class CodenamesDB {
             if (!exists) {
                 const result = await this.#fetchDataFromMongoDB(roomId, key);
                 if (!result.success) {
-                    console.error("Failed to fetch from Mongo during Redis entry creation:", result.error);
+                    logger.error(`Failed to fetch from Mongo during Redis entry creation: ${result.error}`);
                 }
             }
         } finally {
@@ -164,9 +155,9 @@ class CodenamesDB {
     async #withRedisLock(redisKey, fn) {
         const lockKey = `lock:${redisKey}`;
         const lockValue = `${process.pid}-${Date.now()}-${Math.random()}`;
-        console.log(lockKey, lockValue);
+        logger.debug(`${lockKey} ${lockValue}`);
         const acquired = await this.#redisClient.set(lockKey, lockValue, { NX: true, PX: LOCK_TTL });
-        console.log(acquired);
+        logger.debug(acquired);
         if (!acquired) return { success: false, error: "Could not acquire lock" };
     
         try {
@@ -220,7 +211,7 @@ class CodenamesDB {
                     await mongoDBAtomic.setRoomData(roomId, null, data);
                 }
             } catch (err) {
-                console.error('Sync worker error:', err);
+                logger.error(`Codenames sync worker error: ${err}`);
             }
         }, +updateAfterMs);
     }
@@ -261,7 +252,7 @@ class CodenamesDB {
             }
             return { success: true, value: newRoomId };
         } catch (error) {
-            console.log("Error on getting free room:", error);
+            logger.error(`Error on getting free room: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -274,7 +265,7 @@ class CodenamesDB {
 
             return await mongoDBAtomic.createRoom(roomId);
         } catch (error) {
-            console.log("Error on creating room:", error);
+            logger.error(`Error on creating room: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -331,13 +322,12 @@ class CodenamesDB {
             return { success: true, value: value };
         }
         catch (error) {
-            console.log("Error on getting codenames data:", error);
+            logger.error(`Error on getting codenames data: ${error}`);
             return { success: false, error: error.message };
         }
     }
 
     async setRoomData(roomId, key, value) {
-        // console.log(roomId, key, value);
         try {
             if (bannedRooms.has(roomId)) {
                 throw new Error(`Specified room ID (${roomId}) is banned`);
@@ -358,7 +348,7 @@ class CodenamesDB {
     
             return await mongoDBAtomic.setRoomData(roomId, key, value);
         } catch (error) {
-            console.error("Error while updating room data:", error);
+            logger.error(`Error while updating room data: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -394,7 +384,7 @@ class CodenamesDB {
 
             return await mongoDBAtomic.addChatMessage(roomId, newMessage);
         } catch (error) {
-            console.error('Error on adding chat message:', error);
+            logger.error(`Error on adding chat message: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -425,14 +415,14 @@ class CodenamesDB {
                         return result;
                     }
                     const resultMessage = `Successfully added clue with ID ${newClue.id} to team ${teamColor}`;
-                    console.log(resultMessage);
+                    
                     return { success: true, message: resultMessage };
                 });
             }
 
             return await mongoDBAtomic.addClue(roomId, teamColor, newClue);
         } catch (error) {
-            console.error("Error on adding clue:", error);
+            logger.error(`Error on adding clue: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -458,14 +448,14 @@ class CodenamesDB {
                         return result;
                     }
                     const resultMessage = `Successfully updated clue with ID ${clueId}`;
-                    console.log(resultMessage);
+                    
                     return { success: true, message: resultMessage };
                 });
             }
 
             return await mongoDBAtomic.updateClue(roomId, clueId, newClue);
         } catch (error) {
-            console.error("Error on updating clue:", error);
+            logger.error(`Error on updating clue: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -491,14 +481,14 @@ class CodenamesDB {
                         return result;
                     }
                     const resultMessage = `Successfully added selector with ID ${newEndTurnSelector.id}`;
-                    console.log(resultMessage);
+                    
                     return { success: true, message: resultMessage };
                 });
             }
 
             return await mongoDBAtomic.addEndTurnSelector(roomId, newEndTurnSelector);
         } catch (error) {
-            console.error("Error on adding end turn selector:", error);
+            logger.error(`Error on adding end turn selector: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -524,14 +514,14 @@ class CodenamesDB {
                         return result;
                     }
                     const resultMessage = `Successfully removed selector with ID ${selectorId}`;
-                    console.log(resultMessage);
+                    
                     return { success: true, message: resultMessage };
                 });
             }
 
             return await mongoDBAtomic.removeEndTurnSelector(roomId, selectorId);
         } catch (error) {
-            console.error("Error removing selector:", error);
+            logger.error(`Error removing selector: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -560,14 +550,14 @@ class CodenamesDB {
                         return result;
                     }
                     const resultMessage = `Successfully removed selector with ID ${newSelector.id}`;
-                    console.log(resultMessage);
+                    
                     return { success: true, message: resultMessage };
                 });
             }
 
             return await mongoDBAtomic.addWordSelector(roomId, wordText, newSelector);
         } catch (error) {
-            console.error("Error adding selector:", error);
+            logger.error(`Error adding selector: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -596,14 +586,14 @@ class CodenamesDB {
                         return result;
                     }
                     const resultMessage = `Successfully removed selector with ID ${selectorId}`;
-                    console.log(resultMessage);
+                    
                     return { success: true, message: resultMessage };
                 });
             }
 
             return await mongoDBAtomic.removeWordSelector(roomId, wordText, selectorId);
         } catch (error) {
-            console.error("Error removing selector:", error);
+            logger.error(`Error removing selector: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -612,7 +602,7 @@ class CodenamesDB {
         try {
             return await mongoDBAtomic.getWordPack(packId);
         } catch(error) {
-            console.log("Error while getting word pack:", error);
+            logger.error(`Error while getting word pack: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -621,7 +611,7 @@ class CodenamesDB {
         try {
             return await mongoDBAtomic.getWordPackNoWords(packId);
         } catch(error) {
-            console.log("Error while getting word pack without words:", error);
+            logger.error(`Error while getting word pack without words: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -630,7 +620,7 @@ class CodenamesDB {
         try {
             return await mongoDBAtomic.getWordPackWordsOnly(packId);
         } catch(error) {
-            console.log("Error while getting words from word pack:", error);
+            logger.error(`Error while getting words from word pack: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -639,7 +629,7 @@ class CodenamesDB {
         try {
             return await mongoDBAtomic.getAllWordPacks();
         } catch(error) {
-            console.log("Error while getting all word packs:", error);
+            logger.error(`Error while getting all word packs: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -648,7 +638,7 @@ class CodenamesDB {
         try {
             return await mongoDBAtomic.setWordPack(packData);
         } catch (error) {
-            console.error('Error updating word pack:', error);
+            logger.error(`Error updating word pack: ${error}`);
             return { success: false, error: error.message };
         }
     }

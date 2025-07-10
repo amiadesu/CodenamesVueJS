@@ -1,8 +1,9 @@
 import { reactive } from "vue";
 import { io } from "socket.io-client";
 import { gameStore } from '@/stores/gameData';
+import { getConfig } from "@/utils/config";
 
-import { config } from "@/utils/config";
+const config = getConfig();
 
 let gameData = null;
 
@@ -16,15 +17,13 @@ export const state = reactive({
 });
 
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = process.env.NODE_ENV === "production" ? undefined : config.serverIPs.codenames;
+const URL = config.serverURLs.codenames;
 
 export const socket = io(URL, {
     path: "/ios/",
     autoConnect: false,
     auth: {
         userID: localStorage.userID || "",
-        // username: localStorage.username || "",
-        // color: localStorage.color || ""
     }
 });
 

@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia';
-import { config } from '../utils/config';
+import { getConfig } from '@/utils/config';
+
+const config = getConfig();
 
 export const preferencesStore = defineStore('preferences', {
     state: () => ({

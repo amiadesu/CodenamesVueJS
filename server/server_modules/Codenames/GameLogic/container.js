@@ -10,13 +10,15 @@ class DIContainer {
          *   gameSetup: GameSetupModule,
          *   permissionsValidation: PermissionsValidationModule,
          *   words: WordsModule
+         *   wordHelpers: WordHelpersModule
          * }} */
         this.modules = {
             gameboard: require("./gameboard"),
             gameManager: require("./gameManager"),
             gameSetup: require("./gameSetup"),
             permissionsValidation: require("./permissionsValidation"),
-            words: require("./words")
+            words: require("./words"),
+            wordHelpers: require("./wordHelpers")
         };
     }
   

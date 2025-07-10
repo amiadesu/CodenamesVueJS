@@ -1,4 +1,6 @@
 // @ts-check
+const { logger } = require("../../../utils/logger");
+
 const mongoose = require("mongoose");
 const userSchema = require("../MongoDBSchemas/User");
 
@@ -9,26 +11,13 @@ const mongoDBAtomic = require("./MongoDB/mongoDBAtomic");
 const redisAtomic = require("./Redis/redisAtomic");
 
 const {
-    userExample,
     validKeys,
-    bannedRooms,
-    deleteAfterMNumber,
-    updateAfterMNumber,
-    deleteAfterS,
-    updateAfterS,
     expireAfterS,
-    deleteAfterMs,
     updateAfterMs,
-    expireAfterMs,
-    messagesLimitNumber,
-    cluesLimitNumber,
-    messagesLimit,
-    cluesLimit,
     LOCK_TTL
 } = require("../utils/constants");
 
 class GlobalDB {
-
     #redisClient;
     #mongoDBClient;
     #User;
@@ -36,7 +25,7 @@ class GlobalDB {
     
     constructor() {
         this.#redisClient = createClient(config.redis.clientOptions);
-        this.#redisClient.on('error', err => console.log('Redis Global Client Error', err));
+        this.#redisClient.on('error', err => logger.error(`Redis Global Client Error ${err}`));
     }
 
     async initialize() {
@@ -46,22 +35,22 @@ class GlobalDB {
 
             await mongoDBAtomic.init(this.#mongoDBClient);
 
-            console.log('Connected to Global MongoDB');
+            logger.info('Connected to Global MongoDB');
         } catch(error) {
-            console.error('Could not connect to Global MongoDB:', error);
+            logger.error(`Could not connect to Global MongoDB: ${error}`);
             throw error;
         }
         try {
             await this.#redisClient.connect();
             await redisAtomic.init(this.#redisClient);
             
-            console.log('Connected to Global Redis');
+            logger.info('Connected to Global Redis');
 
             this.#redisAvailable = true;
             this.#setupAutomaticRoomPropagation();
     
         } catch (error) {
-            console.error('Could not connect to Global Redis:', error);
+            logger.error(`Could not connect to Global Redis: ${error}`);
             this.#redisAvailable = false;
         }
     }
@@ -73,7 +62,6 @@ class GlobalDB {
     async #fetchDataFromMongoDB(userId, key) {
         try {
             const result = await mongoDBAtomic.getUserData(userId, key);
-            console.log(result);
 
             const value = result.success ? result.value : null;
 
@@ -83,7 +71,7 @@ class GlobalDB {
 
             return { success: true, value: value };
         } catch (error) {
-            console.log("Error while fetching data from MongoDB:", error);
+            logger.error(`Error while fetching data from MongoDB: ${error}`);
             return { success: false, error: error.message };
         }
         
@@ -103,7 +91,7 @@ class GlobalDB {
             if (!exists) {
                 const result = await this.#fetchDataFromMongoDB(userId, key);
                 if (!result.success) {
-                    console.error("Failed to fetch from Mongo during Redis entry creation:", result.error);
+                    logger.error(`Failed to fetch from Mongo during Redis entry creation: ${result.error}`);
                 }
             }
         };
@@ -125,7 +113,7 @@ class GlobalDB {
             if (!exists) {
                 const result = await this.#fetchDataFromMongoDB(userId, key);
                 if (!result.success) {
-                    console.error("Failed to fetch from Mongo during Redis entry creation:", result.error);
+                    logger.error(`Failed to fetch from Mongo during Redis entry creation: ${result.error}`);
                 }
             }
         } finally {
@@ -139,9 +127,9 @@ class GlobalDB {
     async #withRedisLock(redisKey, fn) {
         const lockKey = `lock:${redisKey}`;
         const lockValue = `${process.pid}-${Date.now()}-${Math.random()}`;
-        console.log(lockKey, lockValue);
+        logger.debug(`${lockKey} ${lockValue}`);
         const acquired = await this.#redisClient.set(lockKey, lockValue, { NX: true, PX: LOCK_TTL });
-        console.log(acquired);
+        logger.debug(acquired);
         if (!acquired) return { success: false, error: "Could not acquire lock" };
     
         try {
@@ -195,7 +183,7 @@ class GlobalDB {
                     await mongoDBAtomic.setUserData(userId, null, data);
                 }
             } catch (err) {
-                console.error('Sync worker error:', err);
+                logger.error(`Global sync worker error: ${err}`);
             }
         }, +updateAfterMs);
     }
@@ -218,7 +206,7 @@ class GlobalDB {
 
             return { success: false, error: "Couldn't create user in 5 attempts" };
         } catch (error) {
-            console.log("Error on creating room:", error);
+            logger.error(`Error on creating room: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -235,13 +223,6 @@ class GlobalDB {
 
             if (this.#redisAvailable) {
                 const redisKey = this.#getRedisKey(userId, key);
-
-                if (await this.#redisClient.exists(redisKey)) {
-                    const result = await redisAtomic.get(userId, key, expireAfterS);
-                    if (result.success && result.value !== undefined) {
-                        return result;
-                    }
-                }
 
                 return await this.#withRedisLock(redisKey, async () => {
                     if (await this.#redisClient.exists(redisKey)) {
@@ -271,7 +252,7 @@ class GlobalDB {
             return { success: true, value: value };
         }
         catch (error) {
-            console.log("Error on getting user data:", error);
+            logger.error(`Error on getting user data: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -282,9 +263,37 @@ class GlobalDB {
                 throw new Error("User ID is empty");
             }
 
-            return await mongoDBAtomic.getFullUserData(userId);
+            const resultMongoDBFullUserData = await mongoDBAtomic.getFullUserData(userId);
+            if (!resultMongoDBFullUserData.success) {
+                return resultMongoDBFullUserData;
+            }
+
+            let success = true;
+            let errorMessage = null;
+            let fullUserData = resultMongoDBFullUserData.value;
+            ["name", "color", "sockets"].forEach(async (key) => {
+                if (!success) {
+                    return;
+                }
+                const resultKey = await this.getUserData(userId, key);
+                if (!resultKey.success) {
+                    success = false;
+                    errorMessage = resultKey.error;
+                    return;
+                }
+                fullUserData[key] = resultKey.value;
+            });
+
+            if (!success) {
+                throw new Error(errorMessage);
+            }
+
+            return {
+                success: success,
+                value: fullUserData
+            };
         } catch (error) {
-            console.log("Error on getting full user data:", error);
+            logger.error(`Error on getting full user data: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -311,7 +320,7 @@ class GlobalDB {
     
             return await mongoDBAtomic.setUserData(userId, key, value);
         } catch (error) {
-            console.error("Error while updating user data:", error);
+            logger.error(`Error while updating user data: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -321,8 +330,6 @@ class GlobalDB {
             if (userId === "") {
                 throw new Error("User ID is empty");
             }
-
-            console.log(newData);
 
             const keys = Object.keys(newData);
 
@@ -347,7 +354,7 @@ class GlobalDB {
     
             return await mongoDBAtomic.setUserData(userId, null, newData);
         } catch (error) {
-            console.error("Error while updating user data:", error);
+            logger.error(`Error while updating user data: ${error}`);
             return { success: false, error: error.message };
         }
     }

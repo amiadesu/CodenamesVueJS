@@ -1,17 +1,17 @@
 import { gameStore } from '@/stores/gameData';
-// import { io } from 'socket.io-client';
 import { socket } from "@/sockets/codenames";
+import { getConfig } from '@/utils/config';
 
 export const adminControlMixin = {
     computed: {
         gameData: () => gameStore()
     },
     setup(props) {
-        // setup() receives props as the first argument.
-        // console.log(props.teamColor)
+        
     },
     data() {
         return {
+            restrictions: getConfig().defaultGameRules,
             opened: false,
             oldAmount: 2,
             isDisabled: false,
@@ -23,78 +23,83 @@ export const adminControlMixin = {
         togglePanel() {
             this.opened = !this.opened;
         },
+        handleKeyTogglePanel(event) {
+            console.log(event.key);
+            if (event.key === 'o' || event.key === 'O') {
+                this.togglePanel();
+            }
+        },
+        clamp(x, minx, maxx) {
+            if (x < minx) {
+                x = minx;
+            }
+            if (x > maxx) {
+                x = maxx;
+            }
+            return x;
+        },
         clampGameRules() {
-            if (this.gameData.gameRules.teamAmount < 2) {
-                this.gameData.gameRules.teamAmount = 2;
-            }
-            if (this.gameData.gameRules.teamAmount > 4) {
-                this.gameData.gameRules.teamAmount = 4;
-            }
+            this.gameData.gameRules.teamAmount = clamp(
+                this.gameData.gameRules.teamAmount, 
+                this.restrictions.teamAmount.min, 
+                this.restrictions.teamAmount.max
+            );
 
-            if (this.gameData.gameRules.maximumPlayers < 1) {
-                this.gameData.gameRules.maximumPlayers = 1;
-            }
-            if (this.gameData.gameRules.maximumPlayers > 10) {
-                this.gameData.gameRules.maximumPlayers = 10;
-            }
+            this.gameData.gameRules.maximumPlayers = clamp(
+                this.gameData.gameRules.maximumPlayers, 
+                this.restrictions.maximumPlayers.min, 
+                this.restrictions.maximumPlayers.max
+            );
 
-            if (this.gameData.gameRules.firstMasterTurnTime < 0) {
-                this.gameData.gameRules.firstMasterTurnTime = 0;
-            }
-            if (this.gameData.gameRules.firstMasterTurnTime > 3599) {
-                this.gameData.gameRules.firstMasterTurnTime = 3599;
-            }
+            this.gameData.gameRules.firstMasterTurnTime = this.clamp(
+                this.gameData.gameRules.firstMasterTurnTime,
+                this.restrictions.firstMasterTurnTime.min,
+                this.restrictions.firstMasterTurnTime.max
+            );
+        
+            this.gameData.gameRules.masterTurnTime = this.clamp(
+                this.gameData.gameRules.masterTurnTime,
+                this.restrictions.masterTurnTime.min,
+                this.restrictions.masterTurnTime.max
+            );
+        
+            this.gameData.gameRules.teamTurnTime = this.clamp(
+                this.gameData.gameRules.teamTurnTime,
+                this.restrictions.teamTurnTime.min,
+                this.restrictions.teamTurnTime.max
+            );
 
-            if (this.gameData.gameRules.masterTurnTime < 0) {
-                this.gameData.gameRules.masterTurnTime = 0;
-            }
-            if (this.gameData.gameRules.masterTurnTime > 3599) {
-                this.gameData.gameRules.masterTurnTime = 3599;
-            }
-
-            if (this.gameData.gameRules.teamTurnTime < 0) {
-                this.gameData.gameRules.teamTurnTime = 0;
-            }
-            if (this.gameData.gameRules.teamTurnTime > 3599) {
-                this.gameData.gameRules.teamTurnTime = 3599;
-            }
-
-            if (this.gameData.gameRules.extraTime < 0) {
-                this.gameData.gameRules.extraTime = 0;
-            }
-            if (this.gameData.gameRules.extraTime > 3599) {
-                this.gameData.gameRules.extraTime = 3599;
-            }
-
-            if (this.gameData.gameRules.guessesLimit < 0) {
-                this.gameData.gameRules.guessesLimit = 0;
-            }
-            if (this.gameData.gameRules.guessesLimit > 99) {
-                this.gameData.gameRules.guessesLimit = 99;
-            }
-
-            if (this.gameData.gameRules.baseCards < 1) {
-                this.gameData.gameRules.baseCards = 1;
-            }
-            if (this.gameData.gameRules.baseCards > this.gameData.gameRules.maxCards) {
-                this.gameData.gameRules.baseCards = this.gameData.gameRules.maxCards;
-            }
+            this.gameData.gameRules.extraTime = this.clamp(
+                this.gameData.gameRules.extraTime,
+                this.restrictions.extraTime.min,
+                this.restrictions.extraTime.max
+            );
+        
+            this.gameData.gameRules.guessesLimit = this.clamp(
+                this.gameData.gameRules.guessesLimit,
+                this.restrictions.guessesLimit.min,
+                this.restrictions.guessesLimit.max
+            );
+        
+            this.gameData.gameRules.baseCards = this.clamp(
+                this.gameData.gameRules.baseCards,
+                this.restrictions.baseCards.min,
+                this.gameData.gameRules.maxCards
+            );
 
             for (let i = 0; i < this.gameData.gameRules.teamAmount - 1; i++) {
-                if (this.gameData.gameRules.extraCards[i] < 1 - this.gameData.gameRules.baseCards) {
-                    this.gameData.gameRules.extraCards[i] = 1 - this.gameData.gameRules.baseCards;
-                }
-                if (this.gameData.gameRules.extraCards[i] > this.gameData.gameRules.maxCards) {
-                    this.gameData.gameRules.extraCards[i] = this.gameData.gameRules.maxCards;
-                }
+                this.gameData.gameRules.extraCards[i] = this.clamp(
+                    this.gameData.gameRules.extraCards[i],
+                    this.restrictions.baseCards.min - this.gameData.gameRules.baseCards,
+                    this.gameData.gameRules.maxCards
+                );
             }
 
-            if (this.gameData.gameRules.blackCards < 0) {
-                this.gameData.gameRules.blackCards = 0;
-            }
-            if (this.gameData.gameRules.blackCards > this.gameData.gameRules.maxCards - this.gameData.gameRules.teamAmount) {
-                this.gameData.gameRules.blackCards = this.gameData.gameRules.maxCards - this.gameData.gameRules.teamAmount;
-            }
+            this.gameData.gameRules.blackCards = this.clamp(
+                this.gameData.gameRules.blackCards,
+                this.restrictions.blackCards.min,
+                this.gameData.gameRules.maxCards - this.gameData.gameRules.teamAmount
+            );
         },
         totalCards() {
             let extraSum = 0;
@@ -141,7 +146,6 @@ export const adminControlMixin = {
         },
         randomizeTeamOrder() {
             socket.emit("randomize_team_order");
-            // socket.emit("refresh_gameboard");
         },
         openWordPackSelectionPanel() {
             this.gameData.openedPanels.anything = true;
@@ -187,22 +191,21 @@ export const adminControlMixin = {
             }, 100);
         },
         listenForUpdates() {
-            // socket.on("notify_client_about_change", () => {
-            //     this.updateData();
-            // });
-
-            // this.socket.on("user_connected", (users) => {
-            //     this.users = users
-            // });
+            this.$watch(
+                () => this.gameData.toggles.adminPanel,
+                (newValue, oldValue) => {
+                    if (newValue) {
+                        this.togglePanel();
+                        this.gameData.toggles.adminPanel = false;
+                    }
+                }
+            );
         }
     },
     mounted() {
-        // Connect to the WebSocket server
-        // this.socket = io('http://localhost:3000');
         this.listenForUpdates();
     },
     beforeUnmount() {
-        // Clean up the WebSocket connection
-        // this.socket.disconnect();
+        
     },
 };

@@ -1,14 +1,14 @@
 <script setup>
 import { useRoute } from 'vue-router';
-import { gameStore } from '@/stores/gameData';
 import { globalStore } from '@/stores/globalData';
-import { useDocumentVisibility } from '@vueuse/core';
+import { getConfig } from '@/utils/config';
 
-import { config } from '../../utils/config';
 import Background from '../../components/Home/Background.vue';
 import GamePreview from '../../components/Home/GamePreview.vue';
 import LanguageSelector from '../../components/Global/LanguageSelector.vue';
 import ThemeToggler from '../../components/Global/ThemeToggler.vue';
+
+const config = getConfig();
 
 const availableGames = config["availableGames"];
 
@@ -19,27 +19,25 @@ globalData.remInPixels = parseFloat(getComputedStyle(document.documentElement).f
 
 const route = useRoute();
 
-// if (route.params.roomId && route.params.roomId !== 'rules') {
-//     if (!socket.connected) {
-//         socket.connect();
-//     }
-//     socket.emit("setup_client", route.params.roomId);
-// }
-
 </script>
 
 <template>
     <div id="app-wrapper">
-        <Background></Background>
         <div class="row-wrapper top-row">
+            <span id="website-name-title">
+                {{ config.websiteTitle }}
+            </span>
             <LanguageSelector></LanguageSelector>
             <ThemeToggler></ThemeToggler>
         </div>
-        <div id="game-previews-list-wrapper">
-            <div id="game-previews-list-glass-panel">
-                <template v-for="gameCodename in availableGames">
-                    <GamePreview :game-codename="gameCodename"></GamePreview>
-                </template>
+        <div id="home-view-wrapper">
+            <Background></Background>
+            <div id="game-previews-list-wrapper">
+                <div id="game-previews-list-glass-panel">
+                    <template v-for="gameCodename in availableGames">
+                        <GamePreview :game-codename="gameCodename"></GamePreview>
+                    </template>
+                </div>
             </div>
         </div>
     </div>
@@ -56,32 +54,65 @@ const route = useRoute();
 
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: flex-end;
     flex-direction: column;
-    z-index: 1;
-    overflow-y: auto;
+    z-index: 20;
 }
 
-#game-previews-list-wrapper {
+#home-view-wrapper {
+    height: 96%;
     width: 100%;
-    height: max-content;
+    margin-top: 0.5rem;
+
+    background-color: var(--home-view-background-color);
+
+    position: relative;
+
     display: flex;
     align-items: center;
     justify-content: flex-start;
     flex-direction: column;
-    row-gap: 1rem;
+    z-index: 0;
+
+    overflow-y: visible;
+    overflow-x: hidden;
+}
+
+#home-view-background {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 100vh;
+}
+
+#game-previews-list-wrapper {
+    width: 100%;
+    height: auto;
+    min-height: 90%;
+    flex-grow: 1;
+    flex-shrink: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    margin-bottom: 2rem;
+
+    overflow-y: auto;
+
+    z-index: 1;
 }
 
 #game-previews-list-glass-panel {
     width: 66.5%;
     height: max-content;
     padding: 2rem;
-    margin-top: 4%;
     margin-bottom: 2rem;
 
     border-radius: 1rem;
 
-    background-color: --alpha(var(--color-cornflower-blue-100) / 60%);
+    background-color: var(--preview-glass-panel-color);
     backdrop-filter: blur(2px) saturate(1);
     -webkit-backdrop-filter: blur(2px) saturate(1);
 
@@ -103,10 +134,33 @@ const route = useRoute();
     height: 4%;
     width: 100%;
     align-items: start;
-    position: fixed;
-    top: 0;
-    left: 0;
     z-index: 5;
-    padding-right: 15px;
+    margin-bottom: auto;
+    background-color: var(--preview-top-row-background-color);
+    position: relative;
+}
+
+#website-name-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0 auto;
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-size: 1.1rem;
+
+}
+
+@media screen and (max-width: 1300px) {
+    #game-previews-list-glass-panel {
+        width: 80%;
+    }
+}
+
+@media screen and (max-width: 650px) {
+    #game-previews-list-glass-panel {
+        width: 90%;
+    }
 }
 </style>

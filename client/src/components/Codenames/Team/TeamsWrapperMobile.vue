@@ -105,7 +105,6 @@ export default defineComponent({
             this.$watch(
                 () => this.gameData.teams,
                 (newValue, oldValue) => {
-                    // console.log(this.teamColorValue, newValue, oldValue);
                     this.updateData();
                 }
             );

@@ -1,5 +1,8 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { getConfig } from '@/utils/config';
+
+const defaults = getConfig().defaultGameRules;
 
 export const gameStore = defineStore('gameData', () => {
     const players = ref([]);
@@ -15,28 +18,33 @@ export const gameStore = defineStore('gameData', () => {
     });
     const traitors = ref([]);
     const gameRules = ref({
-        teamAmount: 2,
-        maximumPlayers: 4,
-        teamOrder: ["red", "green"],
-        countdownTime: 0.5,
-        firstMasterTurnTime: 120,
-        masterTurnTime: 60,
-        teamTurnTime: 60,
-        extraTime: 15,
-        freezeTime: false,
-        limitedGuesses: true,
-        guessesLimit: 5,
-        baseCards: 7,
-        extraCards: [3, 2, 1, 0],
-        blackCards: 1,
-        maxCards: 36,
-        fieldSize: "6x6",
+        teamAmount: defaults.teamAmount.default,
+        maximumPlayers: defaults.maximumPlayers.default,
+        teamOrder: defaults.teamOrder.default,
+        countdownTime: defaults.countdownTime.default,
+        firstMasterTurnTime: defaults.firstMasterTurnTime.default,
+        masterTurnTime: defaults.masterTurnTime.default,
+        teamTurnTime: defaults.teamTurnTime.default,
+        extraTime: defaults.extraTime.default,
+        freezeTime: defaults.freezeTime.default,
+        limitedGuesses: defaults.limitedGuesses.default,
+        guessesLimit: defaults.guessesLimit.default,
+        baseCards: defaults.baseCards.default,
+        extraCards: [
+            defaults.extraCards[0].default, 
+            defaults.extraCards[1].default, 
+            defaults.extraCards[2].default, 
+            defaults.extraCards[3].default
+        ],
+        blackCards: defaults.blackCards.default,
+        maxCards: defaults.maxCards.default,
+        fieldSize: defaults.fieldSize.default,
         wordPack: {
-            packId: "english",
+            packId: defaults.wordPack.packId.default,
             name: ""
         },
-        gamemode: "default",
-        locked: false
+        gamemode: defaults.gamemode.default,
+        locked: defaults.locked.default
     });
     const teams = ref({
         "red" : {
@@ -131,6 +139,10 @@ export const gameStore = defineStore('gameData', () => {
         online: true,
         disconnected: false
     });
+    const toggles = ref({
+        adminPanel: false,
+        chatPanel: false
+    });
 
     return {
         players, 
@@ -150,6 +162,7 @@ export const gameStore = defineStore('gameData', () => {
         totalCardAmount, 
         clickers,
         shouldScrollDownChat,
-        serverState
+        serverState,
+        toggles
     };
 });

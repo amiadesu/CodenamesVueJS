@@ -2,8 +2,8 @@
 import { useRoute } from 'vue-router';
 import { gameStore } from '@/stores/gameData';
 import { globalStore } from '@/stores/globalData';
-import { useDocumentVisibility } from '@vueuse/core';
-import { socket, state } from "@/sockets/codenames";
+import { state } from "@/sockets/codenames";
+import { getConfig } from '@/utils/config';
 
 import TeamsWrapperMobile from '../../components/Codenames/Team/TeamsWrapperMobile.vue';
 import EventListener from '../../components/Codenames/EventListener/EventListener.vue';
@@ -22,6 +22,7 @@ import WordPackInfoPanel from '../../components/Codenames/OverlayingPanels/WordP
 import ThemeToggler from '../../components/Global/ThemeToggler.vue';
 import RulesButton from '../../components/Codenames/RulesButton/RulesButton.vue';
 import LanguageSelector from '../../components/Global/LanguageSelector.vue';
+import CodenamesRulesView from './CodenamesRulesView.vue';
 
 const visibility = 'visible';
 let gameData = gameStore();
@@ -31,13 +32,7 @@ globalData.remInPixels = parseFloat(getComputedStyle(document.documentElement).f
 
 const route = useRoute();
 
-// if (route.params.roomId && route.params.roomId !== 'rules') {
-//     if (!socket.connected) {
-//         socket.connect();
-//     }
-//     socket.emit("setup_client", route.params.roomId);
-// }
-
+const config = getConfig();
 </script>
 
 <template>
@@ -98,7 +93,15 @@ const route = useRoute();
             </template>
         </template>
         <template v-else-if="$route.params.roomId === 'rules'">
-        
+            <div class="row-wrapper top-row">
+                <span id="website-name-title">
+                    {{ config.websiteTitle }}
+                </span>
+                <LanguageSelector></LanguageSelector>
+                <ThemeToggler></ThemeToggler>
+            </div>
+            <div id="game-rules-background"></div>
+            <CodenamesRulesView></CodenamesRulesView>
         </template>
         <template v-else>
 
@@ -118,6 +121,16 @@ const route = useRoute();
     justify-content: start;
     flex-direction: column;
     z-index: 1;
+}
+
+#game-rules-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--home-view-background-color);
+    padding-top: 2%;
 }
 
 #game {
@@ -166,7 +179,23 @@ const route = useRoute();
 .row-wrapper.top-row {
     height: 4%;
     width: 100%;
-    justify-content: left;
+    justify-content: right;
+    z-index: 5;
+    margin-bottom: auto;
+    background-color: var(--preview-top-row-background-color);
+    position: relative;
+}
+
+#website-name-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0 auto;
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-size: 1.1rem;
+
 }
 
 .row-wrapper.teams {
@@ -219,7 +248,7 @@ const route = useRoute();
     left: 0;
     height: 100vh;
     width: 100vw;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--overlaying-panel-dimming-color);
 
     display: flex;
     align-items: center;

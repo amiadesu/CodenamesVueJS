@@ -14,20 +14,946 @@
     "gamePreview" : {
         "codenames" : {
             "name" : "Codenames",
-            "description" : "In Codenames, two rival spymasters know the secret identities of 25 agents. Their teammates, however, only know these agents by their codenames — single, seemingly random words like “chocolate,” “sunflower,” or even “carrot.” (Yes, there's an agent out there codenamed \"carrot.\") The goal is simple: each spymaster wants their team to identify all of their agents first, without accidentally revealing the assassin.",
-            "rules" : ""
+            "description" : "Codenames is a team word game where players try to identify their agents hidden in a grid of words. Each team has a Spymaster who gives one-word clues linked to multiple words on the board, and teammates try to guess them while avoiding the opposing team’s words, innocent bystanders, and the deadly assassin. The first team to find all their agents wins."
         },
-        "example" : {
-            "name" : "Game preview example",
-            "description" : "An example of a game preview. This is the description.",
-            "rules" : ""
-        },
-        "read_rules" : "Read rules",
+        "read_rules" : "Rules",
         "enter_room_code" : "Enter room code",
         "or" : "OR",
         "create_new_room" : "Create new room"
     },
     "codenames" : {
+        "states" : {
+            "true" : "enabled",
+            "false" : "disabled"
+        },
+        "rules" : {
+            "done_reading" : "Done reading?",
+            "game_rules" : {
+                "name" : "Game rules",
+                "title" : "Codenames game rules:",
+                "original_rules_link" : {
+                    "message_text" : "Original rules can be found {link}.",
+                    "url_text" : "here"
+                },
+                "original_rules_excerpt" : "A brief excerpt from the original rules that apply to this version of the game as well:",
+                "original_rules" : [
+                    {
+                        "text" : "Game requires at least 4 players (2 teams of 2 players)."
+                    },
+                    {
+                        "text" : "Masters of each team can see the color of words, their teammates cannot."
+                    },
+                    {
+                        "text" : "Each turn master can give 1 clue to their teammates. Rules for giving a clue:",
+                        "subrules" : [
+                            {
+                                "text" : "The clues must consist of 1 word and 1 number. The clue word should link the words you have chosen on the board, and the number of clues should match the number of words on the board."
+                            },
+                            {
+                                "text" : "You cannot give clues that indicate the location of words on the board, the number of letters in them, etc. Also, you cannot give {italic0} additional information about the clue.",
+                                "italics" : [
+                                    {
+                                        "text" : "any"
+                                    }
+                                ]
+                            },
+                            {
+                                "text" : "The clue word should be in the language your room is playing. Foreign words are {italic0} allowed if other teams approve them.",
+                                "italics" : [
+                                    {
+                                        "text" : "only"
+                                    }
+                                ]
+                            },
+                            {
+                                "text" : "The clue word must not repeat, be a compound of or be the same root as any word {italic0} discovered on the board.",
+                                "italics" : [
+                                    {
+                                        "text" : "not yet"
+                                    }
+                                ]
+                            },
+                            {
+                                "text" : "In contrast to the above rule, words connected by rhyme or ending are left to the reasoning of the room host."
+                            },
+                            {
+                                "text" : "The same goes for homonyms, acronyms and abbreviations."
+                            },
+                            {
+                                "text" : "The same also applies for compound words, such as {word0}, but your host can allow also such variants as {word1} and {word2}, but in no case should a player be allowed to come up with their own compound words.",
+                                "words" : [
+                                    {
+                                        "text" : "Greenhouse"
+                                    },
+                                    {
+                                        "text" : "Pack rat"
+                                    },
+                                    {
+                                        "text" : "Mother-in-law"
+                                    }
+                                ]
+                            },
+                            {
+                                "text" : "Proper names are always valid if there is only a name (one word), but if you want to clarify if you mean one or the other person, place, building, etc., then you need host confirmation."
+                            },
+                            {
+                                "text" : "Don't be too strict - the rules about compounds and roots only apply according to modern word morphology."
+                            },
+                            {
+                                "text" : "Clues with the number 0 are allowed - you may give them if you want to show your teammates that they {italic0} choose a word related to the clue you just gave them.",
+                                "italics" : [
+                                    {
+                                        "text" : "must not"
+                                    }
+                                ]
+                            },
+                            {
+                                "text" : "For more examples, please, refer to the {section0} section.",
+                                "section_links" : [
+                                    {
+                                        "text" : "Clues examples",
+                                        "link" : "#clues-examples"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "If the other team's master gives an invalid clue on his current turn, he skips his next turn. This rule applies {italic0} to the current turn's clue - if no one noticed that it was invalid on the current turn, but noticed it later, the rule {italic1} apply.",
+                        "italics" : [
+                            {
+                                "text" : "only"
+                            },
+                            {
+                                "text" : "does not"
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "Each turn begins with the master's turn. A team cannot make a move until the master has made a move. Both the master's move and the team's move have a time limit. If the master fails to make his move in the given time, he starts spending his team's time."
+                    },
+                    {
+                        "text" : "The team must try to guess the words based on their master's clues, and the team has the right to end their current turn early. Whether to allow guessing words on random is left to the host's judgment."
+                    },
+                    {
+                        "text" : "For guessing words of their own color the team gets extra time, for revealing words of the other team's color or white color the team's turn ends immediately. If a team reveals a word of black color, it is eliminated from the game and can no longer win it {italic0} if it has 0 words left.",
+                        "italics" : [
+                            {
+                                "text" : "even"
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "The team that was able to guess all the words of their color first and, in the process, {italic0} reveal the black color word wins.",
+                        "italics" : [
+                            {
+                                "text" : "did not"
+                            }
+                        ]
+                    }
+                ],
+                "version_specific_rules" : "This version-specific rules:",
+                "version_rules" : [
+                    {
+                        "text" : "There can be from 2 to 4 teams."
+                    },
+                    {
+                        "text" : "Word board can have 25, 30, 36, 42 or 49 words. {footnote0}",
+                        "footnotes" : [
+                            {
+                                "text" : "(1.)",
+                                "link" : "#footnote-1"
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "There can be any amount of words per team, black words and white words depending on your host's choice."
+                    },
+                    {
+                        "text" : "There may or may not be a guesses limit and/or time limit depending on your host's choice."
+                    },
+                    {
+                        "text" : "If the time has expired and the team still has not managed to choose a word unambiguously, the word that the {italic0} of the team players chose will be automatically revealed (players who did not choose anything {italic1} counted).",
+                        "italics" : [
+                            {
+                                "text" : "strict majority"
+                            },
+                            {
+                                "text" : "are also"
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "There are multiple game modes available. Please, refer to the {section0} section.",
+                        "section_links" : [
+                            {
+                                "text" : "Game modes",
+                                "link" : "#game-modes"
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "This game version allows you to send a clue with a number from 0 to 10 only. If you need any other number discuss the format of the clue with your host, but remember that clue cannot exceed 30 characters in length."
+                    },
+                    {
+                        "text" : "There is a chat for communication in this version of the game. Masters {italic0} allowed to chat about words on the board during the game process either through chat or by changing their nickname or by any other way.",
+                        "italics" : [
+                            {
+                                "text" : "are not"
+                            }
+                        ]
+                    },
+                    {
+                        "text" : "There can only be 100 clues from any team and 100 chat messages at a time. When a new clue or chat message appears, the oldest one will be deleted."
+                    }
+                ],
+                "game_modes" : {
+                    "title" : "Game modes:",
+                    "modes" : [
+                        {
+                            "name" : "Standard:",
+                            "description" : "Nothing special, just a standard game mode with the rules described above."
+                        },
+                        {
+                            "name" : "Traitor:",
+                            "description" : "Each team has 1 traitor who can be seen by other teams' masters, but not by that team's master. The traitor's goal is to lead their team to defeat by any means necessary. The traitor can see other teams' words and black words, but not white words or their team's words. A traitor cannot be the master of their team.",
+                            "recommendation" : "To play this mode, it is recommended to have at least 8 players in the room (1 to master each of the 2 teams and 3 to each team)."
+                        }
+                    ]
+                },
+                "clues_examples" : {
+                    "title" : "Clues examples:",
+                    "table" : {
+                        "headers" : ["Words", "Valid clue", "Comment"],
+                        "rows" : [
+                            {
+                                "words" : "Watermelon, strawberry",
+                                "clue" : "Seed - 2",
+                                "comment" : {
+                                    "text" : "The clue {word0} would, generally speaking, be invalid because berry is a compound of strawberry.",
+                                    "words" : [
+                                        {
+                                            "text" : "Berry - 2"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "words" : "Theater",
+                                "clue" : "Spectacle - 1",
+                                "comment" : {
+                                    "text" : "The clue {word0} is invalid because theater is another form of the word theater.",
+                                    "words" : [
+                                        {
+                                            "text" : "Theater - 1"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "words" : "Cat, girl",
+                                "clue" : "Adorable - 2",
+                                "comment" : {
+                                    "text" : "The clue {word0} is invalid because it's clearly not in English (actually in Japanese) and can be translated into English directly.",
+                                    "words" : [
+                                        {
+                                            "text" : "Nekomusume - 2"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "words" : "Japan, mafia",
+                                "clue" : "Yakuza - 2",
+                                "comment" : {
+                                    "text" : "This clue is correct because although it is written in Japanese, it cannot be translated into English directly and is actually considered a proper name in English."
+                                }
+                            },
+                            {
+                                "words" : "Heart, machine, examination",
+                                "clue" : "ECG - 3",
+                                "comment" : {
+                                    "text" : "This clue is generally correct because, although it is an abbreviation, it can be written as a single word in its full form. {footnote0}",
+                                    "footnotes" : [
+                                        {
+                                            "text" : "(2.)",
+                                            "link" : "#footnote-2"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "words" : "Space, USA",
+                                "clue" : "Moon - 2",
+                                "comment" : {
+                                    "text" : "The clue {word0} is generally invalid because it is an acronym that cannot be written as a single word in its full form. However, in your room, this acronym may be recognized as a valid proper name and therefore can be used as a clue.",
+                                    "words" : [
+                                        {
+                                            "text" : "NASA - 2"
+                                        }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                },
+                "footnotes" : {
+                    "title" : "Footnotes:",
+                    "notes" : [
+                        {
+                            "id" : "footnote-1",
+                            "text" : "If you know that some players in your room are playing from mobiles, the recommended options are only 25, 30, or 36 words."
+                        },
+                        {
+                            "id" : "footnote-2",
+                            "text" : "Electrocardiogram."
+                        }
+                    ]
+                }
+            },
+            "game_interface" : {
+                "name" : "Game interface",
+                "title" : "Game interface:",
+                "words" : [
+                    "ALIEN",
+                    "AMAZON",
+                    "BARK",
+                    "BATTERY",
+                    "BEIJING",
+                    "BOLT",
+                    "BUCK",
+                    "CAPITAL",
+                    "CHEST",
+                    "COMIC",
+                    "CRANE",
+                    "CZECH",
+                    "DRAFT",
+                    "EMBASSY",
+                    "FENCE",
+                    "GOLD",
+                    "HOSPITAL",
+                    "JET",
+                    "KETCHUP",
+                    "LEMON",
+                    "TOKYO",
+                    "NINJA",
+                    "OCTOPUS",
+                    "PIRATE",
+                    "PLATYPUS",
+                    "REVOLUTION",
+                    "SCORPION",
+                    "SOLDIER",
+                    "TORCH",
+                    "WITCH"
+                ],
+                "team_design" : {
+                    "desktop" : "Desktop team design",
+                    "mobile" : "Mobile team design"
+                },
+                "alerts" : {
+                    "remove_player" : "In the real game, that player would become a spectator.",
+                    "promote_player" : "In the real game, that player would become a host.",
+                    "edit_clue" : "In the real game, this would open the Edit clue panel."
+                },
+                "messages" : {
+                    "top" : [
+                        {
+                            "text" : "Very simplified version of game interface for familiarization purposes."
+                        },
+                        {
+                            "text" : "Keep in mind that in this version, many game features have been simplified or completely changed. {footnote0}",
+                            "footnotes" : [
+                                {
+                                    "text" : "(1.)",
+                                    "link" : "#footnote-1"
+                                }
+                            ]
+                        }
+                    ],
+                    "center" : [
+                        {
+                            "text" : "Example of admin panel that you can find as a host in your room. In the real game you can open it by pressing O key outside of any input element. {footnote0}",
+                            "footnotes" : [
+                                {
+                                    "text" : "(2.)",
+                                    "link" : "#footnote-2"
+                                }
+                            ]
+                        },
+                        {
+                            "text" : "More about the functions of this panel in the actual game can be found in the {tab0} tab.",
+                            "tabs" : [
+                                {
+                                    "text" : "Host settings",
+                                    "index" : 2
+                                }
+                            ]
+                        }
+                    ],
+                    "bottom" : [
+                        {
+                            "text" : "If you are not the host, then pressing the O key outside of any input element will open the settings panel where you can see what settings the host has set in your room. {footnote0}",
+                            "footnotes" : [
+                                {
+                                    "text" : "(2.)",
+                                    "link" : "#footnote-2"
+                                }
+                            ]
+                        },
+                        {
+                            "text" : "Whether you're a host or not, you can also change your nickname in the panel that opens up for you when you press the O key outside of any input element. {footnote0}",
+                            "footnotes" : [
+                                {
+                                    "text" : "(2.)",
+                                    "link" : "#footnote-2"
+                                }
+                            ]
+                        },
+                        {
+                            "text" : "In the real game you can also open a text chat by pressing P key outside of any input element. {footnote0}",
+                            "footnotes" : [
+                                {
+                                    "text" : "(3.)",
+                                    "link" : "#footnote-3"
+                                }
+                            ]
+                        },
+                        {
+                            "text" : "You can also change your color by clicking on the colored circle next to your nickname."
+                        }
+                    ]
+                },
+                "footnotes" : {
+                    "title" : "Footnotes:",
+                    "notes" : [
+                        {
+                            "id" : "footnote-1",
+                            "text" : "In particular, in this version there is no time limit, only the red team makes all of the turns, the size of the game board has been reduced, as well as the layout of the interface elements is different from what you will see in the real game."
+                        },
+                        {
+                            "id" : "footnote-2",
+                            "text" : "Or you can open it by clicking on the triangle button in the center near the left border of the screen."
+                        },
+                        {
+                            "id" : "footnote-3",
+                            "text" : "Or you can open it by clicking on the triangle button in the center near the right border of the screen."
+                        }
+                    ]
+                }
+            },
+            "host_rules" : {
+                "name" : "Host settings",
+                "title" : "Host settings:",
+                "description" : "Description:",
+                "rules" : [
+                    {
+                        "id" : "get-new-gameboard-rule",
+                        "title" : "Get new gameboard",
+                        "description" : [
+                            {
+                                "text" : "Removes the current gameboard and gets a new one."
+                            },
+                            {
+                                "text" : "This action is required after changing the gameboard size."
+                            },
+                            {
+                                "text" : "This action {italic0} be used during game process.",
+                                "italics" : [
+                                    {
+                                        "text" : "cannot"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "team-amount-rule",
+                        "name" : "teamAmount",
+                        "title" : "Amount of teams",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "Amount of teams in the room."
+                            },
+                            {
+                                "text" : "Value 2 will enable red and green teams only."
+                            },
+                            {
+                                "text" : "Value 3 will enable red, blue and green teams."
+                            },
+                            {
+                                "text" : "Value 4 will enable red, yellow, blue and green teams."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "randomize-team-order-rule",
+                        "title" : "Randomize team order",
+                        "description" : [
+                            {
+                                "text" : "Randomly determines the order of teams' moves."
+                            },
+                            {
+                                "text" : "After this action the order of teams' moves {italic0} stay the same.",
+                                "italics" : [
+                                    {
+                                        "text" : "can"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "maximum-players-rule",
+                        "name" : "maximumPlayers",
+                        "title" : "Maximum amount of players per team",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "Maximum amount of players that can be in each team (excluding master)."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "first-master-turn-time-rule",
+                        "name" : "firstMasterTurnTime",
+                        "title" : "First master turn time",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "How long will the first move of the game last for the master of the team that will play first (in seconds)."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "master-turn-time-rule",
+                        "name" : "masterTurnTime",
+                        "title" : "Master turn time",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "How long will the every move (besides very first) of the game last for the team masters (in seconds)."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "team-turn-time-rule",
+                        "name" : "teamTurnTime",
+                        "title" : "Team turn time",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "How long will the every move of the game last for the team members (i.e., excluding masters) (in seconds)."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "extra-time-rule",
+                        "name" : "extraTime",
+                        "title" : "Extra time",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "How much extra time will the team members get for the current turn for revealing the word with the color equal to the team color (in seconds)."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "guesses-limit-rule",
+                        "name" : "guessesLimit",
+                        "title" : "Word guesses limit",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "How many words can the team members say during their move."
+                            },
+                            {
+                                "text" : "Value 0 means that there will be no restrictions (infinite guesses)."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "start-new-game-rule",
+                        "title" : "Start new game",
+                        "description" : [
+                            {
+                                "text" : "Starts the new game."
+                            },
+                            {
+                                "text" : "If the game is going this action will change to End game and doing it will end the current game."
+                            },
+                            {
+                                "text" : "If the game is ended using this action there {italic0} be any winners.",
+                                "italics" : [
+                                    {
+                                        "text" : "will not"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "freeze-time-rule",
+                        "name" : "freezeTime",
+                        "title" : "Freeze time",
+                        "default" : {
+                            "text" : "Default: {boolValue}",
+                            "type" : "boolValue"
+                        },
+                        "description" : [
+                            {
+                                "text" : "If time is freezed then each team (both master and team members) have infinite turn time."
+                            },
+                            {
+                                "text" : "Resets to default with each new game start."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "lock-room-rule",
+                        "name" : "locked",
+                        "title" : "Lock room",
+                        "default" : {
+                            "text" : "Default: {boolValue}",
+                            "type" : "boolValue"
+                        },
+                        "description" : [
+                            {
+                                "text" : "If room is locked then players can't change their team, become masters or become spectators by themselves."
+                            },
+                            {
+                                "text" : "When the room is just created the room will be unlocked by default."
+                            },
+                            {
+                                "text" : "Automatically locks with each new game start."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "pass-turn-rule",
+                        "title" : "Pass turn",
+                        "description" : [
+                            {
+                                "text" : "Ends current turn immideately and starts the next one."
+                            },
+                            {
+                                "text" : "This action {italic0} trigger the word autoselect mechanism.",
+                                "italics" : [
+                                    {
+                                        "text" : "will not"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "remove-all-players-rule",
+                        "title" : "Remove all players",
+                        "description" : [
+                            {
+                                "text" : "Removes all team members from all teams and makes them all spectators."
+                            },
+                            {
+                                "text" : "If the checkbox With masters is checked, then will also do the same with teams' masters."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "randomize-all-players-rule",
+                        "title" : "Randomize all players",
+                        "description" : [
+                            {
+                                "text" : "Shuffles all team members from all teams among each team."
+                            },
+                            {
+                                "text" : "This action guarantees that if there will be enough players and the checkbox With masters will be checked then all of the master slots are filled."
+                            },
+                            {
+                                "text" : "If the checkbox With masters is checked, then will also include the teams' masters into the shuffle list."
+                            },
+                            {
+                                "text" : "This action {italic0} include spectators into the shuffle list.",
+                                "italics" : [
+                                    {
+                                        "text" : "will not"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "field-size-rule",
+                        "name" : "fieldSize",
+                        "title" : "Field size",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "description" : [
+                            {
+                                "text" : "Size of the game field (gameboard)."
+                            },
+                            {
+                                "text" : "5x5 = 25 cards, 5x6 = 30 cards, 6x6 = 36 cards, 6x7 = 42 cards, 7x7 = 49 cards."
+                            },
+                            {
+                                "text" : "Changing the field size will require you to get a new gameboard."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "base-amount-of-cards-rule",
+                        "name" : "baseCards",
+                        "title" : "Base amount of cards",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: field size"
+                        },
+                        "description" : [
+                            {
+                                "text" : "Base amount of cards for each team."
+                            },
+                            {
+                                "text" : "Base amount of cards will be the starting point for the next card amount calculations. All of the unassigned cards will be white cards."
+                            },
+                            {
+                                "text" : "Beware: you {italic0} start new game if the resulting cards amount after all calculations will exceed field size.",
+                                "italics" : [
+                                    {
+                                        "text" : "cannot"
+                                    }
+                                ]
+                            },
+                            {
+                                "text" : "The team that is the last in the team order will get this amount of cards in total."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "extra-1-amount-of-cards-rule",
+                        "name" : "extraCards",
+                        "title" : "Extra 1 amount of cards",
+                        "default" : {
+                            "text" : "Default: {extraValue}",
+                            "type" : "extraValue",
+                            "index" : 0
+                        },
+                        "min" : {
+                            "text" : "Min: 1 - base amount"
+                        },
+                        "max" : {
+                            "text" : "Max: field size"
+                        }, 
+                        "description" : [
+                            {
+                                "text" : "Extra amount of cards for the team that is the first in the team order."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "extra-2-amount-of-cards-rule",
+                        "name" : "extraCards",
+                        "title" : "Extra 2 amount of cards",
+                        "default" : {
+                            "text" : "Default: {extraValue}",
+                            "type" : "extraValue",
+                            "index" : 1
+                        },
+                        "min" : {
+                            "text" : "Min: 1 - base amount"
+                        },
+                        "max" : {
+                            "text" : "Max: field size"
+                        }, 
+                        "description" : [
+                            {
+                                "text" : "Extra amount of cards for the team that is the second in the team order."
+                            },
+                            {
+                                "text" : "Will only apply if there is more than 2 teams in the game."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "extra-3-amount-of-cards-rule",
+                        "name" : "extraCards",
+                        "title" : "Extra 3 amount of cards",
+                        "default" : {
+                            "text" : "Default: {extraValue}",
+                            "type" : "extraValue",
+                            "index" : 2
+                        },
+                        "min" : {
+                            "text" : "Min: 1 - base amount"
+                        },
+                        "max" : {
+                            "text" : "Max: field size"
+                        }, 
+                        "description" : [
+                            {
+                                "text" : "Extra amount of cards for the team that is the third in the team order."
+                            },
+                            {
+                                "text" : "Will only apply if there is more than 3 teams in the game."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "black-cards-amount-rule",
+                        "name" : "blackCards",
+                        "title" : "Black cards amount",
+                        "default" : {
+                            "text" : "Default: {value}",
+                            "type" : "value"
+                        },
+                        "min" : {
+                            "text" : "Min: {value}",
+                            "type" : "value"
+                        },
+                        "max" : {
+                            "text" : "Max: field size"
+                        }, 
+                        "description" : [
+                            {
+                                "text" : "Amount of black cards that will be on the gameboard."
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "gamemode-rule",
+                        "name" : "gamemode",
+                        "title" : "Game mode",
+                        "default" : {
+                            "text" : "Default: {adminValue}",
+                            "type" : "adminValue",
+                            "value_path" : "game_mode"
+                        },
+                        "description" : [
+                            {
+                                "text" : "Game mode which will be used in your room."
+                            },
+                            {
+                                "text" : "Read more about game modes in the {tab0} tab in {otherLink0} section.",
+                                "tabs" : [
+                                    {
+                                        "text" : "Game rules",
+                                        "index" : 0
+                                    }
+                                ],
+                                "otherLinks" : [
+                                    {
+                                        "text" : "Game modes",
+                                        "link" : "#game-modes",
+                                        "index" : 0
+                                    }
+                                ],
+                                "links" : [
+
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id" : "word-pack-rule",
+                        "name" : "wordPack",
+                        "title" : "Word pack",
+                        "default" : {
+                            "text" : "Default: {wordPackValue}",
+                            "type" : "wordPackValue"
+                        },
+                        "description" : [
+                            {
+                                "text" : "Word pack from which the words for the game will be chosen."
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
         "loading" : "Loading...",
         "disconnected" : "Disconnected (another session started)",
         "guesses_no_limit" : "There is no limit for guesses!",
@@ -90,14 +1016,14 @@
             "card_amount_overflow" : "This is too much. Reduce your total amount of cards!",
             "game_mode" : {
                 "select" : "Select game mode:",
-                "default" : "Default",
+                "standard" : "Standard",
                 "traitor" : "Traitor"
             },
             "word_pack" : {
                 "message" : "Word pack:",
                 "select" : "Select word pack"
             },
-            "edit_name" : "Edit name"
+            "edit_user_name" : "Edit name"
         },
         "settings" : {
             "amount_of_teams" : "Amount of teams:",
@@ -128,14 +1054,14 @@
             "card_amount_overflow" : "There is card amount overflow. Game cannot be started.",
             "game_mode" : {
                 "message" : "Game mode:",
-                "default" : "Default",
+                "standard" : "Standard",
                 "traitor" : "Traitor"
             },
             "word_pack" : {
                 "message" : "Word pack:",
                 "view" : "View word pack"
             },
-            "edit_name" : "Edit name"
+            "edit_user_name" : "Edit name"
         },
         "clues" : {
             "0" : "Garden",
@@ -160,6 +1086,7 @@
                 "edit_name" : "Edit your name:"
             },
             "word_pack_selection_panel" : {
+                "selected" : "selected",
                 "close_panel" : "Close panel",
                 "select_word_pack" : "Select word pack",
                 "view_words" : "View words",
