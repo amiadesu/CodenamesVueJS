@@ -16,7 +16,7 @@
             "name" : "Codenames",
             "description" : "Codenames is a team word game where players try to identify their agents hidden in a grid of words. Each team has a Spymaster who gives one-word clues linked to multiple words on the board, and teammates try to guess them while avoiding the opposing team’s words, innocent bystanders, and the deadly assassin. The first team to find all their agents wins."
         },
-        "read_rules" : "Read rules",
+        "read_rules" : "Rules",
         "enter_room_code" : "Enter room code",
         "or" : "OR",
         "create_new_room" : "Create new room"

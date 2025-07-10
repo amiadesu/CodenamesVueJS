@@ -88,6 +88,7 @@ export default defineComponent({
 
 .open-game-rules-button {
     padding: 1px 3px;
+    width: 5rem;
     background-color: var(--panel-button-background-color-1);
     color: var(--panel-button-text-color-1);
     font-weight: 400;
