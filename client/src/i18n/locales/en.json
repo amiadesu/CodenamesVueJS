@@ -743,7 +743,7 @@
                                 "text" : "Shuffles all team members from all teams among each team."
                             },
                             {
-                                "text" : "This action guarantees that if there will be enough players then all of the master slots are filled."
+                                "text" : "This action guarantees that if there will be enough players and the checkbox With masters will be checked then all of the master slots are filled."
                             },
                             {
                                 "text" : "If the checkbox With masters is checked, then will also include the teams' masters into the shuffle list."
