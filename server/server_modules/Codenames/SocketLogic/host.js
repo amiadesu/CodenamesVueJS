@@ -163,6 +163,7 @@ async function removeAllPlayersEvent(io, socketData, withMasters) {
     let teams = await room.getTeams();
 
     io.to(socketData.roomId).emit("update_users", teams, users);
+    io.to(socketData.roomId).emit("request_new_gameboard");
 };
 
 async function removePlayerEvent(io, socketData, playerId) {
@@ -179,6 +180,7 @@ async function removePlayerEvent(io, socketData, playerId) {
     let teams = await room.getTeams();
 
     io.to(socketData.roomId).emit("update_users", teams, users);
+    io.to(socketData.roomId).emit("request_new_gameboard");
 };
 
 async function randomizePlayersEvent(io, socketData, withMasters) {
@@ -201,6 +203,7 @@ async function randomizePlayersEvent(io, socketData, withMasters) {
     let teams = await room.getTeams();
 
     io.to(socketData.roomId).emit("update_users", teams, users);
+    io.to(socketData.roomId).emit("request_new_gameboard");
 };
 
 async function transferHostEvent(io, socketData, playerId) {
