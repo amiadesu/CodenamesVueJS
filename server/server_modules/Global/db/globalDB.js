@@ -236,13 +236,6 @@ class GlobalDB {
             if (this.#redisAvailable) {
                 const redisKey = this.#getRedisKey(userId, key);
 
-                if (await this.#redisClient.exists(redisKey)) {
-                    const result = await redisAtomic.get(userId, key, expireAfterS);
-                    if (result.success && result.value !== undefined) {
-                        return result;
-                    }
-                }
-
                 return await this.#withRedisLock(redisKey, async () => {
                     if (await this.#redisClient.exists(redisKey)) {
                         const result = await redisAtomic.get(userId, key, expireAfterS);
@@ -282,7 +275,35 @@ class GlobalDB {
                 throw new Error("User ID is empty");
             }
 
-            return await mongoDBAtomic.getFullUserData(userId);
+            const resultMongoDBFullUserData = await mongoDBAtomic.getFullUserData(userId);
+            if (!resultMongoDBFullUserData.success) {
+                return resultMongoDBFullUserData;
+            }
+
+            let success = true;
+            let errorMessage = null;
+            let fullUserData = resultMongoDBFullUserData.value;
+            ["name", "color", "sockets"].forEach(async (key) => {
+                if (!success) {
+                    return;
+                }
+                const resultKey = await this.getUserData(userId, key);
+                if (!resultKey.success) {
+                    success = false;
+                    errorMessage = resultKey.error;
+                    return;
+                }
+                fullUserData[key] = resultKey.value;
+            });
+
+            if (!success) {
+                throw new Error(errorMessage);
+            }
+
+            return {
+                success: success,
+                value: fullUserData
+            };
         } catch (error) {
             console.log("Error on getting full user data:", error);
             return { success: false, error: error.message };

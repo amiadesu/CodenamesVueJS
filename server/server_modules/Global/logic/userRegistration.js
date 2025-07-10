@@ -13,7 +13,8 @@ async function processUser(userId, socketId, allSockets) {
         console.log(resultNewUser.error);
         return null;
     }
-    const { newUser, realUserID } = resultNewUser;
+    const newUser = resultNewUser.newUser;
+    const realUserID = resultNewUser.realUserID;
 
     if (!newUser) {
         await disconnectAllSockets(realUserID, allSockets);
