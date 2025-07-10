@@ -23,7 +23,7 @@ async function getGameboardEvent(io, socketData) {
     const room = new RoomContext(socketData.roomId);
 
     const words = await getGameboard(room, socketData.userCodenamesId);
-
+    
     const gameRules = await room.getGameRules();
 
     io.to(socketData.socketId).emit("send_new_gameboard", words);
@@ -51,7 +51,6 @@ async function selectWordEvent(io, socketData, selectedWordText) {
     await toggleWord(room, selectedWordText, selecterIndex, socketData.countdownInterval);
 
     let gameRules = await room.getGameRules();
-    words = await room.getWords();
 
     async function shouldRevealWord() {
         const teams = await room.getTeams();
@@ -79,6 +78,7 @@ async function selectWordEvent(io, socketData, selectedWordText) {
         io.to(socketData.roomId).emit("request_new_gameboard");
         io.to(socketData.roomId).emit("update_game_process", gameProcess);
         io.to(socketData.roomId).emit("update_users", teams, users);
+        io.to(socketData.roomId).emit("update_end_turn_selectors", endTurnSelectors);
         io.to(socketData.socketId).emit("update_client", teams, users, users[selecterIndex], endTurnSelectors, gameRules, gameProcess);
     }
 

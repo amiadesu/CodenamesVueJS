@@ -164,6 +164,10 @@ export default defineComponent({
                 this.gameData.wordBoardData.words = words;
             });
 
+            socket.on("update_end_turn_selectors", (endTurnSelectors) => {
+                this.gameData.endTurnSelectors = endTurnSelectors;
+            });
+
             socket.on("start_countdown", (word) => {
                 this.gameData.selectProgress.selectedObject = word;
                 this.gameData.selectProgress.percentage = 0;
