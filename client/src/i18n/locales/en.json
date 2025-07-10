@@ -14,13 +14,7 @@
     "gamePreview" : {
         "codenames" : {
             "name" : "Codenames",
-            "description" : "In Codenames, two rival spymasters know the secret identities of 25 agents. Their teammates, however, only know these agents by their codenames — single, seemingly random words like “chocolate,” “sunflower,” or even “carrot.” (Yes, there's an agent out there codenamed \"carrot.\") The goal is simple: each spymaster wants their team to identify all of their agents first, without accidentally revealing the assassin.",
-            "rules" : ""
-        },
-        "example" : {
-            "name" : "Game preview example",
-            "description" : "An example of a game preview. This is the description.",
-            "rules" : ""
+            "description" : "Codenames is a team word game where players try to identify their agents hidden in a grid of words. Each team has a Spymaster who gives one-word clues linked to multiple words on the board, and teammates try to guess them while avoiding the opposing team’s words, innocent bystanders, and the deadly assassin. The first team to find all their agents wins."
         },
         "read_rules" : "Read rules",
         "enter_room_code" : "Enter room code",
@@ -398,6 +392,24 @@
                     ],
                     "bottom" : [
                         {
+                            "text" : "If you are not the host, then pressing the O key outside of any input element will open the settings panel where you can see what settings the host has set in your room. {footnote0}",
+                            "footnotes" : [
+                                {
+                                    "text" : "(2.)",
+                                    "link" : "#footnote-2"
+                                }
+                            ]
+                        },
+                        {
+                            "text" : "Whether you're a host or not, you can also change your nickname in the panel that opens up for you when you press the O key outside of any input element. {footnote0}",
+                            "footnotes" : [
+                                {
+                                    "text" : "(2.)",
+                                    "link" : "#footnote-2"
+                                }
+                            ]
+                        },
+                        {
                             "text" : "In the real game you can also open a text chat by pressing P key outside of any input element. {footnote0}",
                             "footnotes" : [
                                 {
@@ -405,6 +417,9 @@
                                     "link" : "#footnote-3"
                                 }
                             ]
+                        },
+                        {
+                            "text" : "You can also change your color by clicking on the colored circle next to your nickname."
                         }
                     ]
                 },

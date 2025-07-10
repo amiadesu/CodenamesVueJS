@@ -14,7 +14,7 @@
     "gamePreview" : {
         "codenames" : {
             "name" : "Codenames",
-            "description" : "In Codenames, two rival spymasters know the secret identities of 25 agents. Their teammates, however, only know these agents by their codenames — single, seemingly random words like “chocolate,” “sunflower,” or even “carrot.” (Yes, there's an agent out there codenamed \"carrot.\") The goal is simple: each spymaster wants their team to identify all of their agents first, without accidentally revealing the assassin.",
+            "description" : "Codenames — це командна гра зі словами, де гравці шукають своїх агентів серед сітки слів. Шпигун-майстер дає однословні підказки, що пов’язані з кількома словами на полі, а решта команди намагається їх вгадати, уникаючи слів суперника, випадкових перехожих і вбивці. Перемагає команда, що першою знайде всіх своїх агентів.",
             "rules" : ""
         },
         "example" : {
@@ -395,6 +395,24 @@
                     ],
                     "bottom" : [
                         {
+                            "text" : "Якщо ж ви не ведучий, то натискання на клавішу Щ за межами будь-якого елемента введення даних відкриє панель налаштувань, де ви можете подивитися на те, які ігрові налаштування виставив ведучий вашої кімнати. {footnote0}",
+                            "footnotes" : [
+                                {
+                                    "text" : "(2.)",
+                                    "link" : "#footnote-2"
+                                }
+                            ]
+                        },
+                        {
+                            "text" : "Незалежно від того, ведучий ви чи ні, ви так само можете змінити свій нікнейм у панелі, яка відкривається під час натискання на клавішу Щ за межами будь-якого елемента введення даних. {footnote0}",
+                            "footnotes" : [
+                                {
+                                    "text" : "(2.)",
+                                    "link" : "#footnote-2"
+                                }
+                            ]
+                        },
+                        {
                             "text" : "У реальній грі ви, так само, можете відкрити текстовий чат, натиснувши на клавішу З за межами будь-якого елемента введення даних. {footnote0}",
                             "footnotes" : [
                                 {
@@ -402,6 +420,9 @@
                                     "link" : "#footnote-3"
                                 }
                             ]
+                        },
+                        {
+                            "text" : "Ви так само можете змінити ваш колір, натиснувши на кольоровий кружок поруч із вашим нікнеймом."
                         }
                     ]
                 },
