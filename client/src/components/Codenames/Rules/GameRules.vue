@@ -30,7 +30,7 @@
                         <span class="word-example">{{ word.text }}</span>
                     </template>
                     <template v-for="(section, sectionIndex) in rule.section_links" #[`section${sectionIndex}`]>
-                        <a class="section-link" :href="section.link">{{ section.text }}</a>
+                        <a class="section-link" @click="scrollToAnchor(section.link)">{{ section.text }}</a>
                     </template>
                     <template v-for="(footnote, footnoteIndex) in rule.footnotes" #[`footnote${footnoteIndex}`]>
                         <a class="footnote-link" @click="scrollToAnchor(footnote.link)"><sup>{{ footnote.text }}</sup></a>
@@ -46,7 +46,7 @@
                                 <span class="word-example">{{ word.text }}</span>
                             </template>
                             <template v-for="(section, sectionIndex) in subrule.section_links" #[`section${sectionIndex}`]>
-                                <a class="section-link" :href="section.link">{{ section.text }}</a>
+                                <a class="section-link" @click="scrollToAnchor(section.link)">{{ section.text }}</a>
                             </template>
                             <template v-for="(footnote, footnoteIndex) in subrule.footnotes" #[`footnote${footnoteIndex}`]>
                                 <a class="footnote-link" @click="scrollToAnchor(footnote.link)"><sup>{{ footnote.text }}</sup></a>
@@ -69,7 +69,7 @@
                         <span class="word-example">{{ word.text }}</span>
                     </template>
                     <template v-for="(section, sectionIndex) in rule.section_links" #[`section${sectionIndex}`]>
-                        <a class="section-link" :href="section.link">{{ section.text }}</a>
+                        <a class="section-link" @click="scrollToAnchor(section.link)">{{ section.text }}</a>
                     </template>
                     <template v-for="(footnote, footnoteIndex) in rule.footnotes" #[`footnote${footnoteIndex}`]>
                         <a class="footnote-link" @click="scrollToAnchor(footnote.link)"><sup>{{ footnote.text }}</sup></a>
@@ -85,7 +85,7 @@
                                 <span class="word-example">{{ word.text }}</span>
                             </template>
                             <template v-for="(section, sectionIndex) in subrule.section_links" #[`section${sectionIndex}`]>
-                                <a class="section-link" :href="section.link">{{ section.text }}</a>
+                                <a class="section-link" @click="scrollToAnchor(section.link)">{{ section.text }}</a>
                             </template>
                             <template v-for="(footnote, footnoteIndex) in subrule.footnotes" #[`footnote${footnoteIndex}`]>
                                 <a class="footnote-link" @click="scrollToAnchor(footnote.link)"><sup>{{ footnote.text }}</sup></a>
@@ -129,7 +129,7 @@
                                 <span class="word-example">{{ word.text }}</span>
                             </template>
                             <template v-for="(section, sectionIndex) in row.comment.section_links" #[`section${sectionIndex}`]>
-                                <a class="section-link" :href="section.link">{{ section.text }}</a>
+                                <a class="section-link" @click="scrollToAnchor(section.link)">{{ section.text }}</a>
                             </template>
                             <template v-for="(footnote, footnoteIndex) in row.comment.footnotes" #[`footnote${footnoteIndex}`]>
                                 <a class="footnote-link" @click="scrollToAnchor(footnote.link)"><sup>{{ footnote.text }}</sup></a>
@@ -191,6 +191,10 @@ export default defineComponent({
     margin: 0 auto;
 }
 
+#codenames-game-rules-content strong {
+    font-weight: 500;
+}
+
 #codenames-game-rules-content .external-link, .section-link, .footnote-link {
     color: var(--preview-link-color);
     cursor: pointer;
@@ -234,7 +238,6 @@ export default defineComponent({
     margin-block-start: 0.3rem;
     margin-block-end: 0.3rem;
     padding-inline-start: 2.5rem;
-    text-indent: 0.5rem;
 }
 
 #codenames-game-rules-content ul.sublist {
@@ -248,6 +251,10 @@ export default defineComponent({
 
 #codenames-game-rules-content ul.enumerated-list {
     list-style-type: decimal;
+}
+
+#codenames-game-rules-content ul.enumerated-list > li > span {
+    margin-left: 0.5rem;
 }
 
 #codenames-game-rules-content table {
@@ -288,7 +295,6 @@ export default defineComponent({
     #codenames-game-rules-content {
         width: 95%;
         height: 25%;
-        text-indent: 0.5rem;
     }
 
     #codenames-game-rules-content h2 {
@@ -307,6 +313,10 @@ export default defineComponent({
 
     .footnote {
         text-indent: 0.5rem;
+    }
+
+    #codenames-game-rules-content ul.enumerated-list > li > span {
+        margin-left: 0.3rem;
     }
 }
 

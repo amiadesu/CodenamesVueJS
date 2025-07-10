@@ -17,7 +17,7 @@ export const state = reactive({
 });
 
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = process.env.NODE_ENV === "production" ? undefined : config.serverIPs.codenames;
+const URL = config.serverIPs.codenames;
 
 export const socket = io(URL, {
     path: "/ios/",

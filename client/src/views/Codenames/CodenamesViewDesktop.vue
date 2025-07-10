@@ -3,6 +3,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { gameStore } from '@/stores/gameData';
 import { globalStore } from '@/stores/globalData';
 import { socket, state } from "@/sockets/codenames";
+import { getConfig } from '@/utils/config';
 
 import TeamDesktop from '../../components/Codenames/Team/TeamDesktop.vue';
 import EventListener from '../../components/Codenames/EventListener/EventListener.vue';
@@ -41,6 +42,8 @@ if (route.params.roomId === "") {
         router.push(`/codenames/${roomCode}`);
     });
 }
+
+const config = getConfig();
 </script>
 
 <template>
@@ -109,9 +112,13 @@ if (route.params.roomId === "") {
         </template>
         <template v-else-if="$route.params.roomId === 'rules'">
             <div class="row-wrapper top-row">
+                <span id="website-name-title">
+                    {{ config.websiteTitle }}
+                </span>
                 <LanguageSelector></LanguageSelector>
                 <ThemeToggler></ThemeToggler>
             </div>
+            <div id="game-rules-background"></div>
             <CodenamesRulesView></CodenamesRulesView>
         </template>
         <template v-else>
@@ -134,6 +141,16 @@ if (route.params.roomId === "") {
     justify-content: center;
     flex-direction: column;
     z-index: 20;
+}
+
+#game-rules-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--home-view-background-color);
+    padding-top: 2%;
 }
 
 #game {
@@ -180,6 +197,21 @@ if (route.params.roomId === "") {
     width: 100%;
     align-items: start;
     z-index: 5;
+    margin-bottom: auto;
+    background-color: var(--preview-top-row-background-color);
+    position: relative;
+}
+
+#website-name-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0 auto;
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-size: 1.1rem;
+
 }
 
 .row-wrapper.teams {

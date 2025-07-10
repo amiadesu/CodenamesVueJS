@@ -118,14 +118,6 @@ onMounted(() => {
     overflow-x: hidden;
 }
 
-#home-view-background {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    height: 100vh;
-    background-color: var(--home-view-background-color);
-}
-
 #game-previews-list-wrapper {
     width: 100%;
     height: auto;
@@ -239,6 +231,11 @@ onMounted(() => {
 
     #rules-switchers-wrapper {
         width: 90%;
+        height: 3rem;
+    }
+
+    .switcher-button {
+        height: 3rem;
     }
 }
 </style>

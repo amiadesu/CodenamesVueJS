@@ -3,6 +3,7 @@ import { useRoute } from 'vue-router';
 import { gameStore } from '@/stores/gameData';
 import { globalStore } from '@/stores/globalData';
 import { state } from "@/sockets/codenames";
+import { getConfig } from '@/utils/config';
 
 import TeamsWrapperMobile from '../../components/Codenames/Team/TeamsWrapperMobile.vue';
 import EventListener from '../../components/Codenames/EventListener/EventListener.vue';
@@ -30,6 +31,8 @@ let globalData = globalStore();
 globalData.remInPixels = parseFloat(getComputedStyle(document.documentElement).fontSize);
 
 const route = useRoute();
+
+const config = getConfig();
 </script>
 
 <template>
@@ -91,9 +94,13 @@ const route = useRoute();
         </template>
         <template v-else-if="$route.params.roomId === 'rules'">
             <div class="row-wrapper top-row">
+                <span id="website-name-title">
+                    {{ config.websiteTitle }}
+                </span>
                 <LanguageSelector></LanguageSelector>
                 <ThemeToggler></ThemeToggler>
             </div>
+            <div id="game-rules-background"></div>
             <CodenamesRulesView></CodenamesRulesView>
         </template>
         <template v-else>
@@ -114,6 +121,16 @@ const route = useRoute();
     justify-content: start;
     flex-direction: column;
     z-index: 1;
+}
+
+#game-rules-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--home-view-background-color);
+    padding-top: 2%;
 }
 
 #game {
@@ -163,6 +180,22 @@ const route = useRoute();
     height: 4%;
     width: 100%;
     justify-content: right;
+    z-index: 5;
+    margin-bottom: auto;
+    background-color: var(--preview-top-row-background-color);
+    position: relative;
+}
+
+#website-name-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0 auto;
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-size: 1.1rem;
+
 }
 
 .row-wrapper.teams {

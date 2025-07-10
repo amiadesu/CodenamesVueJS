@@ -24,6 +24,9 @@ const route = useRoute();
 <template>
     <div id="app-wrapper">
         <div class="row-wrapper top-row">
+            <span id="website-name-title">
+                {{ config.websiteTitle }}
+            </span>
             <LanguageSelector></LanguageSelector>
             <ThemeToggler></ThemeToggler>
         </div>
@@ -130,10 +133,22 @@ const route = useRoute();
     height: 4%;
     width: 100%;
     align-items: start;
-    position: fixed;
-    top: 0;
-    left: 0;
     z-index: 5;
+    margin-bottom: auto;
+    background-color: var(--preview-top-row-background-color);
+    position: relative;
+}
+
+#website-name-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0 auto;
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-size: 1.1rem;
+
 }
 
 @media screen and (max-width: 1300px) {

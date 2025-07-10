@@ -56,90 +56,6 @@
   --main-background-color: var(--color-neutral-200);
   --main-text-color: var(--color-neutral-800);
 
-  --spectators-bar-background-color: var(--color-neutral-400);
-  --spectators-bar-text-color: var(--color-neutral-800);
-
-  --panel-background-color-1: --alpha(var(--color-cornflower-blue-100) / 80%);
-  --panel-background-color-2: --alpha(var(--color-cornflower-blue-50) / 90%);
-  --panel-background-color-dark-1: --alpha(var(--color-neutral-600) / 80%);
-  --panel-text-color-1: var(--color-gray-800);
-  --panel-text-color-2: var(--color-gray-800);
-  --panel-header-1-color-1: var(--color-gray-800);
-  --panel-header-2-color-1: var(--color-gray-800);
-
-  --panel-horizontal-divider-color-1: var(--color-gray-500);
-
-  --panel-button-background-color-1: var(--color-gray-300);
-  --panel-button-hover-background-color-1: var(--color-gray-400);
-  --panel-button-text-color-1: var(--color-gray-800);
-  --panel-button-border-color-1: var(--color-gray-400);
-
-  --panel-input-background-color-1: var(--color-gray-50);
-  --panel-input-text-color-1: var(--color-gray-900);
-  --panel-input-border-color-1: var(--color-gray-300);
-  --panel-input-focus-border-color-1: var(--color-blue-500);
-  --panel-input-focus-box-shadow-color-1: var(--color-blue-500);
-
-  --word-pack-selection-panel-item-background-color-1: --alpha(var(--color-gray-300) / 30%);
-  --word-pack-selection-panel-item-selected-background-color-1: --alpha(var(--color-gray-100) / 70%);
-  --word-pack-selection-panel-item-border-color-1: var(--color-gray-600);
-
-  --team-color-red: --alpha(var(--color-red-500) / 60%);
-  --team-color-green: --alpha(var(--color-green-500) / 60%);
-  --team-color-blue: --alpha(var(--color-blue-500) / 60%);
-  --team-color-yellow: --alpha(var(--color-yellow-300) / 60%);
-  --team-color-blacklisted: rgba(0, 0, 0, 0.4);
-
-  --team-selection-color-red: var(--color-red-600);
-  --team-selection-color-green: var(--color-green-600);
-  --team-selection-color-blue: var(--color-blue-600);
-  --team-selection-color-yellow: var(--color-amber-500);
-
-  --crown-color-red: --alpha(var(--color-red-500) / 90%);
-  --crown-color-green: --alpha(var(--color-green-500) / 90%);
-  --crown-color-blue: --alpha(var(--color-blue-500) / 90%);
-  --crown-color-yellow: --alpha(var(--color-yellow-500) / 90%);
-
-  --word-block-color-unknown: var(--color-orange-200);
-  --word-block-color-border-unknown: var(--color-amber-600);
-  --word-block-color-glow-unknown: var(--color-pink-300);
-  --word-block-color-text-unknown: var(--color-neutral-700);
-
-  --word-block-color-red: var(--color-red-400);
-  --word-block-color-border-red: var(--color-red-700);
-  --word-block-color-glow-red: var(--color-red-300);
-  --word-block-color-text-red: var(--color-neutral-700);
-
-  --word-block-color-green: var(--color-green-400);
-  --word-block-color-border-green: var(--color-green-600);
-  --word-block-color-glow-green: var(--color-green-300);
-  --word-block-color-text-green: var(--color-neutral-700);
-
-  --word-block-color-blue: var(--color-blue-400);
-  --word-block-color-border-blue: var(--color-blue-700);
-  --word-block-color-glow-blue: var(--color-blue-400);
-  --word-block-color-text-blue: var(--color-neutral-700);
-
-  --word-block-color-yellow: var(--color-yellow-200);
-  --word-block-color-border-yellow: var(--color-yellow-500);
-  --word-block-color-glow-yellow: var(--color-yellow-200);
-  --word-block-color-text-yellow: var(--color-neutral-700);
-
-  --word-block-color-white: var(--color-slate-200);
-  --word-block-color-border-white: var(--color-gray-400);
-  --word-block-color-glow-white: var(--color-pink-300);
-  --word-block-color-text-white: var(--color-neutral-700);
-
-  --word-block-color-black: var(--color-neutral-600);
-  --word-block-color-border-black: var(--color-neutral-950);
-  --word-block-color-glow-black: var(--color-pink-300);
-  --word-block-color-text-black: var(--color-neutral-300);
-}
-
-html.light-theme {
-  --main-background-color: var(--color-neutral-200);
-  --main-text-color: var(--color-neutral-800);
-
   --error-color: var(--color-red-700);
 
   --home-view-background-color: var(--color-slate-300);
@@ -246,6 +162,117 @@ html.light-theme {
   --word-block-color-text-black: var(--color-neutral-300);
 }
 
+html.light-theme {
+  --main-background-color: var(--color-neutral-200);
+  --main-text-color: var(--color-neutral-800);
+
+  --error-color: var(--color-red-700);
+
+  --home-view-background-color: var(--color-indigo-200);
+
+  --star-color-1: var(--color-red-500);
+  --star-color-2: var(--color-green-500);
+  --star-color-3: var(--color-blue-500);
+  --star-color-4: var(--color-yellow-500);
+  --star-color-5: var(--color-pink-500);
+
+  --preview-glass-panel-color: --alpha(var(--color-violet-400) / 30%);
+  --preview-top-row-background-color: var(--color-neutral-300);
+  --switcher-button-active-color: #C2C5CC;
+  --switcher-button-non-active-color: var(--color-neutral-500);
+  --preview-link-color: var(--color-fuchsia-500);
+  --preview-italic-color: var(--color-amber-600);
+  --preview-highlight-color: var(--color-red-700);
+  --preview-text-color-1: var(--color-neutral-800);
+  --preview-element-block-background-color: --alpha(var(--color-zinc-300) / 60%);
+
+  --notification-color: var(--color-amber-600);
+
+  --spectators-bar-background-color: var(--color-slate-300);
+  --spectators-bar-text-color: var(--color-neutral-800);
+
+  --panel-background-color-1: --alpha(var(--color-cornflower-blue-100) / 80%);
+  --panel-background-color-2: --alpha(var(--color-cornflower-blue-50) / 90%);
+  --panel-background-color-dark-1: --alpha(var(--color-slate-400) / 80%);
+  --panel-background-color-dark-2: --alpha(var(--color-neutral-600) / 80%);
+  --panel-text-color-1: var(--color-gray-800);
+  --panel-text-color-2: var(--color-gray-800);
+  --panel-text-color-3: var(--color-neutral-300);
+  --panel-header-1-color-1: var(--color-gray-800);
+  --panel-header-2-color-1: var(--color-gray-800);
+
+  --panel-horizontal-divider-color-1: var(--color-gray-500);
+
+  --panel-button-background-color-1: var(--color-gray-300);
+  --panel-button-hover-background-color-1: var(--color-gray-400);
+  --panel-button-text-color-1: var(--color-gray-800);
+  --panel-button-border-color-1: var(--color-gray-400);
+
+  --panel-input-background-color-1: var(--color-gray-50);
+  --panel-input-text-color-1: var(--color-gray-900);
+  --panel-input-border-color-1: var(--color-gray-300);
+  --panel-input-focus-border-color-1: var(--color-blue-500);
+  --panel-input-focus-box-shadow-color-1: var(--color-blue-500);
+
+  --word-pack-selection-panel-item-background-color-1: --alpha(var(--color-gray-300) / 30%);
+  --word-pack-selection-panel-item-selected-background-color-1: --alpha(var(--color-gray-100) / 70%);
+  --word-pack-selection-panel-item-border-color-1: var(--color-gray-600);
+
+  --team-color-red: --alpha(var(--color-red-500) / 60%);
+  --team-color-green: --alpha(var(--color-green-500) / 60%);
+  --team-color-blue: --alpha(var(--color-blue-500) / 60%);
+  --team-color-yellow: --alpha(var(--color-yellow-300) / 60%);
+  --team-color-blacklisted: rgba(0, 0, 0, 0.4);
+  --team-text-color-warning: var(--color-red-700);
+
+  --team-selection-color-red: var(--color-red-600);
+  --team-selection-color-green: var(--color-green-600);
+  --team-selection-color-blue: var(--color-blue-600);
+  --team-selection-color-yellow: var(--color-amber-500);
+
+  --team-toggle-display-button-color: var(--color-neutral-300);
+
+  --crown-color-red: --alpha(var(--color-red-500) / 90%);
+  --crown-color-green: --alpha(var(--color-green-500) / 90%);
+  --crown-color-blue: --alpha(var(--color-blue-500) / 90%);
+  --crown-color-yellow: --alpha(var(--color-yellow-500) / 90%);
+
+  --word-block-color-unknown: var(--color-orange-200);
+  --word-block-color-border-unknown: var(--color-amber-600);
+  --word-block-color-glow-unknown: var(--color-pink-300);
+  --word-block-color-text-unknown: var(--color-neutral-700);
+
+  --word-block-color-red: var(--color-red-400);
+  --word-block-color-border-red: var(--color-red-700);
+  --word-block-color-glow-red: var(--color-red-300);
+  --word-block-color-text-red: var(--color-neutral-700);
+
+  --word-block-color-green: var(--color-green-400);
+  --word-block-color-border-green: var(--color-green-600);
+  --word-block-color-glow-green: var(--color-green-300);
+  --word-block-color-text-green: var(--color-neutral-700);
+
+  --word-block-color-blue: var(--color-blue-400);
+  --word-block-color-border-blue: var(--color-blue-700);
+  --word-block-color-glow-blue: var(--color-blue-400);
+  --word-block-color-text-blue: var(--color-neutral-700);
+
+  --word-block-color-yellow: var(--color-yellow-200);
+  --word-block-color-border-yellow: var(--color-yellow-500);
+  --word-block-color-glow-yellow: var(--color-yellow-200);
+  --word-block-color-text-yellow: var(--color-neutral-700);
+
+  --word-block-color-white: var(--color-slate-200);
+  --word-block-color-border-white: var(--color-gray-400);
+  --word-block-color-glow-white: var(--color-pink-300);
+  --word-block-color-text-white: var(--color-neutral-700);
+
+  --word-block-color-black: var(--color-neutral-600);
+  --word-block-color-border-black: var(--color-neutral-950);
+  --word-block-color-glow-black: var(--color-pink-300);
+  --word-block-color-text-black: var(--color-neutral-300);
+}
+
 html.dark-theme {
   --main-background-color: var(--color-neutral-800);
   --main-text-color: var(--color-neutral-300);
@@ -261,6 +288,7 @@ html.dark-theme {
   --star-color-5: var(--color-pink-300);
 
   --preview-glass-panel-color: --alpha(var(--color-cornflower-blue-100) / 60%);
+  --preview-top-row-background-color: var(--color-neutral-600);
   --switcher-button-active-color: var(--color-neutral-500);
   --switcher-button-non-active-color: var(--color-neutral-700);
   --preview-link-color: var(--color-sky-300);
