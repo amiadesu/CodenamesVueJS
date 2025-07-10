@@ -1086,6 +1086,7 @@
                 "edit_name" : "Edit your name:"
             },
             "word_pack_selection_panel" : {
+                "selected" : "selected",
                 "close_panel" : "Close panel",
                 "select_word_pack" : "Select word pack",
                 "view_words" : "View words",

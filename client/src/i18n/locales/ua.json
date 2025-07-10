@@ -1089,6 +1089,7 @@
                 "edit_name" : "Введіть нове ім'я:"
             },
             "word_pack_selection_panel" : {
+                "selected" : "обрано",
                 "close_panel" : "Закрити панель",
                 "select_word_pack" : "Вибрати набір слів",
                 "view_words" : "Перегляд слів",

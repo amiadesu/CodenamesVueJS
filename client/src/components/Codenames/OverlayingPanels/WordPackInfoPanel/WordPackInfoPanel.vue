@@ -6,7 +6,9 @@
                     <span id="word-pack-main-info-wrapper">
                         <span id="word-pack-name-wrapper">
                             <h2>{{ selectedPack.name }}</h2>
-                            <p v-if="selectedPack.packId === gameData.gameRules.wordPack.packId">(v)</p>
+                            <p v-if="selectedPack.packId === gameData.gameRules.wordPack.packId">
+                                {{ `(${$t("codenames.panels.word_pack_info_panel.selected")})` }}
+                            </p>
                         </span>
                         <p>{{ selectedPack.language }}</p>
                     </span>

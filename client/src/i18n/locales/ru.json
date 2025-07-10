@@ -1089,6 +1089,7 @@
                 "edit_name" : "Введите новое имя:"
             },
             "word_pack_selection_panel" : {
+                "selected" : "выбрано",
                 "close_panel" : "Закрыть панель",
                 "select_word_pack" : "Выбрать набор слов",
                 "view_words" : "Просмотр слов",
