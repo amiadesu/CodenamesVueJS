@@ -2,6 +2,8 @@
 const path = require('path');
 const z = require("zod/v4");
 
+const { logger } = require("../../utils/logger");
+
 const {
     validTeamColorZodSchema,
     validPlayerTeamColorZodSchema,
@@ -42,7 +44,12 @@ const {
 const {
     createNewRoomRateLimiter,
     startNewGameRateLimiter,
-    refreshGameboardRateLimiter
+    randomizeTeamOrderRateLimiter,
+    refreshGameboardRateLimiter,
+    playerRelatedHostActionsRateLimiter,
+    playerProfileRateLimiter,
+    wordRateLimiter,
+    sendNewChatMessageRateLimiter
 } = require("./utils/rateLimiters");
 
 const RoomQueueManager = require("./SocketLogic/roomQueueManager");
@@ -63,29 +70,27 @@ function setupCodenames(codenamesIo) {
     });
 }
 
-let eventCount = 0;
-
 function createIOListener() {
     io.use(async (socket, next) => {
         const userID = socket.handshake.auth.userID;
-        console.log("Auth:", userID);
+        logger.info(`Auth: ${userID}`);
     
         socket.userData = await processUser(userID, socket.id, io.sockets);
         const result = playerIdZodSchema.safeParse(socket.userData.codenamesID);
         if (!result.success) {
-            console.log(result.error);
+            logger.warn(`${userID} ${result.error}`);
             return;
         }
     
         next();
     });
     io.on('connection', async (socket) => {
-        console.log('User connected:', socket.id);
+        logger.info(`User connected: ${socket.id}`);
 
         const socketData = new SocketContext(socket);
 
-        console.log('User id:', socketData.userId);
-        console.log("User Codenames ID:", socketData.userCodenamesId);
+        logger.info(`User id: ${socketData.userId}`);
+        logger.info(`User Codenames ID: ${socketData.userCodenamesId}`);
 
         const originalOn = socket.on.bind(socket);
         socket.on = (event, handler) => {
@@ -96,19 +101,17 @@ function createIOListener() {
                         return;
                     }
                     result.catch((err) => {
-                        console.error(`[Socket Error - async handler: "${event}"]`, err);
+                        logger.error(`[Socket Error - async handler: "${event}"] ${err}`);
                     });
                 } catch (err) {
-                    console.error(`[Socket Error - sync handler: "${event}"]`, err);
+                    logger.error(`[Socket Error - sync handler: "${event}"] ${err}`);
                 }
             };
             return originalOn(event, wrapped);
         };
 
         socket.use(async ([event, data, ...args], next) => {
-            console.log(event, data, ...args);
-            eventCount++;
-            console.log(eventCount);
+            logger.info(`${socketData.socketId} ${event} ${data} ${args}`);
             if (!validEventsWithoutAuthorization.includes(event)) {
                 if (socketData.roomId === "default") {
                     return next(new Error('Unauthorized event'));
@@ -131,7 +134,7 @@ function createIOListener() {
         
         socket.on("error", (err) => {
             if (err && err.message === 'Unauthorized event') {
-                console.log("Unauthorized access blocked.");
+                logger.warn("Unauthorized access blocked.");
                 socket.disconnect(true);
             }
         });
@@ -151,6 +154,7 @@ function createIOListener() {
                 await createNewRoomRateLimiter.consume(socketData.userId);
             }
             catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
                 socket.emit("error_message", { 
                     error_code: "action_rate_limit", 
                     error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
@@ -161,7 +165,7 @@ function createIOListener() {
 
             const result = await CodenamesDB.getFreeRoom();
             if (!result.success) {
-                console.log(result.error);
+                logger.warn(result.error);
                 socket.emit("error_message", { error_code: "no_free_room", error: "Couldn't find any free room. Please try again later." });
             }
             socket.emit("get_free_room_code", result.value);
@@ -170,7 +174,7 @@ function createIOListener() {
         socket.on("process_room", (newRoomId) => {
             let result = roomIdZodSchema.safeParse(newRoomId);
             if (!result.success) {
-                console.log("Zod error:", result.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${result.error}`);
                 socket.emit("error_message", { error_code: "invalid_room_code", error: "The room code is not valid. The room code must contain from 1 to 16 characters and consist only of Latin letters and numbers." });
                 return;
             }
@@ -183,14 +187,13 @@ function createIOListener() {
         socket.on("setup_client", async (newRoomId) => {
             let result = roomIdZodSchema.safeParse(newRoomId);
             if (!result.success) {
-                console.log("Zod error:", result.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${result.error}`);
                 socket.emit("error_message", { error_code: "invalid_room_code", error: "The room code is not valid. The room code must contain from 1 to 16 characters and consist only of Latin letters and numbers." });
                 return;
             }
             newRoomId = result.data;
 
             if (socketData.status.setup_event.active) {
-                console.log(111);
                 socket.emit("error_message", { error_code: "still_being_set_up", error: "Your session is still being set up by the server." });
                 return;
             }
@@ -204,9 +207,9 @@ function createIOListener() {
 
             try {
                 const job = await roomQueueManager.addToRoomQueue(socketData.roomId, "setup_client", socketData.socketId);
-                const completedRes = await job.finished();
+                await job.finished();
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
 
@@ -216,9 +219,18 @@ function createIOListener() {
         
 
         socket.on("edit_user_name", async (newName) => {
+            try {
+                await playerProfileRateLimiter.consume(socketData.userId);
+            }
+            catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
+                // No error message emitting required
+                return;
+            }
+
             const result = usernameZodSchema.safeParse(newName);
             if (!result.success) {
-                console.log("Zod error:", result.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${result.error}`);
                 return;
             }
             newName = result.data;
@@ -226,16 +238,25 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "edit_user_name", socketData.socketId, newName);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
 
         socket.on("change_user_color", async () => {
             try {
+                await playerProfileRateLimiter.consume(socketData.userId);
+            }
+            catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
+                // No error message emitting required
+                return;
+            }
+
+            try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "change_user_color", socketData.socketId);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -243,26 +264,26 @@ function createIOListener() {
         socket.on("state_changed", async (previousColor, newUser) => {
             const resultPlayerColor = validPlayerTeamColorZodSchema.safeParse(previousColor);
             if (!resultPlayerColor.success) {
-                console.log("Zod error:", resultPlayerColor.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${resultPlayerColor.error}`);
                 return;
             }
             previousColor = resultPlayerColor.data;
             const resultPlayer = playerZodSchema.safeParse(newUser);
             if (!resultPlayer.success) {
-                console.log("Zod error:", resultPlayer.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${resultPlayer.error}`);
                 return;
             }
             newUser = resultPlayer.data;
 
             if (newUser?.id !== socketData.userCodenamesId) {
-                console.log("An attempt to impersonate another user has been blocked");
+                logger.warn(`An attempt to impersonate another user has been blocked from ${socketData.socketId}`);
                 return;
             }
 
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "state_changed", socketData.socketId, previousColor, newUser);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -273,32 +294,49 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "get_gameboard", socketData.socketId);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
 
         socket.on("select_word", async (selectedWordText) => {
+            try {
+                await wordRateLimiter.consume(socketData.userId);
+            }
+            catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
+                // No error message emitting required
+                return;
+            }
+
             const result = z.string().min(1).safeParse(selectedWordText);
             if (!result.success) {
-                console.log("Zod error:", result.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${result.error}`);
                 return;
             }
             selectedWordText = result.data;
 
             try {
-                const job = await roomQueueManager.addToRoomQueue(socketData.roomId, "select_word", socketData.socketId, selectedWordText);
-                const completedRes = await job.finished();
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "select_word", socketData.socketId, selectedWordText);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
     
         socket.on("process_click", async (clickedWordText) => {
+            try {
+                await wordRateLimiter.consume(socketData.userId);
+            }
+            catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
+                // No error message emitting required
+                return;
+            }
+
             const result = z.string().min(1).safeParse(clickedWordText);
             if (!result.success) {
-                console.log("Zod error:", result.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${result.error}`);
                 return;
             }
             clickedWordText = result.data;
@@ -306,7 +344,7 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "process_click", socketData.socketId, clickedWordText);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -317,7 +355,7 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "get_all_word_packs", socketData.socketId);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -325,7 +363,7 @@ function createIOListener() {
         socket.on("get_word_pack_no_words", async (packId) => {
             const resultPackId = packIdZodSchema.safeParse(packId);
             if (!resultPackId.success) {
-                console.log("Zod error:", resultPackId.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${resultPackId.error}`);
                 return;
             }
             packId = resultPackId.data;
@@ -333,7 +371,7 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "get_word_pack_no_words", socketData.socketId, packId);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -341,7 +379,7 @@ function createIOListener() {
         socket.on("get_words_from_word_pack", async (packId) => {
             const resultPackId = packIdZodSchema.safeParse(packId);
             if (!resultPackId.success) {
-                console.log("Zod error:", resultPackId.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${resultPackId.error}`);
                 return;
             }
             packId = resultPackId.data;
@@ -349,7 +387,7 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "get_words_from_word_pack", socketData.socketId, packId);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -359,7 +397,7 @@ function createIOListener() {
         socket.on("set_new_game_rules", async (newGameRules) => {
             const result = gameRulesZodSchemaNonStrict.safeParse(newGameRules);
             if (!result.success) {
-                console.log("Zod error:", result.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${result.error}`);
                 return;
             }
             newGameRules = result.data;
@@ -367,7 +405,7 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "set_new_game_rules", socketData.socketId, newGameRules);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -377,6 +415,7 @@ function createIOListener() {
                 await refreshGameboardRateLimiter.consume(socketData.userId);
             }
             catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
                 io.to(socketData.socketId).emit("error_message", { 
                     error_code: "action_rate_limit", 
                     error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
@@ -388,33 +427,68 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "refresh_gameboard", socketData.socketId);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
 
         socket.on("randomize_team_order", async () => {
             try {
+                await randomizeTeamOrderRateLimiter.consume(socketData.userId);
+            }
+            catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
+                // No error message emitting required
+                return;
+            }
+
+            try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "randomize_team_order", socketData.socketId);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
 
         socket.on("pass_turn", async () => {
             try {
+                await playerRelatedHostActionsRateLimiter.consume(socketData.userId);
+            }
+            catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
+                io.to(socketData.socketId).emit("error_message", { 
+                    error_code: "action_rate_limit", 
+                    error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
+                    retry_ms: rejRes.msBeforeNext
+                });
+                return;
+            }
+
+            try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "pass_turn", socketData.socketId);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
     
         socket.on("remove_all_players", async (withMasters) => {
+            try {
+                await playerRelatedHostActionsRateLimiter.consume(socketData.userId);
+            }
+            catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
+                io.to(socketData.socketId).emit("error_message", { 
+                    error_code: "action_rate_limit", 
+                    error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
+                    retry_ms: rejRes.msBeforeNext
+                });
+                return;
+            }
+
             const result = z.boolean().safeParse(withMasters);
             if (!result.success) {
-                console.log("Zod error:", result.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${result.error}`);
                 return;
             }
             withMasters = result.data;
@@ -422,15 +496,28 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "remove_all_players", socketData.socketId, withMasters);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
     
         socket.on("remove_player", async (playerId) => {
+            try {
+                await playerRelatedHostActionsRateLimiter.consume(socketData.userId);
+            }
+            catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
+                io.to(socketData.socketId).emit("error_message", { 
+                    error_code: "action_rate_limit", 
+                    error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
+                    retry_ms: rejRes.msBeforeNext
+                });
+                return;
+            }
+
             const result = playerIdZodSchema.safeParse(playerId);
             if (!result.success) {
-                console.log("Zod error:", result.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${result.error}`);
                 return;
             }
             playerId = result.data;
@@ -438,15 +525,28 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "remove_player", socketData.socketId, playerId);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
     
         socket.on("randomize_players", async (withMasters) => {
+            try {
+                await playerRelatedHostActionsRateLimiter.consume(socketData.userId);
+            }
+            catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
+                io.to(socketData.socketId).emit("error_message", { 
+                    error_code: "action_rate_limit", 
+                    error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
+                    retry_ms: rejRes.msBeforeNext
+                });
+                return;
+            }
+
             const result = z.boolean().safeParse(withMasters);
             if (!result.success) {
-                console.log("Zod error:", result.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${result.error}`);
                 return;
             }
             withMasters = result.data;
@@ -454,15 +554,28 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "randomize_players", socketData.socketId, withMasters);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
         
         socket.on("transfer_host", async (playerId) => {
+            try {
+                await playerRelatedHostActionsRateLimiter.consume(socketData.userId);
+            }
+            catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
+                io.to(socketData.socketId).emit("error_message", { 
+                    error_code: "action_rate_limit", 
+                    error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
+                    retry_ms: rejRes.msBeforeNext
+                });
+                return;
+            }
+
             const result = playerIdZodSchema.safeParse(playerId);
             if (!result.success) {
-                console.log("Zod error:", result.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${result.error}`);
                 return;
             }
             playerId = result.data;
@@ -470,7 +583,7 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "transfer_host", socketData.socketId, playerId);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -482,6 +595,7 @@ function createIOListener() {
                 await startNewGameRateLimiter.consume(socketData.userId);
             }
             catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
                 io.to(socketData.socketId).emit("error_message", { 
                     error_code: "action_rate_limit", 
                     error: `You are being rate limited. Retry after ${rejRes.msBeforeNext}ms.`,
@@ -492,22 +606,21 @@ function createIOListener() {
         
             const resultRandomizeTeamOrder = z.boolean().safeParse(randomizeTeamOrder);
             if (!resultRandomizeTeamOrder.success) {
-                console.log("Zod error:", resultRandomizeTeamOrder.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${resultRandomizeTeamOrder.error}`);
                 return;
             }
             randomizeTeamOrder = resultRandomizeTeamOrder.data;
             const resultGetNewGameboard = z.boolean().safeParse(getNewGameboard);
             if (!resultGetNewGameboard.success) {
-                console.log("Zod error:", resultGetNewGameboard.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${resultGetNewGameboard.error}`);
                 return;
             }
             getNewGameboard = resultGetNewGameboard.data;
 
             try {
-                const job = await roomQueueManager.addToRoomQueue(socketData.roomId, "start_new_game", socketData.socketId, randomizeTeamOrder, getNewGameboard);
-                const completedRes = await job.finished();
+                await roomQueueManager.addToRoomQueue(socketData.roomId, "start_new_game", socketData.socketId, randomizeTeamOrder, getNewGameboard);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -516,7 +629,7 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "get_traitors", socketData.socketId);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -525,7 +638,7 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "get_game_process", socketData.socketId);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -535,13 +648,13 @@ function createIOListener() {
         socket.on("send_clue", async (clueText, teamColor) => {
             const resultClueText = clueTextZodSchema.safeParse(clueText);
             if (!resultClueText.success) {
-                console.log("Zod error:", resultClueText.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${resultClueText.error}`);
                 return;
             }
             clueText = resultClueText.data;
             const resultTeamColor = validTeamColorZodSchema.safeParse(teamColor);
             if (!resultTeamColor.success) {
-                console.log("Zod error:", resultTeamColor.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${resultTeamColor.error}`);
                 return;
             }
             teamColor = resultTeamColor.data;
@@ -549,7 +662,7 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "send_clue", socketData.socketId, clueText, teamColor);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -557,7 +670,7 @@ function createIOListener() {
         socket.on("edit_clue", async (newClue) => {
             const result = clueZodSchema.safeParse(newClue);
             if (!result.success) {
-                console.log("Zod error:", result.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${result.error}`);
                 return;
             }
             newClue = result.data;
@@ -565,7 +678,7 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "edit_clue", socketData.socketId, newClue);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -574,7 +687,7 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "get_clues", socketData.socketId);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -582,9 +695,18 @@ function createIOListener() {
 
 
         socket.on("send_new_chat_message", async (messageText) => {
+            try {
+                await sendNewChatMessageRateLimiter.consume(socketData.userId);
+            }
+            catch (rejRes) {
+                logger.warn(`${socketData.socketId} is being rate limited: ${rejRes}`);
+                // No error message emitting required
+                return;
+            }
+
             const resultChatMessages = chatMessageZodSchema.safeParse(messageText);
             if (!resultChatMessages.success) {
-                console.log("Zod error:", resultChatMessages.error);
+                logger.warn(`Zod error from ${socketData.socketId}: ${resultChatMessages.error}`);
                 return;
             }
             messageText = resultChatMessages.data;
@@ -592,7 +714,7 @@ function createIOListener() {
             try {
                 await roomQueueManager.addToRoomQueue(socketData.roomId, "send_new_chat_message", socketData.socketId, messageText);
             } catch (error) {
-                console.error('Error queuing event:', error);
+                logger.error(`Error queuing event: ${error}`);
                 socket.emit('error', 'Failed to queue event');
             }
         });
@@ -603,20 +725,19 @@ function createIOListener() {
             roomQueueManager.removeSocket(socketData.socketId);
 
             if (!socketData.status.settedUp) {
-                console.log("Some shit is going on... user was not setted up");
+                logger.warn(`User ${socketData.socketId} was not setted up but disconnected`);
                 return;
             }
             if (!(await validateUser(room, socketData.userCodenamesId))) {
-                console.log("Some shit is going on... user was not validated");
+                logger.warn(`User ${socketData.socketId} was not validated but disconnected from room ${room.roomId}`);
                 return;
             }
 
             let users = await room.getUsers();
     
-            console.log('User disconnected:', socket.handshake.address);
+            logger.info(`User ${socketData.socketId} disconnected`);
 
             const objIndex = users.findIndex((obj) => obj.id === socketData.userCodenamesId);
-            console.log(objIndex);
             let newUser = users[objIndex];
             newUser.online = false;
             await updateUser(room, newUser);
@@ -627,7 +748,7 @@ function createIOListener() {
             io.to(socketData.roomId).emit("update_users", teams, users);
 
             if (users.every((user) => !user.online)) {
-                console.log("Room is AFK now!");
+                logger.info(`Room ${room.roomId} is AFK now!`);
             }
             if (users.length === 0) {
                 await roomQueueManager.cleanupRoomQueue(socketData.roomId);
@@ -639,8 +760,3 @@ function createIOListener() {
 module.exports = {
     setupCodenames
 }
-
-// TODO:
-// move disconnect to /SocketLogic/user.js (or should I?)
-// clean up code that left
-// investigate select_word and start_new_game further - possibly, they don't need a const job = ... approach

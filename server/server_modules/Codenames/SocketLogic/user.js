@@ -1,6 +1,8 @@
 // @ts-check
 const CodenamesDB = require("../db/codenamesDB");
 
+const { logger } = require("../../../utils/logger");
+
 const RoomContext = require("../db/roomContext");
 
 const DIContainer = require("../GameLogic/container");
@@ -128,22 +130,20 @@ async function stateChangedEvent(io, socketData, previousColor, newUser) {
         return;
     }
     if (newUser.host && !users[objIndex].host) {
-        console.log("Privilege escalation attempt was blocked.");
+        logger.warn(`Privilege escalation attempt was blocked from ${socketData.socketId}`);
         return;
     }
 
     let updateEveryone = false;
     if (newUser.state.selecting !== "" && newUser.state.selecting === users[objIndex].state.selecting) {
-        console.log(newUser.state.selecting, users[objIndex].state.selecting);
         updateEveryone = true;
         await toggleWord(room, newUser.state.selecting, objIndex, socketData.countdownInterval);
-        console.log(newUser.state.selecting, users[objIndex].state.selecting);
+        
         users = await room.getUsers();
         newUser.state.selection = "";
     }
     users[objIndex].state = newUser.state;
     users[objIndex].state.selecting = "";
-    console.log(newUser.state.selecting, users[objIndex].state.selecting);
 
     if (previousColor !== "spectator") {
         const objIndex = teams[previousColor].team.findIndex((player) => player.id === newUser.id);

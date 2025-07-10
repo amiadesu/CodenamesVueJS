@@ -1,3 +1,6 @@
+// @ts-check
+const { logger } = require("../../../../utils/logger");
+
 const fs = require('fs');
 const path = require('path');
 const { expireAfterS } = require('../../utils/constants');
@@ -38,7 +41,7 @@ class RedisAtomic {
             }));
             return { success: true, message: "Scripts were loaded successfully" };
         } catch (error) {
-            console.error("Error loading Lua scripts:", error);
+            logger.error(`Error loading Lua scripts: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -53,7 +56,7 @@ class RedisAtomic {
             }
             return { success: true, value: null, message: "Couldn't find anything" };
         } catch (error) {
-            console.log("Error while getting data:", error);
+            logger.error(`Error while getting data: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -64,7 +67,7 @@ class RedisAtomic {
             await this.client.set(redisKey, JSON.stringify(value), { EX: expireAfterS });
             return { success: true, message: "Setted data successfully" };
         } catch (error) {
-            console.log("Error while setting data:", error);
+            logger.error(`Error while setting data: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -100,7 +103,7 @@ class RedisAtomic {
                 message: result.ok || 'Operation completed successfully'
             };
         } catch (error) {
-            console.error(`${operation} failed:`, error);
+            logger.error(`${operation} failed: ${error}`);
             return { 
                 success: false, 
                 error: error.message,

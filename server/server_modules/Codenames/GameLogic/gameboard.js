@@ -1,10 +1,6 @@
 // @ts-check
 const CodenamesDB = require("../db/codenamesDB");
 const {
-    isObject,
-    makeID,
-    makeColor,
-    randChoice,
     shuffle
 } = require("../../../utils/extra");
 
@@ -17,8 +13,7 @@ async function getWordsFromPack(packId) {
 }
 
 async function getWordsForRoom(room) {
-    let gameRules = await room.getGameRules();
-    console.log(gameRules);
+    const gameRules = await room.getGameRules();
     const words = await getWordsFromPack(gameRules.wordPack.packId);
     return words;
 }

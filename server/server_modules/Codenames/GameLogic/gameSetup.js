@@ -1,28 +1,13 @@
 // @ts-check
 const {
     updateTeamOrder,
-    updateUser,
-    passTurn,
-    processWin,
-    clearTimer,
-    updateGameTimer,
-    removeAllPlayers,
-    removePlayer,
-    randomizePlayers,
-    transferHost
+    clearTimer
 } = require("./gameManager");
 const {
-    getWordsFromPack,
-    getWordsForRoom,
-    getNewWords,
-    getGameboard
+    getNewWords
 } = require("./gameboard");
 const {
-    isObject,
-    makeID,
-    makeColor,
-    randChoice,
-    shuffle
+    randChoice
 } = require("../../../utils/extra");
 
 async function clearRoles(room) {
@@ -33,7 +18,6 @@ async function setupGamemode(room) {
     let gameRules = await room.getGameRules();
 
     if (gameRules.game_mode === "traitor") {
-        let users = await room.getUsers();
         let teams = await room.getTeams();
         let traitors = await room.getTraitors();
 

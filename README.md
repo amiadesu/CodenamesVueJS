@@ -4,10 +4,12 @@ This is my attempt at creating a website for board game named [Codenames](https:
 
 > [!WARNING]
 > This is my first big pet project, so it definitely contains a lot of serious problems I'm not aware of right now, but I still tried to make it as good as I could at all before releasing it to the public repository.
+
 ## Tech Stack
 
 ### Client
 - **Vue.js 3** – Frontend framework for building reactive UI
+- **VueUse** – Collection of essential Vue composition utilities
 - **Pinia** – State management for Vue
 - **vue-router** – SPA navigation and routing
 - **vue-i18n** – Internationalization and localization
@@ -26,6 +28,7 @@ This is my attempt at creating a website for board game named [Codenames](https:
 - **Zod** – Type-safe schema validation
 - **rate-limiter-flexible** – API rate limiting
 - **async-mutex** – Concurrency control for async operations
+- **Winston** – Logging library for structured logs
 
 ## Recommended IDE Setup
 
@@ -166,6 +169,7 @@ On the client side, you need to add a route to the game in the `/client/src/rout
 
 ## Roadmap
 
+- [x] Add logger
 - [ ] More word pack types support
 
 

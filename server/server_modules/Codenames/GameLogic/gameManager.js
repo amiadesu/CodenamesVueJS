@@ -1,14 +1,7 @@
 // @ts-check
 const {
-    isObject,
-    makeID,
-    makeColor,
-    randChoice,
     shuffle
 } = require("../../../utils/extra");
-const { 
-    clearAllSelections 
-} = require("./wordHelpers");
 
 let io = null;
 
@@ -59,8 +52,6 @@ async function updateUser(room, newUser) {
 
 async function passTurn(room) {
     await clearTimer(room);
-
-    // await clearAllSelections(room);
 
     let gameRules = await room.getGameRules();
     let gameProcess = await room.getGameProcess();
@@ -243,7 +234,6 @@ async function randomizePlayers(room, withMasters = true) {
     const allPlayers = [];
 
     for (const [color, teamData] of Object.entries(teams)) {
-        console.log(color, teamData);
         allPlayers.push(...teamData.team);
         if (withMasters) {
             if (teamData.master) {

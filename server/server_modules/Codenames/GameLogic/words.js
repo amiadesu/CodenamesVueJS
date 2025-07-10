@@ -1,10 +1,7 @@
 // @ts-check
 
 const {
-    toggleWord,
-    toggleWordNoSave,
     clearWord,
-    clearWordNoSave,
     clearAllSelections
 } = require("./wordHelpers");
 
@@ -34,7 +31,6 @@ async function revealWord(room, wordText) {
     gameProcess = await room.getGameProcess();
     
 
-    
 
     const wordObjectIndex = words.findIndex((word) => word.text === wordText);
     if (!words[wordObjectIndex].selectable) {
@@ -108,7 +104,6 @@ async function wordAutoselect(room) {
     });
     
     if (most > teams[gameProcess.currentTurn].team.length - total && mostCnt === 1) {
-        console.log("Selecting", currentMostWord);
         await revealWord(room, currentMostWord);
         selectedSomething = true;
     }

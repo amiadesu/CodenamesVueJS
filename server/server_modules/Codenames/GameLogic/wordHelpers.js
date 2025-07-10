@@ -61,13 +61,17 @@ async function toggleWordNoSave(room, wordText, selectorIndex) {
 }
 
 async function clearWord(room, wordText) {
-    await clearWordNoSave(room, wordText);
+    const changedSomething = await clearWordNoSave(room, wordText);
 
-    await room.save();
+    if (changedSomething) {
+        await room.save();
+    }
 }
 
 async function clearWordNoSave(room, wordText) {
     let users = await room.getUsers(false);
+
+    let changedSomething = false;
 
     if (wordText === "endTurn") {
         let selectors = await room.getEndTurnSelectors();
@@ -78,6 +82,8 @@ async function clearWordNoSave(room, wordText) {
                     users[userIndex].state.selecting = "";
                 }
                 users[userIndex].state.selecting = "";
+
+                changedSomething = true;
             });
         }
 
@@ -87,7 +93,7 @@ async function clearWordNoSave(room, wordText) {
 
         const wordObjectIndex = words.findIndex((word) => word.text === wordText);
         if (wordObjectIndex === -1) {
-            return;
+            return changedSomething;
         }
         const selectors = words[wordObjectIndex].selectedBy;
         if (Array.isArray(selectors)) {
@@ -96,6 +102,8 @@ async function clearWordNoSave(room, wordText) {
                 if (userIndex !== -1) {
                     users[userIndex].state.selecting = "";
                 }
+
+                changedSomething = true;
             });
         }
         words[wordObjectIndex].selectedBy = [];
@@ -104,6 +112,8 @@ async function clearWordNoSave(room, wordText) {
     }
     
     await room.setUsers(users, false);
+
+    return changedSomething;
 }
 
 async function clearAllSelections(room) {
@@ -116,7 +126,6 @@ async function clearAllSelections(room) {
     }
     
     words.forEach(async (word) => {
-        // Need to inverstigate further on this. I don't really like an idea of saving the room for each word.
         await clearWord(room, word.text);
     });
 

@@ -1,6 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
+const { logger } = require("../../../../utils/logger");
+
 const {
     messagesLimit,
     cluesLimit
@@ -63,7 +65,7 @@ class RedisAtomic {
             }
             return { success: true, value: null, message: "Couldn't find anything" };
         } catch (error) {
-            console.log("Error while getting data:", error);
+            logger.error(`Error while getting data: ${error}`);
             return { success: false, error: error.message };
         }
     }
@@ -74,7 +76,7 @@ class RedisAtomic {
             await this.client.set(redisKey, JSON.stringify(value), { EX: expireAfterS });
             return { success: true, message: "Setted data successfully" };
         } catch (error) {
-            console.log("Error while setting data:", error);
+            logger.error(`Error while setting data: ${error}`);
             return { success: false, error: error.message };
         }
     }

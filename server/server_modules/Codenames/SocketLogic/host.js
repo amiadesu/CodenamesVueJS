@@ -1,6 +1,8 @@
 // @ts-check
 const z = require("zod/v4");
 
+const { logger } = require("../../../utils/logger");
+
 const RoomContext = require("../db/roomContext");
 
 const {
@@ -186,7 +188,7 @@ async function removePlayerEvent(io, socketData, playerId) {
 async function randomizePlayersEvent(io, socketData, withMasters) {
     let result = z.boolean().safeParse(withMasters);
     if (!result.success) {
-        console.log("Zod error:", result.error);
+        logger.warn(`Zod error from ${socketData.socketId}: ${result.error}`);
         return;
     }
     withMasters = result.data;
@@ -209,7 +211,7 @@ async function randomizePlayersEvent(io, socketData, withMasters) {
 async function transferHostEvent(io, socketData, playerId) {
     let result = playerIdZodSchema.safeParse(playerId);
     if (!result.success) {
-        console.log("Zod error:", result.error);
+        logger.warn(`Zod error from ${socketData.socketId}: ${result.error}`);
         return;
     }
     playerId = result.data;

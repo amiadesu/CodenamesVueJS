@@ -1,6 +1,8 @@
 // @ts-check
 const RoomContext = require("../db/roomContext");
 
+const { logger } = require("../../../utils/logger");
+
 const {
     Permissions
 } = require("../utils/constants");
@@ -39,7 +41,7 @@ async function startNewGameEvent(io, socketData, randomizeTeamOrder, getNewGameb
     let gameRules = await room.getGameRules();
     let resultGameRules = gameRulesZodSchemaStrict.safeParse(gameRules);
     if (!resultGameRules.success) {
-        console.log("Zod error:", resultGameRules.error);
+        logger.warn(`Zod error from ${socketData.socketId}: ${resultGameRules.error}`);
         io.to(socketData.socketId).emit("error_message", { error_code: "invalid_game_rules", error: "Game rules object is invalid." });
         return;
     }

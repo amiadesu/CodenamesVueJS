@@ -1,6 +1,8 @@
 // @ts-check
 const RoomContext = require("../db/roomContext");
 
+const { logger } = require("../../../utils/logger");
+
 const {
     Permissions
 } = require("../utils/constants");
@@ -35,7 +37,7 @@ async function selectWordEvent(io, socketData, selectedWordText) {
     
     let words = await room.getWords();
     if (!words.some((word) => word.text === selectedWordText) && selectedWordText !== "endTurn") {
-        console.log("Invalid word was selected:", selectedWordText);
+        logger.warn(`Invalid word was selected by ${socketData.socketId}: ${selectedWordText}`);
         return;
     }
     
@@ -118,7 +120,7 @@ async function processClickEvent(io, socketData, clickedWordText) {
 
     let words = await room.getWords();
     if (!words.some((word) => word.text === clickedWordText)) {
-        console.log("Invalid word was selected:", clickedWordText);
+        logger.warn(`Invalid word was clicked by ${socketData.socketId}: ${clickedWordText}`);
         return;
     }
 

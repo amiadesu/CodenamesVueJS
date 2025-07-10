@@ -4,6 +4,8 @@ const path = require('path');
 const chokidar = require('chokidar');
 const CodenamesDB = require("./codenamesDB");
 
+const { logger } = require("../../../utils/logger");
+
 let packsFolderPath = null;
 let packsFilePath = null;
 
@@ -12,7 +14,7 @@ function setupWordPackWatcher(pathToWordPackFolder) {
     packsFilePath = path.join(pathToWordPackFolder, "packs.json");
     updateMongoDB();
     chokidar.watch(packsFilePath).on('change', () => {
-        console.log(`${packsFilePath} has been updated. Checking for changes...`);
+        logger.info(`${packsFilePath} has been updated. Checking for changes...`);
         updateMongoDB();
     });
 }
@@ -40,13 +42,13 @@ const updateMongoDB = async () => {
                 };
                 await CodenamesDB.setWordPack(packData);
 
-                console.log(`Updated or created pack: ${packId}`);
+                logger.info(`Updated or created pack: ${packId}`);
             } else {
-                console.log(`No changes detected for pack: ${packId}`);
+                logger.info(`No changes detected for pack: ${packId}`);
             }
         }
     } catch (err) {
-        console.error('Error updating MongoDB:', err);
+        logger.error(`Error updating MongoDB: ${err}`);
     }
 };
 

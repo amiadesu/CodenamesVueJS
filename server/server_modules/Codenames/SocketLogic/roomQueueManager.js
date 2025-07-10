@@ -3,6 +3,8 @@ const Queue = require('bull');
 const { Mutex } = require('async-mutex');
 const redis = require('redis');
 
+const { logger } = require("../../../utils/logger");
+
 const {
     getGameboardEvent,
     selectWordEvent,
@@ -57,7 +59,7 @@ class RoomQueueManager {
         
         this.redisClient = redis.createClient(config.redis.clientOptions);
         this.redisClient.on('error', (err) => {
-            console.error('Redis client error:', err);
+            logger.error(`Redis client error: ${err}`);
         });
 
         // Event processors now expect positional arguments
@@ -132,7 +134,7 @@ class RoomQueueManager {
             });
 
             queue.on('error', (error) => {
-                console.error(`Queue ${queueName} error:`, error);
+                logger.error(`Queue ${queueName} error: ${error}`);
             });
 
             queue.process(async (job) => {
@@ -145,7 +147,7 @@ class RoomQueueManager {
                     }
                     throw new Error(`Unknown event type: ${eventType}`);
                 } catch (error) {
-                    console.error(`Job ${job.id} failed:`, error);
+                    logger.error(`Job ${job.id} failed: ${error}`);
                     throw error;
                 }
             });
@@ -345,10 +347,10 @@ class RoomQueueManager {
                 await queue.close();
                 await queue.obliterate({ force: true });
                 this.queues.delete(roomId);
-                console.log(`Queue for room ${roomId} cleaned up successfully`);
+                logger.info(`Queue for room ${roomId} cleaned up successfully`);
             }
         } catch (error) {
-            console.error(`Error cleaning up queue for room ${roomId}:`, error);
+            logger.error(`Error cleaning up queue for room ${roomId}: ${error}`);
             throw error;
         } finally {
             release();
