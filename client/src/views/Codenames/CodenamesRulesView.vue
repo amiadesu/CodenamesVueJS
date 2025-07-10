@@ -201,7 +201,7 @@ onMounted(() => {
     content: '';
     flex: 1;
     display: block;
-    border-bottom: 1px solid black;
+    border-bottom: 2px solid var(--preview-divider-color);
 }
 
 .separator:not(:empty)::before {

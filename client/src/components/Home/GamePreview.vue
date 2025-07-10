@@ -83,7 +83,7 @@ export default defineComponent({
     row-gap: 0.5rem;
     padding: 0.5rem;
     border-radius: 0.7rem;
-    border: 2px solid black;
+    border: 2px solid var(--preview-element-block-border-color);
 }
 
 .open-game-rules-button {

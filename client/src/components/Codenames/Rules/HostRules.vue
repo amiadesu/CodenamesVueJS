@@ -154,6 +154,7 @@ export default defineComponent({
     word-wrap: break-word;
     flex-grow: 1;
     flex-shrink: 0;
+    border: 2px solid var(--preview-element-block-border-color);
 }
 
 .title-wrapper {
@@ -244,7 +245,7 @@ export default defineComponent({
 }
 
 #codenames-host-rules-content table, th, td {
-    border: 1px solid black;
+    border: 2px solid var(--preview-divider-color);
 }
 
 #codenames-host-rules-content th, td {

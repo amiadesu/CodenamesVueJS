@@ -47,18 +47,12 @@
   --color-cornflower-blue-900: oklch(3.0377% 0.02105 264.05);
   --color-cornflower-blue-950: oklch(0% 0 none);
 
-  --star-color-1: var(--color-red-300);
-  --star-color-2: var(--color-green-300);
-  --star-color-3: var(--color-blue-300);
-  --star-color-4: var(--color-yellow-300);
-  --star-color-5: var(--color-pink-300);
-
   --main-background-color: var(--color-neutral-200);
   --main-text-color: var(--color-neutral-800);
 
   --error-color: var(--color-red-700);
 
-  --home-view-background-color: var(--color-slate-300);
+  --home-view-background-color: var(--color-indigo-200);
 
   --star-color-1: var(--color-red-500);
   --star-color-2: var(--color-green-500);
@@ -66,19 +60,24 @@
   --star-color-4: var(--color-yellow-500);
   --star-color-5: var(--color-pink-500);
 
-  --preview-glass-panel-color: --alpha(var(--color-cornflower-blue-300) / 40%);
-  --switcher-button-active-color: var(--color-neutral-300);
+  --preview-top-row-background-color: var(--color-neutral-300);
+  --preview-glass-panel-color: --alpha(var(--color-violet-400) / 30%);
+  --switcher-button-active-color: #C2C5CC;
   --switcher-button-non-active-color: var(--color-neutral-500);
-  --preview-link-color: var(--color-cyan-200);
-  --preview-italic-color: var(--color-teal-400);
-  --preview-highlight-color: var(--color-rose-500);
   --preview-text-color-1: var(--color-neutral-800);
+  --preview-link-color: var(--color-fuchsia-500);
+  --preview-italic-color: var(--color-amber-600);
+  --preview-highlight-color: var(--color-red-700);
   --preview-element-block-background-color: --alpha(var(--color-zinc-300) / 60%);
+  --preview-element-block-border-color: var(--color-zinc-700);
+  --preview-divider-color: var(--color-zinc-700);
 
   --notification-color: var(--color-amber-600);
 
   --spectators-bar-background-color: var(--color-slate-300);
   --spectators-bar-text-color: var(--color-neutral-800);
+
+  --overlaying-panel-dimming-color: rgba(0, 0, 0, 0.5);
 
   --panel-background-color-1: --alpha(var(--color-cornflower-blue-100) / 80%);
   --panel-background-color-2: --alpha(var(--color-cornflower-blue-50) / 90%);
@@ -176,20 +175,24 @@ html.light-theme {
   --star-color-4: var(--color-yellow-500);
   --star-color-5: var(--color-pink-500);
 
-  --preview-glass-panel-color: --alpha(var(--color-violet-400) / 30%);
   --preview-top-row-background-color: var(--color-neutral-300);
+  --preview-glass-panel-color: --alpha(var(--color-violet-400) / 30%);
   --switcher-button-active-color: #C2C5CC;
   --switcher-button-non-active-color: var(--color-neutral-500);
+  --preview-text-color-1: var(--color-neutral-800);
   --preview-link-color: var(--color-fuchsia-500);
   --preview-italic-color: var(--color-amber-600);
   --preview-highlight-color: var(--color-red-700);
-  --preview-text-color-1: var(--color-neutral-800);
   --preview-element-block-background-color: --alpha(var(--color-zinc-300) / 60%);
+  --preview-element-block-border-color: var(--color-zinc-700);
+  --preview-divider-color: var(--color-zinc-700);
 
   --notification-color: var(--color-amber-600);
 
   --spectators-bar-background-color: var(--color-slate-300);
   --spectators-bar-text-color: var(--color-neutral-800);
+
+  --overlaying-panel-dimming-color: rgba(0, 0, 0, 0.5);
 
   --panel-background-color-1: --alpha(var(--color-cornflower-blue-100) / 80%);
   --panel-background-color-2: --alpha(var(--color-cornflower-blue-50) / 90%);
@@ -287,20 +290,24 @@ html.dark-theme {
   --star-color-4: var(--color-yellow-300);
   --star-color-5: var(--color-pink-300);
 
-  --preview-glass-panel-color: --alpha(var(--color-cornflower-blue-100) / 60%);
   --preview-top-row-background-color: var(--color-neutral-600);
+  --preview-glass-panel-color: --alpha(var(--color-cornflower-blue-100) / 60%);
   --switcher-button-active-color: var(--color-neutral-500);
   --switcher-button-non-active-color: var(--color-neutral-700);
+  --preview-text-color-1: var(--color-neutral-300);
   --preview-link-color: var(--color-sky-300);
   --preview-italic-color: var(--color-lime-300);
   --preview-highlight-color: var(--color-pink-300);
-  --preview-text-color-1: var(--color-neutral-300);
   --preview-element-block-background-color: var(--color-zinc-500);
+  --preview-element-block-border-color: var(--color-zinc-700);
+  --preview-divider-color: var(--color-zinc-700);
 
   --notification-color: var(--color-yellow-300);
 
   --spectators-bar-background-color: var(--color-neutral-600);
   --spectators-bar-text-color: var(--color-neutral-200);
+
+  --overlaying-panel-dimming-color: rgba(0, 0, 0, 0.5);
 
   --panel-background-color-1: --alpha(var(--color-cornflower-blue-100) / 80%);
   --panel-background-color-2: --alpha(var(--color-cornflower-blue-50) / 90%);

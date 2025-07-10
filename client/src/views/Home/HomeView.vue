@@ -62,6 +62,7 @@ const route = useRoute();
 #home-view-wrapper {
     height: 96%;
     width: 100%;
+    margin-top: 0.5rem;
 
     background-color: var(--home-view-background-color);
 

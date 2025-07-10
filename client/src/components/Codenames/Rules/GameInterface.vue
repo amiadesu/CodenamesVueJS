@@ -285,7 +285,7 @@ export default defineComponent({
 }
 
 #game-interface-content table, th, td {
-    border: 1px solid black;
+    border: 2px solid var(--preview-divider-color);
 }
 
 #game-interface-content th, td {

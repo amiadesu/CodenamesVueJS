@@ -265,7 +265,7 @@ export default defineComponent({
 }
 
 #codenames-game-rules-content table, th, td {
-    border: 1px solid black;
+    border: 2px solid var(--preview-divider-color);
 }
 
 #codenames-game-rules-content th, td {
