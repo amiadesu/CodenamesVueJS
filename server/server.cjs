@@ -2,7 +2,6 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
-var middleware = require('socketio-wildcard')();
 
 const { config } = require("./utils/config");
 
@@ -29,9 +28,7 @@ setupUserRegistration().then(() => {
 })
 
 const CodenamesIO = globalIO.of("/codenames");
-// CodenamesIO.use(middleware);
 setupCodenames(CodenamesIO);
-// const io = globalio;
 
 
 server.listen(3000, () => {
