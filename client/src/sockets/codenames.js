@@ -17,7 +17,7 @@ export const state = reactive({
 });
 
 // "undefined" means the URL will be computed from the `window.location` object
-const URL = config.serverIPs.codenames;
+const URL = config.serverURLs.codenames;
 
 export const socket = io(URL, {
     path: "/ios/",
