@@ -6,26 +6,26 @@ This is my attempt at creating a website for board game named [Codenames](https:
 > This is my first big pet project, so it definitely contains a lot of serious problems I'm not aware of right now, but I still tried to make it as good as I could at all before releasing it to the public repository.
 ## Tech Stack
 
-**Client:** 
-- Vue.js 3
-- pinia
-- vue-i18n
-- vue-router
-- TailwindCSS
-- socket.io-client
+### Client
+- **Vue.js 3** – Frontend framework for building reactive UI
+- **Pinia** – State management for Vue
+- **vue-router** – SPA navigation and routing
+- **vue-i18n** – Internationalization and localization
+- **Tailwind CSS** – Utility-first CSS framework
+- **socket.io-client** – Real-time communication via WebSocket
 
-**Server:**
-- Node.js
-- express
-- socket.io
-- cors
-- chokidar (for detecting updated or new word packs)
-- mongoose
-- redis
-- zod
-- rate-limiter-flexible
-- async-mutex
-- bull
+### Server
+- **Node.js** – JavaScript runtime environment
+- **Express** – Web framework for building APIs
+- **Socket.IO** – Real-time WebSocket server
+- **CORS** – Cross-Origin Resource Sharing middleware
+- **Chokidar** – File watching (for dynamic word pack updates)
+- **Mongoose** – MongoDB object modeling
+- **Redis** – In-memory data store for caching and queues
+- **Bull** – Redis-based job queue
+- **Zod** – Type-safe schema validation
+- **rate-limiter-flexible** – API rate limiting
+- **async-mutex** – Concurrency control for async operations
 
 ## Recommended IDE Setup
 
@@ -33,13 +33,13 @@ This is my attempt at creating a website for board game named [Codenames](https:
 
 ## Project Setup
 
-For client side:
+On client-side:
 ```sh
 cd client
 npm install
 ```
 
-For server side:
+On server-side:
 ```sh
 cd server
 npm install
@@ -53,13 +53,13 @@ What you should put inside `/server/.env` described inside `/server/.env.example
 
 ### Compile and Hot-Reload for Development
 
-For client side:
+On client-side:
 ```sh
 cd client
 npm run dev
 ```
 
-For server side:
+On server-side:
 ```sh
 cd client
 node server.cjs
@@ -68,13 +68,13 @@ node server.cjs
 
 ### Compile and Minify for Production
 
-For client side:
+On client-side:
 ```sh
 cd client
 npm run build
 ```
 
-For server side:
+On server-side:
 ```sh
 cd client
 node server.cjs
@@ -110,11 +110,11 @@ There are multiple other fields that you can configure:
 "availableGames" : ["codenames", "Maybe other games"]
 ```
 
-Fields `"defaultLocale"` and `"fallbackLocale"` should contain a valid language code that you have setted up inside i18n. Find more information here.
+Fields `"defaultLocale"` and `"fallbackLocale"` should contain a valid language code that you have setted up inside i18n. Find more information [here](#how-can-i-add-my-own-locale).
 
 `"defaultTheme"` field's value can be only `"light"` or `"dark"`.
 
-Field `"availableGames"` should contain a list of game unique IDs that you use to define which exactly game the user is wanna play. Find more information here.
+Field `"availableGames"` should contain a list of game unique IDs that you use to define which exactly game the user is wanna play. Find more information [here](#how-can-i-add-my-own-game).
 
 Note that the `“defaultGameRules”` field is not included here. The reason is that this field is used to simplify the retrieval of predefined restrictions on the client side (which are still checked on the server side) and it is not recommended to change it. However, if you do want to change something, look also at the zod schemas, MongoDB schemas and constants inside constants.js file (all on the server side) for Codenames.
 
@@ -153,12 +153,20 @@ You should paste an updated file to the `/WordPacks/Codenames/Packs/` folder, bu
 
 The actual trigger for update is a word pack version that you've defined inside `/WordPacks/Codenames/packs.json` file. Just update the `"version"` field value and your word pack will be updated.
 
+#### How can I add my own game?
+
+This will be much more complicated than anything else out here.
+
+First, you have to look at the user object structure in MongoDB and update it corresponding to your needs.
+
+Second, you have to write your own server logic, put it in the appropriate place in the `/server/` folder (if you want to use the same server for some reason) and configure it.
+
+On the client side, you need to add a route to the game in the `/client/src/router/index.js` file, along with a localization for it and a DOM renderer. While doing this, you also need to choose a unique codename for your game, which you should use wherever you need to specify that you want to render or work only with that particular game. Remember to add this identifier to the list of unique game codenames in the `“availableGames”` field to add your game to the main screen.
+
 
 ## Roadmap
 
 - [ ] More word pack types support
-
-- [x] Add more integrations
 
 
 ## Authors
