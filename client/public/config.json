@@ -4,7 +4,7 @@
     "fallbackLocale" : "en",
     "defaultTheme" : "light",
     "serverURLs" : {
-        "codenames" : "http://localhost:3000/codenames"
+        "codenames" : "http://example.com:3000/codenames"
     },
     "availableGames" : ["codenames"],
     "defaultGameRules" : {
