@@ -90,12 +90,12 @@ Unique features for this version of game:
 - Multiple word packs available
 - In-game text chat
 
-At client side:
+On client-side:
 - Light/dark mode toggle
 - Language selector
 - The game rules tab is interactive
 
-At server side:
+On server-side:
 - Ability to update or add new word packs without the need to restart the server
 - Both long-term (using MongoDB) and short-term (caching using Redis) storage
 ## FAQ
