@@ -1,7 +1,7 @@
 // @ts-check
 const dotenv = require('dotenv');
 const z = require("zod/v4");
-dotenv.config({ path: '.env.dev' });
+dotenv.config({ path: '.env' });
 
 const envSchema = z.object({
     MONGO_DB_URL: z.string().min(1),
