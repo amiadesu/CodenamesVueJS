@@ -1,6 +1,7 @@
 import { gameStore } from '@/stores/gameData';
 import { socket } from "@/sockets/codenames";
 import { getConfig } from '@/utils/config';
+import { clamp } from '@/utils/extra';
 
 export const adminControlMixin = {
     computed: {

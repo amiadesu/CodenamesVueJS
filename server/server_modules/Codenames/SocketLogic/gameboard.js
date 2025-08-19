@@ -25,10 +25,11 @@ async function getGameboardEvent(io, socketData) {
     const room = new RoomContext(socketData.roomId);
 
     const words = await getGameboard(room, socketData.userCodenamesId);
+    const gameProcess = await room.getGameProcess();
     
     const gameRules = await room.getGameRules();
 
-    io.to(socketData.socketId).emit("send_new_gameboard", words);
+    io.to(socketData.socketId).emit("send_new_gameboard", words, gameProcess.wordsCount);
     io.to(socketData.socketId).emit("update_game_rules", gameRules);
 }
 

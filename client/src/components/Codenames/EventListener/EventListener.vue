@@ -160,8 +160,9 @@ export default defineComponent({
                 socket.emit("get_gameboard");
             });
 
-            socket.on("send_new_gameboard", (words) => {
+            socket.on("send_new_gameboard", (words, wordsCount) => {
                 this.gameData.wordBoardData.words = words;
+                this.gameData.gameProcess.wordsCount = wordsCount;
             });
 
             socket.on("update_end_turn_selectors", (endTurnSelectors) => {
